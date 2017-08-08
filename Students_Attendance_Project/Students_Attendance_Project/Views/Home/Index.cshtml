@@ -1,0 +1,120 @@
+﻿@{
+    ViewBag.Title = "เมนูหลัก";
+
+}
+<style>
+    figure.item {
+        /* To correctly align image, regardless of content height: */
+        vertical-align: top;
+        display: inline-block;
+        /* To horizontally center images and caption */
+        text-align: center;
+        /* The width of the container also implies margin around the images. */
+        width: 120px; /*ความกว้างของข้อความ ควรเท่ากับความกว้างของรูป*/
+    }
+
+    img.size {
+        width: 72px;
+        height: 72px;
+    }
+
+    .caption {
+        /* Make the caption a block so it occupies its own line. */
+        display: block;
+    }
+</style>
+<div class="visible-xs visible-sm">
+    <br />
+</div>
+<div class="visible-lg visible-md">
+    <br /><br />
+</div>
+@*<section class="content-header">
+    <h4><span class="glyphicon glyphicon-hand-right"></span> ข้อมูลพื้นฐาน</h4>
+</section>*@
+<div class="row">
+    <div class="col-md-12 col-lg-12 col-sm-12 col-xs-12" >
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+            <!-- small box -->
+            <div>
+                <figure class="item">
+                    <a href="@Url.Action("Subject","Home")"><img class="size" src="~/icon/Book.png"></a>
+                    <figcaption class="caption"><a href="@Url.Action("Subject","Home")">ข้อมูลรายวิชา</a></figcaption>
+                </figure>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+            <!-- small box -->
+            <div>
+                <figure class="item">
+                    <a href="@Url.Action("studyGroup","Home") "><img class="size" src="~/icon/icon_group_study.png"></a>
+                    <figcaption class="caption"><a href="@Url.Action("studyGroup","Home")">ข้อมูลกลุ่มเรียน</a></figcaption>
+                </figure>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+            <!-- small box -->
+            <div>
+                <figure class="item">
+                    <a href="@Url.Action("Schedule","Home") "><img class="size" src="~/icon/icon_schedule.png"></a>
+                    <figcaption class="caption"><a href="@Url.Action("Schedule","Home")">ตารางสอน</a></figcaption>
+                </figure>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+            <!-- small box -->
+            <div>
+                <figure class="item">
+                    <a href="@Url.Action("ScheduleCheck","Home")"><img class="size" src="~/icon/icon_check1.png"></a>
+                    <figcaption class="caption"><a href="@Url.Action("ScheduleCheck","Home")">เช็คชื่อ</a></figcaption>
+                </figure>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+            <!-- small box -->
+            <div>
+                <figure class="item">
+                    <a href="@Url.Action("SummaryListCheck","Home")"><img class="size" src="~/icon/icon_file2.png"></a>
+                    <figcaption class="caption"><a href="@Url.Action("SummaryListCheck","Home")">สรุปผลการเช็คชื่อ</a></figcaption>
+                </figure>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+            <!-- small box -->
+            <div>
+                <figure class="item">
+                    <a href="@Url.Action("SummaryNoExam","Home")"><img class="size" src="~/icon/icon_file1.png"></a>
+                    <figcaption class="caption"><a href="@Url.Action("SummaryNoExam","Home")">สรุปเช็คชื่อนักศึกษาไม่มีสิทธิ์สอบ</a></figcaption>
+                </figure>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+            <!-- small box -->
+            <div>
+                <figure class="item">
+                    <a href="@Url.Action("Contact","Home")"><img class="size" src="~/icon/icon_help.png.png"></a>
+                    <figcaption class="caption"><a href="@Url.Action("Contact","Home")">ช่วยเหลือ คู่มือ</a></figcaption>
+                </figure>
+            </div>
+        </div>
+    </div>
+    <!-- Main row -->
+</div>
+@*<section class="content-header">
+    <h4><span class="glyphicon glyphicon-hand-right"></span> การเช็คชื่อ รายงานสรุปผล</h4>
+</section>*@
+<div class="row">
+    <div class="col-md-12">
+        
+        
+        
+    </div>
+</div>
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $('.sidebar-menu > li').removeClass('active');
+            $('.index').addClass('active');
+        });
+    </script>
+     }

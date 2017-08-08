@@ -1,0 +1,181 @@
+﻿
+@{
+    ViewBag.Title = "test";
+}
+
+<h2>test</h2>
+
+@*<div class="row" style="margin-top:50px;">
+        <table class="table table-bordered test">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>LastName</th>
+                    <th>NickName</th>
+                    <th>Status</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>John</td>
+                    <td>Conner</td>
+                    <td>Terminator1</td>
+                    <td>
+                        <label class="radio-inline"><input type="radio" name="optradio[0]" id="a" value="1">มา</label>
+                        <label class="radio-inline"><input type="radio" name="optradio[0]" id="a" value="2">ขาด</label>
+                        <label class="radio-inline"><input type="radio" name="optradio[0]" id="a" value="3">สาย</label>
+                        <label class="radio-inline"><input type="radio" name="optradio[0]" id="a" value="4">ลา</label>
+                    </td>
+                    <td class="hidden">
+                        <input type="text" name="txt[0]" value="a"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>John2</td>
+                    <td>Conner2</td>
+                    <td>Terminator2</td>
+                    <td>
+                        <label class="radio-inline"><input type="radio" name="optradio[1]" id="a" value="1">มา</label>
+                        <label class="radio-inline"><input type="radio" name="optradio[1]" id="a" value="2">ขาด</label>
+                        <label class="radio-inline"><input type="radio" name="optradio[1]" id="a" value="3">สาย</label>
+                        <label class="radio-inline"><input type="radio" name="optradio[1]" id="a" value="4">ลา</label>
+                    </td>
+                    <td class="hidden">
+                        <input type="text" name="txt[1]" value="b" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>John3</td>
+                    <td>Conner3</td>
+                    <td>Terminator3</td>
+                    <td>
+                        <label class="radio-inline"><input type="radio" name="optradio[2]" id="a" value="1">มา</label>
+                        <label class="radio-inline"><input type="radio" name="optradio[2]" id="a" value="2">ขาด</label>
+                        <label class="radio-inline"><input type="radio" name="optradio[2]" id="a" value="3">สาย</label>
+                        <label class="radio-inline"><input type="radio" name="optradio[2]" id="a" value="4">ลา</label>
+                    </td>
+                    <td class="hidden">
+                        <input type="text" name="txt[2]" value="c" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn btn-primary show">Click Me!</button>
+    </div>*@
+
+<form id="User-form" class="form-horizontal">
+
+
+    <input type="hidden" name="UserID" id="UserID" value="0">
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Username :</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="Username1" name="Username" tabindex="1" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Password :</label>
+        <div class="col-sm-4">
+            <input type="password" class="form-control" id="Password1" name="Password" tabindex="2" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label">ชื่อ :</label>
+        <div class="col-sm-5">
+            <input type="text" class="form-control " id="FirstName1" name="FirstName" tabindex="3" required
+                   minlength="5" maxlength="15">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label">นามสกุล :</label>
+        <div class="col-sm-5">
+            <input type="text" class="form-control Input-error" id="LastName1" name="LastName" tabindex="4" required>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Email :</label>
+        <div class="col-sm-6">
+            <input type="email" class="form-control" id="Email1" name="Email" tabindex="5" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label">โทรศัพท์ :</label>
+        <div class="col-sm-4">
+            <input type="tel" class="form-control" id="PhoneNum1" name="PhoneNum" tabindex="6" required onkeyup="isNumber(this.value,this)"
+                   minlength="10" maxlength="10">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label">ID Line :</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" id="LineID1" name="LineID" tabindex="7" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label">สิทธิ์การใช้งาน :</label>
+        <div class="col-sm-4">
+            <select class="form-control" id="UserRoleID1" name="UserRoleID" tabindex="8">
+                <option value="1">ผู้ดูแลระบบ</option>
+                <option value="2">ผู้ใช้งานทั่วไป</option>
+            </select>
+        </div>
+    </div>
+    <button>OK</button>
+</form>
+
+
+@section scripts{
+    <script>
+        $('#User-form').validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class"
+        });
+
+        function isNumber(sText, obj) {
+            var ValidChars = "1234567890";
+            var IsNumber = true;
+            var Char;
+            for (i = 0; i < sText.length && IsNumber == true; i++) {
+                Char = sText.charAt(i);
+                if (ValidChars.indexOf(Char) == -1) {
+                    IsNumber = false;
+                }
+            }
+            if (IsNumber == false) {
+                obj.value = sText.substr(0, sText.length - 1);
+            }
+            $('#PhoneNum1').addClass("Input-error");
+        }
+
+        $(function () {
+            $('.show').click(function () {
+                console.log($('txt[1]').val());
+                var result = new Array();
+                $('.test tbody tr').each(function () {
+                    //console.log($(this));
+                    var data = $($(this).find('td')[0]).html();
+                    var data1 = $($(this).find('td')[1]).html();
+                    var data2 = $($(this).find('td')[2]).html();
+                    var data3 = $($(this).find('#a:checked')).val();
+                    var data4 = $($(this).find('td')[4]).val();
+                    result.push({
+                        name: data,
+                        lastname: data1,
+                        nickname: data2,
+                        status: data3,
+                        ID: data4,
+                    })
+                });
+                console.log(result);
+            });
+        });
+    </script>
+}

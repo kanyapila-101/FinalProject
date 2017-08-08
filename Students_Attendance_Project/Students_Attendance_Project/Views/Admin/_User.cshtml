@@ -1,0 +1,527 @@
+﻿@model Students_Attendance_Project.Models.FilterModel
+@using Students_Attendance_Project.Models;
+@using PagedList.Mvc;
+@using PagedList;
+
+<link href="~/AdminLTE-master/pagedlist.css" rel="stylesheet" type="text/css" />
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "บัญชีผู้ใช้";
+}
+<section>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel panel-primary">
+                <div class="box-header">
+                    <div class="box-header">
+                        <div class="caption">
+                            <i class="fa fa-cogs"></i> &nbsp;<strong style="font-size: 16px; ">ข้อมูลบัญชีผู้ใช้ระบบ</strong>
+                            @*<a href="@Url.Action("CreateUser","Admin")" class="btn btn-primary btn-sm pull-right" role="button">เพิ่ม</a>*@
+
+                            <button type="button" class="btn btn-primary btn-sm pull-right btn-adduser"><i class="fa fa-user-plus"></i>&nbsp;เพิ่มบัญชีผู้ใช้</button>
+                        </div>
+                        <p>
+                            <hr />
+                        </p>
+                        <div class="row col-sm-5 pull-right">
+                            <form id="form-search" action="#" class="form-horizontal" method="post" enctype="multipart/form-data">
+                                <div class="input-group">
+                                    <input type="text" name="Query" class="form-control" placeholder="ค้นหา..">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default btn-search" type="submit"><i class="fa fa-search"></i></button>
+                                    </span>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <!-- Teble-->
+                        <div class="table-scrollable" id="DetailUser-table">
+                            <table class="table table-bordered table-hover text-center" id="DetailUser-table">
+                                <thead>
+                                    <tr class="success">
+                                        <th> Username</th>
+                                        @*<th> Password </th>*@
+                                        <th> ชื่อไทย </th>
+                                        <th> ชื่ออังกฤษ </th>
+                                        <th> สังกัด </th>
+                                        <th> สิทธิ์ </th>
+                                        <th> </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-left">
+                                    @{
+                                        var entity = (PagedList.IPagedList<UserMedel>)ViewBag.DetailUser;
+                                        if (entity.Count > 0 && entity != null)
+                                        {
+                                            int line = 0;
+                                            foreach (var r in entity)
+                                            {
+                                                <tr class="@(line % 2 != 0 ? "info":"")">
+                                                    <td style="text-align:left">@r.Username</td>
+                                                    @*<td style="text-align:left">@r.Password</td>*@
+                                                    <td style="text-align:left">@r.Name</td>
+                                                    <td style="text-align:left">@r.NameEN</td>
+                                                    <td style="text-align:left">@r.DeptName</td>
+                                                    <td>@r.Role</td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-warning btn-xs btn-edit" data-userid="@r.UserID" role="button" data-toggle="tooltip" data-placement="right" title="แก้ไข"><i class="fa fa-pencil"></i></button>
+                                                        @*<button type="button" class="btn btn-danger btn-xs btn-del" data-userid="@r.UserID" role="button" data-toggle="tooltip" data-placement="right" title="ลบข้อมูลผู้ใช้"><i class="fa fa-remove"></i></button>*@
+                                                    </td>
+                                                </tr>
+                                                line++;
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row pull-right" style="margin-right:2px;">
+                            @Html.PagedListPager((IPagedList)ViewBag.DetailUser, page => Url.Action("_User", new { page }))
+                        </div>
+                        <!-- table-->
+                        <!-- modal User-->
+                        <form id="User-form" class="form-horizontal">
+                            <div class="modal fade" id="UserModal" role="dialog">
+                                <div class="modal-dialog modal-lg">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">บัญชีผู้ใช้งาน</h4>
+                                        </div>
+                                        <div class="modal-body ">
+
+                                            <input type="hidden" name="UserID" id="UserID" value="0">
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Username :<span class="isRed"> *</span></label>
+                                                <div class="col-sm-3">
+                                                    <input type="text" class="form-control" id="Username" name="Username" tabindex="1" required
+                                                           onkeyup="isUsername1(this.value, this)" onblur="CheckUsername()">
+                                                    <div id="isavailable" style="padding-top: 3px;"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Password :<span class="isRed"> *</span></label>
+                                                <div class="col-sm-3">
+                                                    <input type="password" class="form-control" id="Password" name="Password" tabindex="2" required
+                                                           minlength="8" maxlength="16">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">ชื่อไทย :<span class="isRed"> *</span></label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" class="form-control" id="Name" name="Name" tabindex="3" required
+                                                           onkeyup="isThaichar1(this.value, this)">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">ชื่ออังกฤษ :<span class="isRed"> *</span></label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" class="form-control" id="NameEN" name="NameEN" tabindex="4" required
+                                                           onkeyup="isUsername(this.value, this)">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">สาขาวิชา :<span class="isRed"> *</span></label>
+                                                <div class="col-sm-5">
+                                                    <select class="form-control" id="DeptCode" name="DeptCode" tabindex="8" required>
+                                                        <option value="">-- กรุณาเลือก --</option>
+                                                        @{
+                                                            var dept = (List<DepartmentModel>)ViewBag.department;
+                                                            if (dept.Count > 0 && dept != null)
+                                                            {
+                                                                foreach (var r in dept)
+                                                                {
+                                                                    <option value="@r.DeptCode">@r.DeptName</option>
+                                                                }
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">สิทธิ์การใช้งาน :<span class="isRed"> *</span></label>
+                                                <div class="col-sm-3">
+                                                    <select class="form-control" id="Role" name="Role" tabindex="8" required>
+                                                        <option value="">-- กรุณาเลือก --</option>
+                                                        <option value="user">user</option>
+                                                        <option value="admin">admin</option>
+                                                        <option value="superadmin">superadmin</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">ยกเลิก</button>
+                                            <button type="button" class="btn btn-success pull-right btn-save" data-dismiss="modal">บันทึกข้อมูล</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- modal CreateUser-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts{
+
+    @*@Scripts.Render("~/bundles/jqueryval")*@
+<script src="~/Scripts/bootstrap-show-password.js"></script>
+    <script>
+
+        function isNumber(sText, obj) {
+            var ValidChars = "1234567890A";
+            var IsNumber = true;
+            var Char;
+            for (i = 0; i < sText.length && IsNumber == true; i++) {
+                Char = sText.charAt(i);
+                if (ValidChars.indexOf(Char) == -1) {
+                    IsNumber = false;
+                }
+            }
+            if (IsNumber == false) {
+                obj.value = sText.substr(0, sText.length - 1);
+            }
+        }
+
+        function isUsername1(sText, obj) {
+            var ValidChars = ".QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890 ";
+            var IsNumber = true;
+            var Char;
+            for (i = 0; i < sText.length && IsNumber == true; i++) {
+                Char = sText.charAt(i);
+                if (ValidChars.indexOf(Char) == -1) {
+                    IsNumber = false;
+                }
+            }
+            if (IsNumber == false) {
+                obj.value = sText.substr(0, sText.length - 1);
+            }
+        }
+
+        var isUsernamebool = false;
+        var isEmail = false;
+        function CheckUsername() {
+            var username = $('#Username').val();
+            //alert(stext);
+            if (username != "") {
+                $.ajax({
+                    type: "POST",
+                    cache: false,
+                    url: '@Url.Action("CheckUsername","Admin")',
+                    dataType: "json",
+                    data: { _username: username },
+                    traditional: true,
+                    beforeSend: function () {
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message;
+                        }
+                        if (status == false) {
+                            isUsernamebool = false;
+                            $('#isavailable').html(username + " มีผู้ใช้งานแล้ว กรุณาป้อนใหม่").addClass("isRed");
+                            $('#User-form').find('.form-group').find('#Username').removeClass('valid').addClass('error');
+                        }
+                        else {
+                            isUsernamebool = true;
+                            $('#isavailable').html("");
+                            $('#User-form').find('.form-group').find('#Username').removeClass('error').addClass('valid');
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    }
+                });
+            }
+            else {
+                isUsernamebool = false;
+                $('#isavailable').html("");
+                $('#User-form').find('.form-group').find('#Username').addClass('error').removeClass('valid');
+            }
+            return status;
+        }
+
+        function CheckEmail() {
+            var email = $('#Email').val();
+            //alert(stext);
+            if (email != "") {
+                $.ajax({
+                    type: "POST",
+                    cache: false,
+                    url: '@Url.Action("CheckEmail","Admin")',
+                    dataType: "json",
+                    data: { _email: email },
+                    traditional: true,
+                    beforeSend: function () {
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message;
+                        }
+                        if (status == false) {
+                            isEmail = false;
+                            $('#isEmail1').html("ที่อยู่อีเมล์นี้ มีผู้ใช้งานแล้ว กรุณาป้อนใหม่").addClass("isRed");
+                            $('#User-form').find('.form-group').find('#Email').removeClass('valid').addClass('error');
+                        }
+                        else {
+                            isEmail = true;
+                            $('#isEmail1').html("");
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    }
+                });
+            }
+            return status;
+        }
+
+        $('#User-form').validate({
+            onchange: false,
+            rules: {
+                Username: { required: true, },
+                Password: { required: true, minlength: 8 },
+                Name: { required: true },
+                NameEN: { required: true },
+                DeptCode: { required: true, },
+                Role: { required: true },
+            },
+            messages: {
+                Username: { required: "กรุณาป้อน Username" },
+                Password: { required: "กรุณาป้อน Password", minlength: "กรุณาป้อน Password อย่างน้อย 8-16 ตัวอักษร" },
+                Name: "กรุณาป้อนชื่อให้ถูกต้อง",
+                NameEN: "กรุณาป้อนชื่ออังกฤษให้ถูกต้อง",
+                DeptCode: "กรุณาเลือกสาขาวิชา",
+                Role: { required: "กรุณาป้อนเลือกสิทธิ์การใช้งาน" },
+            },
+        });
+
+        function ResetModal() {
+            $('#isavailable').html("");
+            $('#isEmail1').html("");
+            $('#User-form').find('.form-group').find('label.error').remove();
+            $('#User-form').find('.form-group').find('.error').removeClass('error');
+            $('#User-form').find('.form-group').find('.valid').removeClass('valid');
+        }
+
+        $(document).ready(function () {
+            $('.sidebar-menu > li').removeClass('active');
+            $('.User').addClass('active');
+            $('#Password').password();
+            $('.btn-adduser').click(function () {
+                $('#User-form').find("input").val("");
+                $('#DeptCode').val("");
+                $('#Role').val("");
+                $('#UserID').val("0");
+                ResetModal();
+                $('#UserModal').modal('show');
+                $('#Username').attr("readonly", false);
+                $('#DeptCode').attr("disabled", false);
+                $('#Username').attr("onblur", "CheckUsername()");
+            });
+
+            $('.btn-del').click(function () {
+                var id = $(this).data("userid");
+                swal({
+                    title: "ลบข้อมูล?",
+                    text: "คุณต้องการจะลบข้อมูลจริงหรือไม่!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "ใช่ !",
+                    cancelButtonText: "ยกเลิก",
+                    closeOnConfirm: false,
+                    closeOnCancel: true
+                },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            type: "POST", // method ที่จะส่ง
+                            cache: false,
+                            url: '@Url.Action("DeleteUser", "Admin")',  // ส่งไปให้ที่ได้ ระบุ
+                            dataType: "json", // ชนิดข้อมูลที่ส่ง
+                            data: { id: id }, // ข้อมูลที่ส่ง
+                            traditional: true, // การจดจำข้อมูล
+                            beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                                loadSpin();
+                            },
+                            success: function (res) {
+
+                                var status = false;
+                                var message = 'ดำเนินการไม่สำเร็จ';
+                                if (res != null && res != undefined) {
+                                    status = res.status;
+                                    message = res.message != '' ? res.message : message;
+                                }
+                                if (status == false) {
+                                    swal("เกิดข้อผิดพลาด", message, "error");
+
+                                } else {
+
+                                    swal({
+                                        title: "ลบข้อมูลเรียบร้อยเเล้ว",
+                                        type: "success",
+                                        showConfirmButton: false,
+                                        timer: 1000,
+                                        //confirmButtonColor: "#AEDEF4",
+                                        //confirmButtonText: "Ok",
+                                        closeOnConfirm: false
+                                    },
+                                    function () {
+                                        location.reload(true);
+                                    });
+                                }
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+                                swal("เกิดข้อผิดพลาด", message, "error");
+                                unLoadSpin();
+                            },
+                            complete: function () {
+                                unLoadSpin();
+                            }
+                        });
+
+                    }
+                });
+            });
+
+            $('.btn-edit').click(function () {
+                isUsernamebool = true;
+                isEmail = true;
+                $("#UserID").val($(this).data("userid"));
+                var tempid = $("#UserID").val();
+                //alert(tempid);
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("UpdateUser", "Admin")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: { id: $('#UserID').val() }, // ข้อมูลที่ส่ง
+                    traditional: true, // การจดจำข้อมูล
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+
+                        } else {
+                            $('#Username').val(res.data.Username);
+                            $('#Password').val(res.data.Password);
+                            $('#Name').val(res.data.Name);
+                            $('#NameEN').val(res.data.NameEN);
+                            //$('#Department').find('option').remove();
+                            $('#DeptCode').val(res.data.DeptCode);
+                            $('#Role').val(res.data.Role);
+                            ResetModal();
+                            $('#UserModal').modal('show');
+                            $('#Username').attr("readonly", true);
+                            $('#DeptCode').attr("disabled", true);
+                            $('#Username').attr("onblur", null);
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    }
+                });
+            });
+
+            $('.btn-save').click(function () {
+                console.log(isEmail);
+                console.log(isUsernamebool);
+                if ($('#User-form').valid() && isUsernamebool == true) {
+
+                    //alert("OKOK");
+                    $.ajax({
+                        type: "POST", // method ที่จะส่ง
+                        cache: false,
+                        url: '@Url.Action("SaveUser", "Admin")',  // ส่งไปให้ที่ได้ ระบุ
+                        dataType: "json", // ชนิดข้อมูลที่ส่ง
+                        data: $('#User-form').serialize(), // ข้อมูลที่ส่ง
+                        traditional: true, // การจดจำข้อมูล
+                        beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                            loadSpin();
+                        },
+                        success: function (res) {
+
+                            var status = false;
+                            var message = 'ดำเนินการไม่สำเร็จ';
+                            if (res != null && res != undefined) {
+                                status = res.status;
+                                message = res.message;
+                            }
+                            if (status == false) {
+                                message = res.message;
+                                sweetAlert("เกิดข้อผิดพลาด", "ข้อมูล Username ซ้ำ!", "error");
+
+                            } else {
+                                swal({
+                                    title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                    type: "success",
+                                    showConfirmButton: false,
+                                    timer: 1000,
+                                    //confirmButtonColor: "#AEDEF4",
+                                    //confirmButtonText: "Ok",
+                                    closeOnConfirm: false
+                                },
+                                    function () {
+                                        location.reload(true);
+                                    });
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+                            unLoadSpin();
+                        },
+                        complete: function () {
+                            unLoadSpin();
+                        },
+                    });
+                }
+                else if (isUsernamebool == false) {
+                    $('#User-form').find('.form-group').find('#Username').removeClass('valid').addClass('error');
+                }
+                return false;
+            });
+
+        });
+    </script>
+}

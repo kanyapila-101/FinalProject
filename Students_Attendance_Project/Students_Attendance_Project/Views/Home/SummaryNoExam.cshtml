@@ -1,0 +1,129 @@
+﻿@model Students_Attendance_Project.Models.FilterModel
+@using Students_Attendance_Project.Models;
+@using PagedList.Mvc;
+@using PagedList;
+@{
+    ViewBag.Title = "สรุปรายชื่อ นศ.ที่ไม่มีสิทธิ์สอบ";
+    var entity = (List<SummaryModel>)ViewBag.Summary;
+}
+
+<section>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel panel-primary">
+                <div class="box-header">
+                    <div class="box-header">
+                        <div class="caption">
+                            <i class="fa fa-cogs"></i> &nbsp;<strong style="font-size: 16px; ">สรุปรายชื่อนักศึกษาที่ไม่มีสิทธิ์สอบ</strong>
+                        </div>
+                        <p>
+                            <hr />
+                        </p>
+                        <div class="row">
+                            <div class="col-sm-5 pull-right">
+                                <form id="form-search" action="" class="form-horizontal" method="post" enctype="multipart/form-data">
+                                    <div class="form-group">
+                                        <div class="col-sm-6 pull-right">
+                                            <select class="form-control" id="Query" name="Query" tabindex="1" onchange="Submit()">
+                                                @{
+                                                    var TermEntity = (List<SchoolYearModel>)ViewBag.SchYear;
+                                                    if (TermEntity.Count > 0 && TermEntity != null)
+                                                    {
+                                                        foreach (var r in TermEntity)
+                                                        {
+                                                            if (r.Term.Equals("3"))
+                                                            {
+                                                                <option value="@r.SchYearID">@r.Year/@r.Term ฤดูร้อน</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@r.SchYearID">@r.Year/@r.Term</option>
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <!-- Teble-->
+                        <div class="table-scrollable">
+                            <table class="table table-bordered table-hover text-center" id="summaryNoExam-table">
+                                <thead>
+                                    <tr class="success">
+                                        <th style="width: 5%"> ลำดับ </th>
+                                        <th style="width: 25%"> สาขาวิชา </th>
+                                        <th style="width: 10%"> กลุ่มเรียน </th>
+                                        <th style="width: 30%"> รายวิชา </th>
+                                        <th style="width: 10%"> ดาวน์โหลด </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-left">
+                                    @{
+                                        if (entity.Count > 0 && entity != null)
+                                        {
+                                            int line = 1;
+                                            foreach (var r in entity)
+                                            {
+
+                                                <tr class="@(line % 2 == 0 ? "info":"")">
+                                                    <td class="hidden">
+                                                        <input type="hidden" id="schYearID" value="@r.SchYearID" />
+                                                    </td>
+                                                    <td>@line</td>
+                                                    <td style="text-align:left">@r.DeptName</td>
+                                                    <td>@r.StudyGroupCode</td>
+                                                    <td style="text-align:left">[@r.SubjectCode] @r.SubjectName </td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-primary btn-xs btn-ExportToExcel" role="button"
+                                                                onclick="location.href='@Url.Action("ExportSummaryNoExam", "Home", new StudyGroupModel { SchYearID = r.SchYearID, StudyGroupID = r.StudyGroupID, StudyGroupCode = r.StudyGroupCode, Course = r.Course, SubjectCode = r.SubjectCode } )'">
+                                                            Export to Excel
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                line++;
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        @*<div class="row pull-right" style="margin-right:2px;">
+                                @Html.PagedListPager((IPagedList)ViewBag.Summary, page => Url.Action("SummaryNoExam", new { page }))
+                            </div>*@
+                        <!-- table-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $('.sidebar-menu > li').removeClass('active');
+            $('.summary').addClass('active');
+            $('.summary > ul > .summary2').addClass('active');
+
+        });
+        function Submit() {
+            loadSpin();
+            $('#form-search').submit();
+
+        }
+        //var id = $('#schYearID').val();
+        //alert(id);
+        $('#Query').val(@entity.Select(r => r.SchYearID).FirstOrDefault());
+
+        if (@Model.Query+"" != "") {
+            $('#Query').val(@Model.Query);
+        }
+        else {
+            $('#Query').val(@entity.Select(r => r.SchYearID).FirstOrDefault());
+        }
+    </script>
+}

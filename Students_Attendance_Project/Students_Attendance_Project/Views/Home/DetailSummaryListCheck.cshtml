@@ -1,0 +1,170 @@
+﻿@using Students_Attendance_Project.Models;
+@using Students_Attendance_Project.Common;
+@{
+    ViewBag.Title = "รายละเอียดสรุปผลการเช็คชื่อ";
+    var header = (List<SummaryModel>)ViewBag.Header;
+    var dataDate = (List<DisplaySumModel>)ViewBag.DateCheck;
+    var schYearId = 0;
+}
+
+<style>
+    th.rotate {
+        /* Something you can count on */
+        height: 100px;
+        width: 20px;
+        /*white-space: nowrap;*/
+    }
+
+        th.rotate > div {
+            width: 2px;
+            -moz-transform: rotate(-90.0deg); /* FF3.5+ */
+            -o-transform: rotate(-90.0deg); /* Opera 10.5 */
+            -webkit-transform: rotate(-90.0deg); /* Saf3.1+, Chrome */
+            filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0.083); /* IE6,IE7 */
+            -ms-filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0.083); /* IE8 */
+            /* Internet Explorer */
+            filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+            /* Standard */
+            transform: rotate(-90.0deg);
+        }
+
+            th.rotate > div > span {
+                text-align: center;
+                padding-top: 50px;
+                padding-left: 0px;
+            }
+
+    .showdateNotCheck {
+        padding-left: 10px;
+        /*background-color: aqua;
+                border-left: 5px solid blue;*/
+    }
+</style>
+<section>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel panel-primary">
+                <div class="box-header">
+                    <div class="box-header">
+                        <div class="caption">
+                            <i class="fa fa-cogs"></i> &nbsp;<strong style="font-size: 16px; ">รายละเอียดสรุปผลการเช็คชื่อ</strong>
+                        </div>
+                        <hr />
+                        <div class="row col-sm-12">
+                            <span>ประจำภาคภาคการศึกษา @header.Select(r => r.Term).FirstOrDefault()/@header.Select(r => r.Year).FirstOrDefault()</span>
+                            &emsp; &emsp; &emsp;<span> @header.Select(r => r.DeptName).FirstOrDefault()</span>&emsp; &emsp; &emsp;
+                            <span>รายวิชา @header.Select(r => r.SubjectCode).FirstOrDefault() | @header.Select(r => r.SubjectName).FirstOrDefault()</span>
+                            &emsp; &emsp; &emsp;<span>กลุ่มเรียน @header.Select(r => r.StudyGroupCode).FirstOrDefault()</span>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <!-- Teble-->
+                        <div class="table-scrollable">
+                            <table class="table table-bordered table-hover text-center" id="summaryListCheck-table">
+                                <thead>
+                                    <tr class="success">
+                                        <th style="width: 4%;"> ลำดับ </th>
+                                        <th style="width: 15%;"> รหัสนักศึกษา </th>
+                                        <th style="width: 24%;"> ชื่อ-สกุล </th>
+                                        @{
+                                            //dataDate.OrderBy(r => r.DateCheck.DayOfYear);
+                                            foreach (var r in dataDate)
+                                            {
+                                                <th class="rotate"><div><span>@r.DateCheck.ToString("d/MM/yy", Shared.CultureInfoTh)</span></div></th>
+                                            }
+                                        }
+                                        <th style="width: 3%;"> มา </th>
+                                        <th style="width: 3%;"> สาย </th>
+                                        <th style="width: 3%;"> ลา </th>
+                                        <th style="width: 3%;"> ขาด </th>
+                                        <th style="width: 3%;"> รวม </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-left">
+                                    @{
+                                        var student = (List<StudentModel>)ViewBag.Student;
+                                        var datastatus = (List<StudentCheckModel>)ViewBag.DataStatus;
+                                        if (student.Count > 0 && student != null)
+                                        {
+                                            int line = 1;
+
+                                            foreach (var r in student) // วาดข้อมล นศ ในตารางตามแนวนอน
+                                            {
+                                                <tr class="@(line % 2 == 0 ? "info" : "")">
+                                                    <td>@line</td>
+                                                    <td style="text-align:left">@r.StdCode</td>
+                                                    <td style="text-align:left">@r.NameTH</td>
+                                                    @{
+                                                        if ((dataDate.Count > 0 && dataDate != null) && (datastatus.Count > 0 && datastatus != null))
+                                                        {
+                                                            string showStatus = "";
+                                                            foreach (var x in dataDate)
+                                                            {
+                                                                var data = datastatus.Where(c => c.StdID == r.StdID && c.DateCheck == x.DateCheck).Select(c => c.StatusID).FirstOrDefault();
+                                                                showStatus = data == 1 ? "/" : data == 2 ? "ส" : data == 3 ? "ล" : data == 4 ? "X" : "";
+                                                                <td style="text-align:center">@showStatus</td>
+                                                            }
+                                                            var ma = datastatus.Where(c => c.StdID == r.StdID && c.StatusID == 1).Count();
+                                                            var say = datastatus.Where(c => c.StdID == r.StdID && c.StatusID == 2).Count();
+                                                            var la = datastatus.Where(c => c.StdID == r.StdID && c.StatusID == 3).Count();
+                                                            var khad = datastatus.Where(c => c.StdID == r.StdID && c.StatusID == 4).Count();
+                                                            var sum = ma + say + la + khad;
+                                                            <td style="text-align:center">@ma</td>
+                                                            <td style="text-align:center">@say</td>
+                                                            <td style="text-align:center">@la</td>
+                                                            <td style="text-align:center">@khad</td>
+                                                            <td style="text-align:center">@sum</td>
+                                                        }
+                                                    }
+                                                </tr>
+                                                                line++;
+                                                            }
+                                                        }
+                                    }
+                                </tbody>
+                            </table>
+                            @{
+                                var dateHoliday = (List<DisplaySumModel>)ViewBag.DateHoliday;  // วันที่ไม่มีการเช็คชื่อ แสดงใต้ตาราง
+                                if (dateHoliday.Count > 0 && dateHoliday != null)
+                                {
+                                    <p class="showdateNotCheck"><strong>หมายเหตุ</strong></p>
+                                    foreach (var n in dateHoliday)
+                                    {
+                                        <p class="showdateNotCheck">
+                                            <span class="isRed">*</span> <span>@n.DateCheck.ToString("dd/MM/yyyy", Shared.CultureInfoTh)&emsp; @n.Note</span>
+                                        </p>
+                                    }
+                                }
+                            }
+                        </div>
+                        <!-- table-->
+                        <div class="box-footer">
+                            <button type="button" class="btn btn-primary btn-ExportToExcel" role="button"
+                                    @{  using (var db = new Student_AttendanceEntities()) { var term = header.Select(r => r.Term).FirstOrDefault(); var year = header.Select(r => r.Year).FirstOrDefault(); schYearId = (from s in db.Tb_SchoolYear where s.Term == term && s.Year == year select s.SchYearID).FirstOrDefault(); }/* เอา ID ปีการศึกษา เพื่องส่งไป export Excel*/ }
+                                    onclick="location.href='@Url.Action("ExportSummaryListCheck", "Home", new StudyGroupModel
+                                                       {
+                                                           SchYearID = schYearId,
+                                                           StudyGroupID = header.Select(r => r.StudyGroupID).FirstOrDefault(),
+                                                           Course = header.Select(r => r.Course).FirstOrDefault(),
+                                                           SubjectCode = header.Select(r => r.SubjectCode).FirstOrDefault(),
+                                                           StudyGroupCode = header.Select(r => r.StudyGroupCode).FirstOrDefault()
+                                                       })'">
+                                @* ส่งค่าไปข้อมูล เพื่อ Export Excel *@
+                                Export to Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $('.sidebar-menu > li').removeClass('active');
+            $('.summary').addClass('active');
+            $('.summary > ul > .summary1').addClass('active');
+        });
+    </script>
+}

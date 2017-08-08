@@ -1,0 +1,144 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "เมนูหลัก";
+}
+<style>
+    figure.item {
+        /* To correctly align image, regardless of content height: */
+        vertical-align: top;
+        display: inline-block;
+        /* To horizontally center images and caption */
+        text-align: center;
+        /* The width of the container also implies margin around the images. */
+        width: 120px; /*ความกว้างของข้อความ ควรเท่ากับความกว้างของรูป*/
+    }
+
+    img.size {
+        width: 72px;
+        height: 72px;
+    }
+
+    .caption {
+        /* Make the caption a block so it occupies its own line. */
+        display: block;
+    }
+</style>
+<div class="visible-xs visible-sm">
+    <br />
+</div>
+<div class="visible-lg visible-md">
+    <br /><br />
+</div>
+<section class="content-header">
+    <h4><span class="glyphicon glyphicon-hand-right"></span> ข้อมูลพื้นฐาน</h4>
+</section>
+<section>
+    <div class="row">
+        <div class="col-md-12 col-lg-12 col-sm-12 col-xs-12">
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                <!-- small box -->
+                <div>
+                    <figure class="item">
+                        <a href="@Url.Action("Faculty","Admin") "><img class="size" src="~/icon/admin-faculty.png"></a>
+                        <figcaption class="caption"><a href="@Url.Action("Faculty","Admin")">คณะ</a></figcaption>
+                    </figure>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                <!-- small box -->
+                <div>
+                    <figure class="item">
+                        <a href="@Url.Action("Department","Admin") "><img class="size" src="~/icon/admin-dept.png"></a>
+                        <figcaption class="caption"><a href="@Url.Action("Department","Admin")">สาขาวิชา</a></figcaption>
+                    </figure>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                <!-- small box -->
+                <div>
+                    <figure class="item">
+                        <a href="@Url.Action("SchoolYear","Admin") "><img class="size" src="~/icon/icon_calendar.png"></a>
+                        <figcaption class="caption"><a href="@Url.Action("SchoolYear","Admin")">ปีการศึกษา</a></figcaption>
+                    </figure>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                <!-- small box -->
+                <div>
+                    <figure class="item">
+                        <a href="@Url.Action("Building","Admin") "><img class="size" src="~/icon/icon_building.png"></a>
+                        <figcaption class="caption"><a href="@Url.Action("Building","Admin")">อาคารเรียน</a></figcaption>
+                    </figure>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                <!-- small box -->
+                <div>
+                    <figure class="item">
+                        <a href="@Url.Action("Room","Admin") "><img class="size" src="~/icon/icon_room.png"></a>
+                        <figcaption class="caption"><a href="@Url.Action("Room","Admin")">ห้องเรียน</a></figcaption>
+                    </figure>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                <!-- small box -->
+                <div>
+                    <figure class="item">
+                        <a href="@Url.Action("Holiday","Admin") "><img class="size" src="~/icon/admin-holiday.png"></a>
+                        <figcaption class="caption"><a href="@Url.Action("Holiday","Admin")">วันหยุดราชการ</a></figcaption>
+                    </figure>
+                </div>
+            </div>
+
+        </div>
+        <!-- Main row -->
+    </div>
+</section>
+<section class="content-header">
+    <h4><span class="glyphicon glyphicon-hand-right"></span> บัญชีผู้ใช้ ข้อมูลรายวิชา</h4>
+</section>
+<section>
+    <div class="row">
+        <div class="col-md-12 col-lg-12 col-sm-12 col-xs-12">
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                <!-- small box -->
+                <div>
+                    <figure class="item">
+                        <a href="@Url.Action("_User","Admin")"><img class="size" src="~/icon/admin-user.png"></a>
+                        <figcaption class="caption"><a href="@Url.Action("_User","Admin")">ข้อมูลบัญชีผู้ใช้</a></figcaption>
+                    </figure>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                <!-- small box -->
+                <div>
+                    <figure class="item">
+                        <a href="@Url.Action("Subject","Admin") "><img class="size" src="~/icon/Book.png"></a>
+                        <figcaption class="caption"><a href="@Url.Action("Subject","Admin")">ข้อมูลรายวิชา</a></figcaption>
+                    </figure>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                <!-- small box -->
+                <div>
+                    <figure class="item">
+                        <a href="~/Usermanual/AdminManual.pdf" download="คู่มือการใช้งานสำหรับผู้ดูแลระบบ"><img class="size" src="~/icon/admin-help.png"></a>
+                        <figcaption class="caption"><a href="~/Usermanual/AdminManual.pdf" download="คู่มือการใช้งานสำหรับผู้ดูแลระบบ">คู่มือการใช้งาน</a></figcaption>
+                    </figure>
+                </div>
+            </div>
+        </div>
+        <!-- Main row -->
+    </div>
+</section>
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $('.sidebar-menu > li').removeClass('active');
+            $('.index').addClass('active');
+        });
+    </script>
+}

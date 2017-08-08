@@ -1,0 +1,407 @@
+﻿@using Students_Attendance_Project.Models;
+@using Students_Attendance_Project.Common;
+@{
+    //ViewBag.Title = "Layout";
+    var user = (Tb_User)Shared.getUserLogon();
+}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>@ViewBag.Title</title>
+    <link rel="shortcut icon" type="image/x-icon" href="~/icon/Logo_RMUTI.ico" />
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="~/AdminLTE-master/bootstrap/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="~/AdminLTE-master/dist/css/AdminLTE.min.css">
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+       folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="~/AdminLTE-master/dist/css/skins/_all-skins.min.css">
+    <!-- iCheck -->
+    <link rel="stylesheet" href="~/AdminLTE-master/plugins/iCheck/flat/blue.css">
+    <!-- Morris chart -->
+    <link rel="stylesheet" href="~/AdminLTE-master/plugins/morris/morris.css">
+    <!-- jvectormap -->
+    <link rel="stylesheet" href="~/AdminLTE-master/plugins/jvectormap/jquery-jvectormap-1.2.2.css">
+    <!-- Date Picker -->
+    <link href="~/Content/bootstrap-datepicker-thai/css/datepicker.css" rel="stylesheet" />
+    @*<link rel="stylesheet" href="~/AdminLTE-master/plugins/datepicker1/datepicker.css" media="screen">*@
+    
+    <link rel="stylesheet" href="~/Content/sweetalert.css">
+
+    <link rel="stylesheet" href="~/AdminLTE-master/plugins/timepicker/bootstrap-timepicker.min.css">
+    <!-- bootstrap wysihtml5 - text editor -->
+    <link rel="stylesheet" href="~/AdminLTE-master/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" href="~/AdminLTE-master/bootstrap/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- fullCalendar 2.2.5-->
+    <link rel="stylesheet" href="~/AdminLTE-master/plugins/fullcalendar/fullcalendar.min.css">
+    <link rel="stylesheet" href="~/AdminLTE-master/plugins/fullcalendar/fullcalendar.print.css" media="print">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="~/AdminLTE-master/dist/css/AdminLTE.min.css">
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+         folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="~/AdminLTE-master/dist/css/skins/_all-skins.min.css">
+
+     <!--Spinner-Loader-->
+    <link href="~/Scripts/spinner/loading.min.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    @RenderSection("styles", required: false)
+    <style>
+        .table-scrollable {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            border: 1px solid #e7ecf1;
+            margin: 10px 0 !important;
+        }
+
+        .portlet.blue, .portlet.box.blue > .portlet-title, .portlet > .portlet-body.blue {
+            background-color: #3598dc;
+        }
+
+        .portlet.box.blue {
+            border: 1px solid #60aee4;
+            border-top: 0;
+        }
+
+        .portlet > .portlet-title > .tools {
+            float: right;
+            display: inline-block;
+            padding: 12px 0 8px;
+        }
+
+        a.collapse {
+            background-image: url(asset/global/img/portlet-collapse-icon.png);
+            width: 14px;
+            visibility: visible;
+        }
+
+        a.reload {
+            background-image: url(asset/global/img/portlet-reload-icon.png);
+            width: 13px;
+        }
+    </style>
+    <style>
+        /*Input and Text Validate css*/
+        .my-error-class {
+            color: #ff5c33; /* red */
+        }
+
+        .my-valid-class {
+            /*color: #00CC00;*/ /* green */
+            border: 1px solid #33cc33;
+            border-left: 3px solid #33cc33;
+        }
+        input.error, select.error, textarea.error{
+            border: 1px solid #ff5c33;
+            border-left: 3px solid #ff5c33;
+        }
+        input.valid, select.valid, textarea.valid{
+            border: 1px solid #33cc33;
+            border-left: 3px solid #33cc33;
+        }
+        label.error{
+            padding-top: 5px;
+            color: #ff5c33;
+            font-size: 12px
+        }
+        .isGreen{
+            color: #33cc33;
+            font-size: 14px;
+        }
+        .isRed{
+            color: #ff5c33;
+            font-size: 16px;
+        }
+        div.isRed{
+            font-size: 12px;
+        }
+        div.btn-file .valid{
+            border: none;
+        }
+        div.btn-file .error{
+            border: none;
+        }
+    </style>
+
+</head>
+
+<body class="fixed hold-transition skin-blue sidebar-mini">
+    <div id="loader">
+    </div>
+
+    <div class="wrapper">
+        <header class="main-header">
+            <!-- Logo -->
+            <a href="@Url.Action("index","Home")" class="logo">
+                <!-- mini logo for sidebar mini 50x50 pixels -->
+                <span class="logo-mini"><i class="fa fa-check-square-o fa-3x"></i></span>
+                <!-- logo for regular state and mobile devices -->
+                <span class="logo-lg" style="font-size: 16px;"><i class="fa fa-check-square-o fa-2x"></i><b>Student’s Attendance</b></span>
+            </a>
+            <!-- Header Navbar: style can be found in header.less -->
+            <nav class="navbar navbar-static-top">
+                <!-- Sidebar toggle button-->
+                <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                    <span class="sr-only">Toggle navigation</span>
+                </a>
+                <div class="navbar-custom-menu">
+                    <ul class="nav navbar-nav">
+                        <!-- Messages: style can be found in dropdown.less-->
+                        <!-- Notifications: style can be found in dropdown.less -->
+                        @*<li class="dropdown notifications-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-bell-o"></i>
+                                <span class="label label-warning">10</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="header">You have 10 notifications</li>
+                                <li>
+                                    <!-- inner menu: contains the actual data -->
+                                    <ul class="menu">
+                                        <li>
+                                            <a href="#"><i class="fa fa-users text-aqua"></i> 5 new members joined today</a>
+                                        </li>
+                                        <li>
+                                            <a href="#"><i class="fa fa-warning text-yellow"></i> Very long description</a>
+                                        </li>
+                                        <li>
+                                            <a href="#"><i class="fa fa-users text-red"></i> 5 new members joined</a>
+                                        </li>
+                                        <li>
+                                            <a href="#"><i class="fa fa-shopping-cart text-green"></i> 25 sales made</a>
+                                        </li>
+                                        <li>
+                                            <a href="#"><i class="fa fa-user text-red"></i> You changed your username</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="footer"><a href="#">View all</a></li>
+                            </ul>
+                        </li>*@
+                        <!-- Tasks: style can be found in dropdown.less -->
+                        <!-- User Account: style can be found in dropdown.less -->
+                        <li class="dropdown user user-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <img src="~/icon/UserNull.png" class="user-image" alt="User Image">
+                                <span class="hidden-xs">Hello! @user.NameEN</span> <b class="caret hidden-xs"></b>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <!-- User image -->
+                                <li class="user-header">
+                                    <img src="~/icon/UserNull.png" class="img-circle" alt="User Image">
+                                    <p>
+                                        @user.NameEN
+                                    </p>
+                                </li>
+                                <!-- Menu Footer-->
+                                <li class="user-footer">
+                                    <div class="pull-left">
+                                        <a href="@Url.Action("_Profile", "Home")" class="btn btn-default btn-sm">ข้อมูลส่วนตัว</a>
+                                    </div>
+                                    <div class="pull-right">
+                                        <a href="@Url.Action("Logout","Login")" class="btn btn-default btn-sm">ออกจากระบบ</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <!-- Control Sidebar Toggle Button -->
+                </div>
+            </nav>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <!-- sidebar: style can be found in sidebar.less -->
+            <section class="sidebar">
+                <ul class="sidebar-menu">
+                    <li class="header"></li>
+                    @if (user.Role == "admin" || user.Role == "superadmin")
+                    {
+                        <li class="treeview">
+                            <a href="@Url.Action("index","Admin")">
+                                <i class="fa fa-refresh"></i> <span>สลับไปหน้าผู้ดูแลระบบ</span>
+                            </a>
+                        </li>
+                    }
+                    
+                    <li class="treeview index">
+                        <a href="@Url.Action("index","Home")">
+                            <i class="fa fa-home"></i> <span>เมนูหลัก</span>
+                        </a>
+                    </li>
+                    <li class="treeview Subject">
+                        <a href="@Url.Action("Subject","Home")">
+                            <i class="fa fa-book"></i> <span>ข้อมูลรายวิชา</span>
+                        </a>
+                    </li>
+                    <li class="treeview studyGroup">
+                        <a href="@Url.Action("studyGroup","Home")">
+                            <i class="fa fa-users"></i> <span>ข้อมูลกลุ่มเรียน</span>
+                        </a>
+                    </li>
+                    <li class="treeview schedule">
+                        <a href="@Url.Action("schedule","Home")">
+                            <i class="fa fa-table"></i> <span>ตารางสอน</span>
+                            <span class="pull-right-container">@*<small class="label pull-right bg-green">New</small>*@</span>
+                        </a>
+                    </li>
+                    <li class="treeview ScheduleCheck">
+                        <a href="@Url.Action("ScheduleCheck", "Home")">
+                            <i class="fa  fa-check-square-o"></i>
+                            <span>เช็คชื่อ</span>
+                        </a>
+                    </li>
+                   
+                    <li class="treeview summary">
+                        <a href="@Url.Action("","Home")">
+                            <i class="fa fa-files-o"></i> <span>รายงานสรุปผล</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-chevron-down pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li class="summary1"><a href="@Url.Action("SummaryListCheck","Home")"><i class="fa fa-circle-o"></i> สรุปผลการเช็คชื่อ</a></li>
+                            <li class="summary2"><a href="@Url.Action("SummaryNoExam","Home")"><i class="fa fa-circle-o"></i> สรุปรายชื่อ นศ. ไม่มีสิทธิ์สอบ</a></li>
+                        </ul>
+                    </li>
+                    @*<li>
+                        <a href="@Url.Action("HolidayCalendar","Home")">
+                            <i class="fa fa-calendar"></i> <span>ปฏิทินวันหยุดไทย</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Logout","Login")">
+                            <i class="fa fa-sign-out"></i> <span>ออกจากระบบ</span>
+                        </a>
+                    </li>*@
+                </ul>
+            </section>
+            <!-- /.sidebar -->
+        </aside>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content">
+                @RenderBody()
+            </section>
+            <!-- Main content -->
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+        <footer class="main-footer text-center">
+            <div>
+                <strong >
+                    <span>&copy;</span>
+                    <span id="copyright">
+                        <script>
+                            document.getElementById('copyright').appendChild(document.createTextNode(new Date().getFullYear()))
+                        </script>
+                    
+                        <a href="@Url.Action("index","Home")" target="_blank">ระบบเช็คชื่อการเข้าเรียนของนักศึกษาออนไลน์</a>, Developed by <a href="https://www.cpe.rmuti.ac.th" target="_blank">CPE. </a>
+                    </span>
+                    <span class="pull-right hidden-xs hidden-sm">
+                        THEME : <a href="http://almsaeedstudio.com" target="_blank"> Almsaeed Studio</a>
+                    </span>
+                </strong>
+            </div>
+            
+            @*<p class="text-center"><a href="@Url.Action("index","Home")"><strong>ระบบเช็คชื่อการเข้าเรียนของนักศึกษาออนไลน์</strong></a></p>
+            <div class="pull-right hidden-xs hidden-sm">
+                <b>Version</b> 2.3.5
+            </div>
+            <div class="hidden-sm hidden-xs">
+                <strong>Copyright &copy; 2014-2016 <a href="http://almsaeedstudio.com" target="_blank">Almsaeed Studio</a>.</strong> All rights
+            reserved.
+            </div>*@
+        </footer>
+    </div>
+    <!-- ./wrapper -->
+    <!-- jQuery 2.2.3 -->
+    <script src="~/AdminLTE-master/plugins/jQuery/jquery-2.2.3.min.js"></script>
+
+    <!-- jQuery UI 1.11.4 -->
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+    <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+    <script>
+        $.widget.bridge('uibutton', $.ui.button);
+    </script>
+    <!-- Bootstrap 3.3.6 -->
+    @*<script src="~/AdminLTE-master/bootstrap/js/bootstrap.min.js"></script>*@
+    <!-- Morris.js charts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+    @*<script src="~/AdminLTE-master/plugins/morris/morris.min.js"></script>*@
+    <!-- Sparkline -->
+    <script src="~/AdminLTE-master/plugins/sparkline/jquery.sparkline.min.js"></script>
+    <!-- jvectormap -->
+    <script src="~/AdminLTE-master/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js"></script>
+    <script src="~/AdminLTE-master/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+    <!-- jQuery Knob Chart -->
+    <script src="~/AdminLTE-master/plugins/knob/jquery.knob.js"></script>
+    <!-- datepicker -->
+    <script src="~/Content/bootstrap-datepicker-thai/js/bootstrap-datepicker.js"></script>
+    <script src="~/Content/bootstrap-datepicker-thai/js/bootstrap-datepicker-thai.js"></script>
+    <script src="~/Content/bootstrap-datepicker-thai/js/locales/bootstrap-datepicker.th.js"></script>
+
+    <!-- Bootstrap WYSIHTML5 -->
+    <script src="~/AdminLTE-master/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+    <!-- Slimscroll -->
+    <script src="~/AdminLTE-master/plugins/slimScroll/jquery.slimscroll.min.js"></script>
+    <!-- FastClick -->
+    <script src="~/AdminLTE-master/plugins/fastclick/fastclick.js"></script>
+    <!-- AdminLTE App -->
+    <script src="~/AdminLTE-master/dist/js/app.min.js"></script>
+    <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+    @*<script src="~/AdminLTE-master/dist/js/pages/dashboard.js"></script>*@
+    <!-- AdminLTE for demo purposes -->
+    <script src="~/AdminLTE-master/dist/js/demo.js"></script>
+    <!-- bootstrap time picker -->
+    <script src="~/AdminLTE-master/plugins/timepicker/bootstrap-timepicker.min.js"></script>
+    <script src="~/Content/sweetalert-dev.js"></script>
+
+    <script src="~/Scripts/bootstrap.min.js"></script>
+
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <!--Spinner-Loader-->
+    <script src="~/Scripts/spinner/jquery.loading.min.js"></script>
+    @RenderSection("scripts", required: false)
+    <script>
+        // Spinner-Loading 
+        // show
+        function loadSpin() {
+            $.showLoading({ name: 'circle-fade', allowHide: true });
+        }
+        //hide
+        function unLoadSpin() {
+            $.hideLoading();
+        }
+        $('[data-toggle="tooltip"]').tooltip();
+        
+    </script>
+
+</body>
+
+</html>

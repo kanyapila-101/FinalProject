@@ -1,0 +1,862 @@
+﻿@model Students_Attendance_Project.Models.FilterModel
+@using Students_Attendance_Project.Models;
+@using PagedList.Mvc;
+@using PagedList;
+@{
+    ViewBag.Title = "ตารางสอน";
+    var dataSubj = (List<StudyGroupModel>)ViewBag.Subject;
+}
+@{
+    var time = new string[] { "", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00" };
+}
+
+<style>
+    .fromSchecule {
+        padding-left: 5%;
+    }
+</style>
+
+@*<section class="content-header">
+        <h1>ข้อมูลตารางสอน</h1>
+        <ol class="breadcrumb">
+                <li><a href="../../default.html"><i class="fa fa-dashboard"></i> หน้าหลัก</a></li>
+                <li class="active"><a href="group_study.html">จัดการกลุ่มเรียน</a></li>
+            </ol>
+    </section>*@
+@{
+    if (dataSubj.Count == 0)
+    {
+        <div class="alert alert-warning">
+            <strong>หมายเหตุ!</strong> คุณยังไม่ได้เพิ่มกลุ่มเรียน กรุณาเพิ่มกลุ่มเรียน เพื่อทำการสร้างตารางสอน
+        </div>
+    }
+}
+<!-- Main content -->
+<section class="content">
+    <div class="row">
+        <div class="col-12">
+            <!-- Horizontal Form -->
+            <div class="panel panel-primary">
+                <div class="panel-body">
+                    <div class="box-header">
+                        <i class="fa fa-cogs pull-left"></i> &nbsp;<strong style="font-size: 16px; ">ตารางสอน</strong>
+                        <div class="row col-sm-3 pull-right">
+                            <form id="form-search" action="#" class="form-horizontal" method="post" enctype="multipart/form-data">
+                                <select class="form-control col-sm-2" id="Query" name="Query" onchange="Submit()">
+                                    @{
+                                        var entityYear = (List<SchoolYearModel>)ViewBag.SearchYear;
+                                        if (entityYear.Count > 0 && entityYear != null)
+                                        {
+                                            foreach (var r in entityYear)
+                                            {
+                                                if (r.Term.Equals("3"))
+                                                {
+                                                    <option value="@r.SchYearID">@r.Year/@r.Term ฤดูร้อน</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@r.SchYearID">@r.Year/@r.Term</option>
+                                                }
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="table-scrollable" id="DetailUser-table">
+                        <!-- /.box-header -->
+                        <!-- form start -->
+                        <form class="form-horizontal">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover text-center" id="DetailUser-table">
+                                    <tbody>
+                                        <tr class="gridViewHeader" align="text-center">
+                                            <th style="width:120px" bgcolor="#99bbff">วัน  \  คาบ</th>
+                                            @{
+                                                var stringheader = new string[] { "08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00", "11:00 - 12:00", "12:00 - 13:00", "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00", "17:00 - 18:00", "18:00 - 19:00", "19:00 - 20:00", "20:00 - 21:00", "21:00 - 22:00" };
+                                                for (int rw = 0; rw < 14; rw++)
+                                                {
+                                                    <th style="width:7.142857%" bgcolor="#99bbff">@stringheader[rw]</th>
+                                                }
+                                            }
+                                        </tr>
+
+                                        @{
+                                            var data = (List<Students_Attendance_Project.Models.Tb_Schedule>)ViewBag.Day;
+                                            var day = new string[] { "อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์" };
+                                            for (int i = 0; i <= 6; i++)
+                                            {
+                                                <tr class="gridViewAltRow" align="text-center">
+                                                    <td bgcolor="#99bbff">@day[i]</td>
+                                                    @{
+                                                        var numday = (i + 1).ToString();
+                                                        var result = data.Where(x => x.DayTeach == numday).ToList();
+                                                        if (result.Count() == 0)
+                                                        {
+                                                            for (int row = 0; row < 14; row++)
+                                                            {
+                                                                <td align="right">
+                                                                    <table border="0" style="width: 100%">
+                                                                        <tbody>
+                                                                            <tr>
+                                                                                <td align="Left">
+                                                                                    <span id="">
+                                                                                    </span>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td align="Left">
+                                                                                    <span id="">
+                                                                                    </span>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td align="Left">
+                                                                                    <span id="">
+                                                                                    </span>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td align="Left">
+                                                                                    <span id="">
+                                                                                    </span>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </td>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            var temp = 1;
+                                                            var roudcount = 1;
+                                                            foreach (var r in result)
+                                                            {
+                                                                for (int j = temp; j <= 15; j++)
+                                                                {
+                                                                    if (j == r.StartTimeInt)
+                                                                    {
+                                                                        <td class="active-period" align="center" colspan="@r.TotalHour" bgcolor="#d3efff">
+                                                                            <table border="0" style="width: 100%">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <!-- คาบเรียน  -->
+                                                                                        <td align="Left">
+                                                                                            <span id="" style="font-family:Tahoma;font-size: 13px;">
+                                                                                                [@r.SubjectCode]<br>
+                                                                                                วิชา @dataSubj.Where(x => x.SubjectCode == r.SubjectCode).Select(x => x.SubjectName).FirstOrDefault()<br>
+                                                                                                กลุ่มเรียน @dataSubj.Where(x => x.StudyGroupID == r.StudyGroupID).Select(x => x.StudyGroupCode).FirstOrDefault()<br>
+                                                                                                ห้อง @r.RoomNo <br>
+                                                                                                @{
+                                                                                                    string typesubject = "";
+                                                                                                    typesubject = (r.TypeSubject == 1 ? "(ท." + r.TotalHour / 1 + ")" : "(ป." + r.TotalHour / 3 + ")").ToString();
+                                                                                                }
+                                                                                                @typesubject
+                                                                                            </span>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td calign="Left">
+                                                                                            <div class="btn-group pull-right">
+                                                                                                <!-- edit  -->
+                                                                                                <button class="btn btn-warning btn-xs btn-edit" data-scheduleid="@r.ScheduleID" type="button" data-toggle="tooltip" data-placement="top" title="แก้ไข">
+                                                                                                    <span class="fa fa-pencil" aria-hidden="true"></span>
+                                                                                                </button>
+                                                                                                <!-- delete  -->
+                                                                                                @*<button class="btn btn-danger btn-xs" type="button" data-toggle="tooltip" data-placement="top" title="ลบ">
+                                                                                                        <span class="fa fa-trash-o" aria-hidden="true"></span>
+                                                                                                    </button>*@
+                                                                                            </div>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </td>
+                                                                                                        temp = (int)r.EndTimeInt;
+                                                                                                        j = temp;
+                                                                                                        if (roudcount != result.Count())
+                                                                                                        {
+                                                                                                            break;
+                                                                                                        }
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        <td>
+                                                                                                            <table border="0" style="width: 100%">
+                                                                                                                <tbody>
+                                                                                                                    <tr>
+                                                                                                                        <td align="Left">
+                                                                                                                            <span id="">
+                                                                                                                            </span>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                    <tr>
+                                                                                                                        <td align="Left">
+                                                                                                                            <span id="">
+                                                                                                                            </span>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                    <tr>
+                                                                                                                        <td align="Left">
+                                                                                                                            <span id="">
+                                                                                                                            </span>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                    <tr>
+                                                                                                                        <td align="Left">
+                                                                                                                            <span id="">
+                                                                                                                            </span>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                </tbody>
+                                                                                                            </table>
+                                                                                                        </td>
+                                                                                                                }
+                                                                                                            }
+                                                                                                            roudcount++;
+                                                                                                        }
+                                                                                                    }
+                                                    }
+                                                </tr>
+                                                                                                    }
+                                        }
+                                    </tbody>
+                                </table>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+                    <button class="btn btn-primary pull-right" id="btn_addSchedule" onclick="FormAddShow()"><i class="fa fa-plus"> เพิ่มตารางสอน</i></button>
+                </div>
+            </div>
+        </div>
+        <!-- /.box -->
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="panel panel-primary panelShow">
+                <div class="box-header">
+                    <div class="caption">
+                        <i class="fa fa-cogs"></i> &nbsp;เพิ่มตารางสอน
+                    </div>
+                    <hr />
+                </div>
+                <form class="form-horizontal" id="Schedule-form" enctype="multipart/form-data">
+                    <div class="panel-body">
+                        <div>
+                            <input type="hidden" id="ScheduleID" name="ScheduleID" value="0" />
+                        </div>
+                        <div>
+                            <input type="hidden" id="UserID" name="UserID" value="" />
+                        </div>
+                        <div class="row fromSchecule">
+                            <aside class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">ภาคการศึกษา :</label>
+                                    <div class="col-sm-5">
+                                        <select class="form-control" id="SchYearID" name="SchYearID" tabindex="1">
+                                            @{
+                                                var schYEntity = (List<SchoolYearModel>)ViewBag.SchYear;
+                                                if (schYEntity.Count > 0 && schYEntity != null)
+                                                {
+                                                    foreach (var r in schYEntity)
+                                                    {
+                                                        if (r.Term.Equals("3"))
+                                                        {
+                                                            <option value="@r.SchYearID">@r.Year/@r.Term ฤดูร้อน</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@r.SchYearID">@r.Year/@r.Term</option>
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </aside>
+                            <aside class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">วัน :</label>
+                                    <div class="col-sm-5">
+                                        <select class="form-control" id="DayTeach" name="DayTeach" tabindex="2" required onchange="CheckDay(this.value)">
+                                            <option value="">-- กรุณาเลือก --</option>
+                                            <option value="1">อาทิตย์</option>
+                                            <option value="2">จันทร์</option>
+                                            <option value="3">อังคาร</option>
+                                            <option value="4">พุธ</option>
+                                            <option value="5">พฤหัสบดี</option>
+                                            <option value="6">ศุกร์</option>
+                                            <option value="7">เสาร์</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </aside>
+                        </div>
+                        <div class="row fromSchecule">
+                            <aside class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">วิชา-กลุ่มเรียน :</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" id="SubjectCode" name="SubjectCode" tabindex="3" required onchange="EnableInput()">
+                                            @{
+                                                <option value="">-- กรุณาเลือก --</option>
+                                                {
+                                                    foreach (var r in dataSubj)
+                                                    {
+                                                        <option value="@r.SubjectCode,@r.Course,@r.StudyGroupID">[@r.SubjectCode] @r.SubjectName - @r.StudyGroupCode</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </aside>
+                            <aside class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">ประเภทวิชา :</label>
+                                    <div class="col-sm-6">
+                                        <label class="radio-inline">
+                                            <input type="radio" name="typeSubject" id="typeSubject" checked="checked" value="1" tabindex="4">ทฤษฎี
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" name="typeSubject" id="typeSubject" value="3">ปฏิบัติ
+                                        </label>
+                                        <div>
+                                            <label for="typeSubject" class="error" style="display:none;"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </aside>
+                        </div>
+                        <div class="row fromSchecule">
+                            <aside class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">เวลา (เริ่ม) :</label>
+                                    <div class="col-sm-3">
+                                        <select class="form-control" id="StartTimeInt" name="StartTimeInt" tabindex="5" required onchange="getTypeSubject()">
+                                            @{
+                                                for (int i = 1; i < 14; i++)
+                                                {
+                                                    <option value="@i">@time[i]</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                    <div id="Nosubject" style="padding-top: 3px;"></div>
+                                </div>
+                            </aside>
+                            <aside class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">เวลา (สิ้นสุด) :</label>
+                                    <div class="col-sm-3">
+                                        <select class="form-control" id="EndTimeInt" name="EndTimeInt" tabindex="6" required>
+                                            @{
+                                                for (int i = 2; i <= 14; i++)
+                                                {
+                                                    <option value="@i">@time[i]</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </aside>
+                        </div>
+                        <div class="row fromSchecule">
+                            <aside class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">อาคารเรียน :</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" id="BuildingCode" name="BuildingCode" tabindex="7" onchange="getRoom()">
+                                            @{
+                                                <option value="">-- กรุณาเลือก --</option>
+                                                var building = (List<BuildingModel>)ViewBag.Building;
+                                                if (building.Count > 0 && building != null)
+                                                {
+                                                    foreach (var r in building)
+                                                    {
+                                                        <option value="@r.BuildingCode">@r.BuildingCode | @r.BuildingName</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </aside>
+                            <aside class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">ห้องเรียน :</label>
+                                    <div class="col-sm-5">
+                                        <select class="form-control" id="RoomNo" name="RoomNo" tabindex="8" required>
+                                            <option value="">-- กรุณาเลือก --</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </aside>
+                        </div>
+
+                    </div>
+                    <div class="box-footer">
+                        <div>
+                            <button type="button" class="btn btn-default btn-cancel">ยกเลิก</button>
+                            <button type="button" class="btn btn-success pull-right btn-save">บันทึกข้อมูล</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts{
+    <script>
+        function Submit() {
+            $('#form-search').submit();
+        }
+        $('.btn-edit').click(function () {
+            var id = $(this).data("scheduleid");
+            //alert(id);
+            //swal("ไม่สามารถแก้ไขได้", "เนื่องจากอยู่ในช่วงปรับปรุงแก้ไข ", "warning");
+            $.ajax({
+                type: "POST", // method ที่จะส่ง
+                cache: false,
+                url: '@Url.Action("UpdateSchedule", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                dataType: "json", // ชนิดข้อมูลที่ส่ง
+                data: { id: id }, // ข้อมูลที่ส่ง
+                traditional: false, // การจดจำข้อมูล
+                beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                    loadSpin();
+                },
+                success: function (res) {
+
+                    var status = false;
+                    var message = 'ดำเนินการไม่สำเร็จ';
+                    if (res != null && res != undefined) {
+                        status = res.status;
+                        message = res.message != '' ? res.message : message;
+                    }
+                    if (status == false) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+
+                    } else {
+
+                        $('#ScheduleID').val(res.data.ScheduleID);
+                        $('#SchYearID').val(res.data.SchYearID);
+                        $('#DayTeach').val(res.data.DayTeach);
+                        $('#SubjectCode').val(res.data.SubjectCode + ',' + res.data.Course + ',' + res.data.StudyGroupID);
+                        //ข้าม redio btn
+                        $('#StartTimeInt').val(res.data.StartTimeInt);
+                        $('#EndTimeInt').val(res.data.EndTimeInt);
+                        $('#BuildingCode').val(res.data.BuildingCode);
+                        $('#RoomNo').find('option').remove();
+                        $('#RoomNo').append('<option value="' + res.data.RoomNo + '">' + res.data.RoomNo + '</option>');
+                        $("input[name=typeSubject][value='" + res.data.TypeSubject + "']").prop("checked", true);
+                        $('.panelShow').slideDown();
+                        //$('#DepartmentModal').modal('show');
+                        $('#SubjectCode').prop("disabled", true);
+                        $('#typeSubject').attr("disabled", true);
+                        $('#StartTimeInt').attr("disabled", false);
+                        $('#EndTimeInt').attr("disabled", false);
+                        $('html, body').animate({ scrollTop: 800 }, 'slow');
+                        $('.panelShow').focus();
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    swal("เกิดข้อผิดพลาด", message, "error");
+                    unLoadSpin();
+                },
+                complete: function () {
+                    unLoadSpin();
+                }
+            });
+        });
+        function initialSelect() {
+            $('#StartTimeInt').find('option').remove();
+            $('#EndTimeInt').find('option').remove();
+            $('#RoomNo').find('option').remove();
+            $('#RoomNo').append('<option value="">-- กรุณาเลือก --</option>');
+            //alert(res.data);
+            for (var i = 1; i < 14; i++) {
+                //$('#EndTimeInt').append(new Option(time[i], i));
+                $('#StartTimeInt').append('<option value="' + i + '">' + time[i] + '</option>');
+            }
+            for (var i = 2; i <= 14; i++) {
+                //$('#EndTimeInt').append(new Option(time[i], i));
+                $('#EndTimeInt').append('<option value="' + i + '">' + time[i] + '</option>');
+            }
+        }
+
+        function getRoom() {
+            var id = $('#BuildingCode').val();
+            var day = $('#DayTeach').val();
+            var EndTimeInt = $('#EndTimeInt').val();
+            var StartTimeInt = $('#StartTimeInt').val();
+            var send = id + "," + day + "," + EndTimeInt + "," + StartTimeInt;
+            //alert(id);
+            $.ajax({
+                type: "POST", // method ที่จะส่ง
+                cache: false,
+                url: '@Url.Action("getRoom", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                dataType: "json", // ชนิดข้อมูลที่ส่ง
+                data: { _send: send }, // ข้อมูลที่ส่ง
+                traditional: true, // การจดจำข้อมูล
+                beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                    loadSpin();
+                },
+
+                success: function (res) {
+
+                    var status = false;
+                    var message = 'ดำเนินการไม่สำเร็จ';
+                    if (res != null && res != undefined) {
+                        status = res.status;
+                        message = res.message != '' ? res.message : message;
+                    }
+                    if (status == false) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+
+                    } else {
+                        $('#RoomNo').find('option').remove();
+                        $('#RoomNo').append('<option value="">-- กรุณาเลือก --</option>');
+                        // solution one
+                        //$.each(res.data, function (i, e){
+                        //    alert(res.data[i].DeptID);
+                        //});
+
+                        //solutoin two
+                        $.each(res.data, function (i, e) {
+                            //alert(e.Dept_PK + "   " + e.DeptName);
+                            $('#RoomNo').append('<option value="' + e.RoomNo + '">' + e.RoomNo + '</option>');
+                        });
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    swal("เกิดข้อผิดพลาด", message, "error");
+                    unLoadSpin();
+                },
+                complete: function () {
+                    unLoadSpin();
+                },
+            });
+        }
+
+        function resetForm() {
+            //$('.isSubject').html("");
+            $('#SubjectCode').prop("disabled", false);
+            $('#StartTimeInt').attr("disabled", true);
+            $('#EndTimeInt').attr("disabled", true);
+            initialSelect();
+            $('#SubjectCode').val("");
+            $('#DayTeach').val("");
+            $('#RoomNo').val("");
+            $('#BuildingCode').val("");
+            $('#Schedule-form').find('.form-group').find('label.error').remove();
+            $('#Schedule-form').find('.form-group').find('.error').removeClass('error');
+            $('#Schedule-form').find('.form-group').find('.valid').removeClass('valid');
+            $("input[name=typeSubject][value='3']").prop("disabled", true);
+        }
+
+        $('#Query').val(@dataSubj.Select(r => r.SchYearID).FirstOrDefault());
+
+        if (@Model.Query+"" != "") {
+            $('#Query').val(@Model.Query);
+        }
+        else {
+            $('#Query').val(@dataSubj.Select(r => r.SchYearID).FirstOrDefault());
+        }
+        $(document).ready(function () {
+            $('.panelShow').hide();
+            $('.sidebar-menu > li').removeClass('active');
+            $('.schedule').addClass('active');
+        });
+        $('.btn-cancel').click(function () {
+            resetForm();
+            $('.panelShow').slideUp();
+            $('html, body').animate({ scrollTop: 100 }, 'slow');
+        });
+        function FormAddShow() {
+            resetForm();
+            $('.panelShow').slideDown();
+            $('html, body').animate({ scrollTop: 800 }, 'slow');
+            $('.panelShow').focus();
+        }
+
+        $('#Schedule-form').validate({
+            rules: {
+                SubjectCode: { required: true },
+                StartTimeInt: { required: true },
+                RoomNo: { required: true },
+                DayTeach: { required: true },
+                'typeSubject': { required: true },
+                EndTimeInt: { required: true },
+            },
+            messages: {
+                SubjectCode: { required: "กรุณาเลือกวิชา-กลุ่มเรียน" },
+                StartTimeInt: { required: "กรุณาเลือกเวลาเริ่มต้น" },
+                RoomNo: { required: "กรุณาเลือกห้องเรียน" },
+                DayTeach: { required: "กรุณาเลือกวันสอน" },
+                'typeSubject': { required: "กรุณาเลือกประเภทวิชา" },
+                EndTimeInt: { required: "กรุณาเลือกเวลาสิ้นสุด" },
+            }
+        });
+
+        function isNumberRoom(sText, obj) {
+            $('#StdError').html("");
+            var ValidChars = "ABCD1234567890-";
+            var IsNumber = true;
+            var Char;
+            for (i = 0; i < sText.length && IsNumber == true; i++) {
+                Char = sText.charAt(i);
+                if (ValidChars.indexOf(Char) == -1) {
+                    IsNumber = false;
+                }
+            }
+            if (IsNumber == false) {
+                obj.value = sText.substr(0, sText.length - 1);
+            }
+        }
+
+        $('.btn-save').click(function () {
+            var form_data = new FormData($('#Schedule-form')[0]);
+            if ($('#Schedule-form').valid()) {
+                $.ajax({
+                    type: 'post',
+                    cache: false,
+                    url: '@Url.Action("SaveSchedule", "Home")',
+                    dataType: 'json',
+                    traditional: true,
+                    contentType: false,
+                    processData: false,
+                    data: form_data,
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+
+                        } else {
+                            swal({
+                                title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                type: "success",
+                                showConfirmButton: false,
+                                timer: 1000,
+                                closeOnConfirm: false
+                            },
+                                function () {
+                                    location.reload(true);
+                                });
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    },
+                });
+            }
+            else {
+
+            }
+        });
+
+        var time = ["", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"];
+
+        function CheckDay(dayNumber) {
+            //$('#SubjectCode').prop("disabled", false);
+            var schYear = $('#SchYearID').val();
+            //var UserID = 1; // รอแก้ไข
+            if (dayNumber != "") {
+                var data = dayNumber + "," + schYear + "," + UserID;
+                $.ajax({
+                    type: 'post',
+                    cache: false,
+                    url: '@Url.Action("CheckDay", "Home")',
+                    dataType: 'json',
+                    traditional: true,
+                    data: { _data: data },
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == true) {
+                            $('#StartTimeInt').find('option').remove();
+                            $('#EndTimeInt').find('option').remove();
+                            //alert(res.data);
+                            for (var i = res.data; i < 14; i++) {
+                                //$('#EndTimeInt').append(new Option(time[i], i));
+                                $('#StartTimeInt').append('<option value="' + i + '">' + time[i] + '</option>');
+                            }
+                            for (var i = res.data + 1; i <= 14; i++) {
+                                //$('#EndTimeInt').append(new Option(time[i], i));
+                                $('#EndTimeInt').append('<option value="' + i + '">' + time[i] + '</option>');
+                            }
+                            //$('#SubjectCode').val("");
+                            EnableInput();
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    },
+                });
+            }
+        }
+
+        var checkedValue = $('#Schedule-form').find('input[name=typeSubject]:checked').val();
+        $("input[type='radio']").change(function () {
+            checkedValue = $(this).val();
+            getTypeSubject();
+        });
+
+        function getTypeSubject() {
+            var id = $('#SubjectCode').val();
+            var startTime = parseInt($('#StartTimeInt').val());
+            //alert(checkedValue);
+            if (id != "") {
+                //$('#Nosubject').html("");
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("getTypeSubject", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: { _id: id }, // ข้อมูลที่ส่ง
+                    traditional: true, // การจดจำข้อมูล
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status;
+                        var strdata;
+                        var sumTime;
+                        var total;
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == true) {
+                            if (res.data.TimeTheory != 0 && res.data.TimePractice != 0 && checkedValue == 1) {
+                                //alert(1);
+                                $("input[name=typeSubject][value='1']").prop("checked", true);
+                                strdata = res.data.TimeTheory.toString();
+                                if (strdata != 0) {
+                                    $('#EndTimeInt').find('option').remove();
+                                    sumTime = parseInt(strdata);
+                                    total = parseInt(startTime) + sumTime;
+                                    total > 14 ? total = 14 : total = total;
+                                    // $('#EndTimeInt').append('<option value="' + total + '">' + time[total] + '<option>');
+                                    $('#EndTimeInt').append(new Option(time[total], total));
+                                }
+                            }
+                            else if (res.data.TimeTheory != 0 && res.data.TimePractice != 0 && checkedValue == 3) {
+                                //alert(3);
+                                $("input[name=typeSubject][value='3']").prop("checked", true);
+                                strdata = res.data.TimePractice.toString();
+                                if (strdata != 0) {
+                                    $('#EndTimeInt').find('option').remove();
+                                    sumTime = parseInt(strdata);
+                                    total = parseInt(startTime) + sumTime;
+                                    total > 14 ? total = 14 : total = total;
+                                    for (var i = (startTime + 1) ; i <= total; i++) {
+                                        $('#EndTimeInt').append(new Option(time[i], i));
+                                        //console.log(i);
+                                    }
+                                    $('#EndTimeInt').val(total);
+                                }
+                            }
+                            else if (res.data.TimeTheory != 0 || res.data.TimePractice == 0) {
+                                checkedValue = 1;
+                                $("input[name=typeSubject][value='1']").prop("checked", true);
+                                $("input[name=typeSubject][value='3']").prop("disabled", true);
+                                strdata = res.data.TimeTheory.toString();
+                                if (strdata != 0) {
+                                    $('#EndTimeInt').find('option').remove();
+                                    sumTime = parseInt(strdata);
+                                    total = parseInt(startTime) + sumTime;
+                                    total > 14 ? total = 14 : total = total;
+                                    // $('#EndTimeInt').append('<option value="' + total + '">' + time[total] + '<option>');
+                                    $('#EndTimeInt').append(new Option(time[total], total));
+                                }
+                                //else {
+                                //    // swal("ขออภัย !", "ประเภทรายวิชานี้เป็น ทฤษฎี", "error")
+                                //    $("input[name=typeSubject][value='3']").prop("checked", true);
+                                //}
+                            }
+                            else if (res.data.TimeTheory == 0 || res.data.TimePractice != 0) {
+                                checkedValue = 3;
+                                $("input[name=typeSubject][value='3']").prop("checked", true);
+                                $("input[name=typeSubject][value='1']").prop("disabled", true);
+                                strdata = res.data.TimePractice.toString();
+                                if (strdata != 0) {
+                                    $('#EndTimeInt').find('option').remove();
+                                    sumTime = parseInt(strdata);
+                                    total = parseInt(startTime) + sumTime;
+                                    total > 14 ? total = 14 : total = total;
+                                    for (var i = (startTime + 1) ; i <= total; i++) {
+                                        $('#EndTimeInt').append(new Option(time[i], i));
+                                        //console.log(i);
+                                    }
+                                    $('#EndTimeInt').val(total);
+                                }
+                                //else {
+                                //    swal("ขออภัย !", "ประเภทรายวิชานี้เป็น ทฤษฎี", "error");
+                                //}
+                            }
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    },
+                });
+            }
+            else {
+                swal("ขออภัย !", "กรุณาเลือกวิชา-กลุ่มเรียนก่อน", "error");
+            }
+        }
+
+        function EnableInput() {
+            if ($('#SubjectCode').val() != "") {
+                $('#StartTimeInt').attr("disabled", false);
+                $('#EndTimeInt').attr("disabled", false);
+                $("input[name=typeSubject][value='1']").prop("disabled", false);
+                $("input[name=typeSubject][value='3']").prop("disabled", false);
+                $("input[name=typeSubject][value='1']").prop("checked", false);
+                $("input[name=typeSubject][value='3']").prop("checked", false);
+                getTypeSubject();
+            }
+            else {
+                //alert($('#SubjectCode').val());
+                $('#StartTimeInt').attr("disabled", true);
+                $('#EndTimeInt').attr("disabled", true);
+            }
+        }
+
+    </script>
+}

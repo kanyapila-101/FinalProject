@@ -1,0 +1,610 @@
+﻿@model Students_Attendance_Project.Models.FilterModel
+@using Students_Attendance_Project.Models;
+@using PagedList.Mvc;
+@using PagedList;
+@using Students_Attendance_Project.Common;
+@{
+    ViewBag.Title = "เช็คชื่อ";
+    var dataStudyGroup = (List<StudyGroupModel>)ViewBag.StudyGroup;
+    var dateToday = DateTime.Now.ToString("d/MM/yyyy", Shared.CultureInfoTh);
+    var entity = (List<StudentCheckModel>)ViewBag.StdCheck;
+}
+<style type="text/css">
+    .detail {
+        word-wrap: break-word;
+        white-space: pre;
+        text-overflow: ellipsis;
+    }
+</style>
+
+<!-- /.box table -->
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <!-- BEGIN SAMPLE TABLE PORTLET-->
+        <div class="box box-info">
+            <div class="box-header">
+                <strong style="font-size: 16px; ">บันทึกการสอน</strong>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                </div>
+            </div>
+
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div class="row pull-right" style="margin-right:2px;">
+                    <button type="button" class="btn btn-sm btn-primary btn-addNote">เพิ่ม</button>
+                </div>
+                <br />
+                <hr />
+                <div class="table-responsive">
+                    <table class="table no-margin table-hover text-center" id="NoteTeach-table">
+                        <thead>
+                            <tr class="success">
+                                <th style="width: 10%">วันที่</th>
+                                <th style="width: 80%">รายละเอียด</th>
+                                <th style="width: 10%"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="detail"></tbody>
+                    </table>
+                </div>
+                <!-- /.table-responsive -->
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer clearfix">
+
+            </div>
+            <!-- /.box-footer -->
+        </div>
+        <!-- /.box -->
+    </div>
+    <div class="col-md-1"></div>
+</div>
+
+<!-- /.box table -->
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <!-- BEGIN SAMPLE TABLE PORTLET-->
+        <div class="box box-info">
+            <div class="box-header">
+                <div class="box-header">
+                    <div class="caption">
+                        <i class="fa fa-cogs"></i> &nbsp;<strong style="font-size: 16px; ">เช็คชื่อนักศึกษา</strong>
+                    </div>
+                    <p>
+                        <hr />
+                        <div class="row col-sm-12">
+                            ปีการศึกษา : @dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.Term).FirstOrDefault()/@dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.Year).FirstOrDefault()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            กลุ่มเรียน : @dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.StudyGroupCode).FirstOrDefault()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            วิชา-หลักสูตร : [@dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.SubjectCode).FirstOrDefault()] @dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.SubjectName).FirstOrDefault()
+                            (@dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.Course).FirstOrDefault())&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;วันที่   @dateToday
+                        </div>
+                    </p>
+                </div>
+                <div class="portlet-body">
+                    <input type="hidden" id="StdCount" value="@entity.Count" />
+                    <div class="table-responsive">
+                        <form id="StdCheck-form" class="form-inline">
+                            <table class="table table-bordered table-hover text-center" id="StdCheck-table">
+                                <thead>
+                                    <tr class="success">
+                                        <th style="width: 20%">รหัสนักศึกษา</th>
+                                        <th style="width: 25%">ชื่อ-นามสกุล</th>
+                                        <th style="width: 30%">สถานะ</th>
+                                        <th style="width: 25%">หมายเหตุ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @{
+
+                                        if (entity.Count > 0 && entity != null)
+                                        {
+                                            int line = 0;
+                                            //var id = entity.Select(r => r.StudyGroupID);
+                                            var count = entity.Where(x => x.StatusID == 7).Count(); <!-- จำนวนสถานะที่ = ชดเชย -->
+                                            foreach (var r in entity)
+                                            {
+                                                <tr class="@(line % 2 != 0 ? "info" : "")">
+                                                    <td class="hidden">
+                                                        <input type="hidden" value="@r.StudyGroupID" id="StudyGroupID" />
+                                                        <input type="hidden" value="@r.StdID" id="StdID" />
+                                                        <input type="hidden" value="@DateTime.Now.ToShortDateString()" id="DateCheck" />
+                                                        <input type="hidden" value="@r.StdCheckID" id="StdCheckID" />
+                                                        <input type="hidden" value="@count" id="isbtndisabled" /> <!-- จำนวนสถานะที่ = ชดเชย เพื่อส่งค่าไปเช็ค btn-save-->
+                                                    </td>
+                                                    <td style="text-align: left">@r.StdCode</td>
+                                                    <td style="text-align: left">@r.NameTH</td>
+                                                    <td>
+                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="1" @((r.StatusID == 1) ? "checked" : (r.StatusID == 7) ? "disabled" : "")>มา</label>
+                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="2" @((r.StatusID == 2) ? "checked" : (r.StatusID == 7) ? "disabled" : "")>สาย</label>
+                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="3" @((r.StatusID == 3) ? "checked" : (r.StatusID == 7) ? "disabled" : "")>ลา</label>
+                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="4" @((r.StatusID == 4) ? "checked" : (r.StatusID == 7) ? "disabled" : "")>ขาด</label>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="col-sm-12 Note" name="Note" value="@r.Note" @((r.StatusID == 7) ? "readonly" : "") />
+                                                    </td>
+                                                </tr>
+                                                line++;
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </form>
+                        <div class="box-footer">
+                            <button class="btn btn-success pull-right btn-save"
+                                    disabled>
+                                บันทึกข้อมูล
+                            </button>
+                            <button class="btn btn-default pull-left" onclick="location.href='@Url.Action("ScheduleCheck", "Home")', loadSpin();">ยกเลิก</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-1"></div>
+</div>
+
+<div class="modal fade" id="StdCheckModal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header success">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">การเช็คชื่อ</h4>
+            </div>
+            <div class="modal-body info">
+
+                <input type="hidden" name="NewRoom" id="NewRoom" value="1">
+                <div class="row">
+                    <div class="col-sm-2"></div>
+                    <div class="col-sm-8" style="padding-left: 15%;">
+                        <div class="form-group">
+                            <strong>ไม่ได้เช็คชื่อนักศึกษา : <span id="present">...</span>   คน</strong>
+                        </div>
+                        <span class="isRed">กรุณาเลือกสถานะ :</span>
+                        <div class="form-group">
+                            <label class="radio-inline pull-left">&nbsp;<input type="radio" name="StatusID[]" id="StatusID" value="1">มา</label>
+                            <label class="radio-inline pull-left"><input type="radio" name="StatusID[]" id="StatusID" value="2">สาย</label>
+                            <label class="radio-inline pull-left"><input type="radio" name="StatusID[]" id="StatusID" value="3">ลา</label>
+                            <label class="radio-inline pull-left"><input type="radio" name="StatusID[]" id="StatusID" value="4">ขาด</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-2"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">กลับไปเช็คชื่อใหม่</button>
+                <button type="button" class="btn btn-success pull-right btn-save2" data-dismiss="modal">บันทึกข้อมูล</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="NoteTeach-form" class="form-horizontal">
+    <div class="modal fade" id="NoteTeachModal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">บันทึกการสอน</h4>
+                </div>
+                <div class="modal-body">
+
+                    <input type="hidden" name="NoteID" id="NoteID" value="0">
+                    <input type="hidden" name="StudyGroupID" id="StudyGroupID" value="@dataStudyGroup.Select(r => r.StudyGroupID).SingleOrDefault()">
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">หัวข้อ :<span class="isRed"> *</span></label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" id="NoteName" name="NoteName" tabindex="1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">รายละเอียด :<span class="isRed"> *</span></label>
+                        <div class="col-sm-7">
+                            <textarea class="form-control" rows="5" id="DetailNote" name="DetailNote" tabindex="2" required></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-success pull-right btn-saveNote" data-dismiss="modal">บันทึกข้อมูล</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+
+    <script>
+        var groupID = @dataStudyGroup.Select(r => r.StudyGroupID).SingleOrDefault();
+        var count = $('#StdCount').val();
+        var checked = 0;
+        var StatusReCheck = 0;
+        function LoopCheckRadio() {
+            var id
+            checked = 0;
+            $("table tbody tr td input[id=StatusID]:radio").each(function () {
+                if ($(this).is(":checked")) {
+                    id = $(this).val();
+                    checked++;
+                    //alert(count);
+                    //alert(checked);
+                    console.log(count - checked);
+                } else {
+                    // do something else
+                }
+            });
+            return count - checked;
+        }
+
+        function NoteTeach() {
+            if (groupID != "") {
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("getNoteTeach", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: { id: groupID }, // ข้อมูลที่ส่ง
+                    traditional: true, // การจดจำข้อมูล
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+
+                        } else {
+
+                            $('#NoteTeach-table').find('tbody').find('tr').remove();
+                            if (res.data != null) {
+                                $.each(res.data, function (i, e) {
+                                    $('#NoteTeach-table').find('tbody').append(
+                                        '<tr>'+
+                                        '<td>' + e.dateNote + '</td>'+
+                                        '<td style="text-align:left"><strong>หัวข้อ : ' + e.NoteName + '</strong><br/><strong>รายละเอียด : </strong><span class"detail">' + e.DetailNote + '</span></td>'+
+                                        '<td><button type="button" class="btn btn-warning btn-xs btn-editNote" data-noteteach="' + e.NoteID + "," + e.StudyGroupID + '" role="button" data-toggle="tooltip" data-placement="top" title="แก้ไข"><i class="fa fa-pencil"></i></button>'+" "+
+                                        '<button type="button" class="btn btn-danger btn-xs btn-delNote" data-noteteach="' + e.NoteID + '" role="button" data-toggle="tooltip" data-placement="top" title="ลบ"><i class="fa fa-remove"></i></button></td>'+
+                                        '</tr>');
+                                });
+                            }
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        unLoadSpin();
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                        btnDelAppend(groupID);
+                        btnEditAppend(groupID);
+                    },
+                });
+            }
+        }
+
+        $('#NoteTeach-form').validate({
+            rules:{
+                NoteName: {required: true},
+                DetailNote: {required: true }
+            },
+            messages:{
+                NoteName: {required: "กรุณาป้อนหัวข้อบันทึกการสอน"},
+                DetailNote: {required: "กรุณาป้อนรายละเอียดบันทึกการสอน" }
+            }
+        });
+
+        $('.btn-saveNote').click(function () {
+            //$('#StudyGroupID').val(groupID);
+            //alert($('#StudyGroupID').val());
+            if ($('#NoteTeach-form').valid()) {
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("SaveNoteTeach", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: $('#NoteTeach-form').serialize(), // ข้อมูลที่ส่ง
+                    traditional: true,
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+
+                        }else {
+                            $('#NoteTeachModal').modal("hide");
+                            swal({
+                                title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                type: "success",
+                                showConfirmButton: false,
+                                //confirmButtonColor: "#AEDEF4",
+                                //confirmButtonText: "Ok",
+                                timer: 1000,
+                                closeOnConfirm: false
+                            });
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด","ไม่สามารถบันทึกข้อมูลได้","error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        NoteTeach();
+                    },
+                });
+            }
+            return false;
+        });
+
+        function btnDelAppend(groupID) {
+            $('.btn-delNote').click(function () {
+                var data = $(this).data("noteteach");
+                //alert(data);
+                swal({
+                    title: "ลบข้อมูล?",
+                    text: "คุณต้องการจะลบข้อมูลจริงหรือไม่!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "ใช่ !",
+                    cancelButtonText: "ยกเลิก",
+                    closeOnConfirm: false,
+                    closeOnCancel: true
+                },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            type: "POST", // method ที่จะส่ง
+                            cache: false,
+                            url: '@Url.Action("DeleteNoteTeach", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                            dataType: "json", // ชนิดข้อมูลที่ส่ง
+                            data: { _id: data }, // ข้อมูลที่ส่ง
+                            traditional: true, // การจดจำข้อมูล
+                            beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                                loadSpin();
+                            },
+                            success: function (res) {
+
+                                var status = false;
+                                var message = 'ดำเนินการไม่สำเร็จ';
+                                if (res != null && res != undefined) {
+                                    status = res.status;
+                                    message = res.message != '' ? res.message : message;
+                                }
+                                if (status == false) {
+                                    swal("ขออภัย!", message, "error");
+
+                                } else {
+                                    swal({
+                                        title: "ลบข้อมูลเรียบร้อยเเล้ว",
+                                        type: "success",
+                                        showConfirmButton: false,
+                                        //confirmButtonColor: "#AEDEF4",
+                                        //confirmButtonText: "Ok",
+                                        timer: 1000,
+                                        closeOnConfirm: false
+                                    });
+                                    $('#NoteTeachModal').modal("hide");
+                                }
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+
+                            },
+                            complete: function () {
+                                unLoadSpin();
+                                NoteTeach();
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        function btnEditAppend(groupID) {
+            $('.btn-editNote').click(function () {
+                var data = $(this).data("noteteach");
+                //alert(data);
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("UpdateNoteTeach", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: { _data: data }, // ข้อมูลที่ส่ง
+                    traditional: true, // การจดจำข้อมูล
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("ขออภัย!", message, "error");
+
+                        } else {
+                            $('#NoteID').val(res.data.NoteID);
+                            $('#NoteName').val(res.data.NoteName);
+                            $('#DetailNote').val(res.data.DetailNote);
+                            ResetModal();
+                            $('#NoteTeachModal').modal('show');
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                        //NoteTeach();
+                    }
+                });
+            });
+        }
+        function ResetModal() {
+            $('#NoteTeach-form').find('.form-group').find('label.error').remove();
+            $('#NoteTeach-form').find('.form-group').find('.error').removeClass('error');
+            $('#NoteTeach-form').find('.form-group').find('.valid').removeClass('valid');
+        }
+        $(document).ready(function () {
+            $('.sidebar-menu > li').removeClass('active');
+            $('.ScheduleCheck').addClass('active');
+            NoteTeach();
+            //btnEditAppend(groupID);
+            $('.btn-addNote').click(function () {
+                $('#NoteID').val("0");
+                $('#NoteName').val("");
+                $('#DetailNote').val("");
+                ResetModal();
+                $('#NoteTeachModal').modal("show");
+            });
+
+            if ($('#isbtndisabled').val() > 0) {
+                $('.btn-save').prop('disabled', true);
+            }
+            else {
+                $('.btn-save').prop('disabled', false);
+            }
+            var result = new Array();
+            //$('#StdCheckModal').modal('show');
+            $('.btn-save2').click(function () {
+                StatusReCheck = $('#StdCheckModal').find("input[type=radio]:checked").val();
+                // alert(StatusReCheck);
+                result = [];
+                $('#StdCheck-table tbody tr').each(function () {
+                    //console.log($(this));
+                    var data = $($(this).find('td #StudyGroupID')).val();
+                    var data0 = $($(this).find('td #StdID')).val();
+                    //var data1 = $($(this).find('td')[1]).html();
+                    //var data2 = $($(this).find('td')[2]).html();
+                    var data4 = $($(this).find('td input[name="Note"]')).val(); // จะเอาอะไรตรงนี้ หมายเหตุ จากtext
+                    var data3 = $($(this).find('#StatusID:checked')).val();
+                    var dataidCheck = $($(this).find('td #StdCheckID')).val();
+
+                    result.push({
+                        StdCheckID: dataidCheck,
+                        StudyGroupID: data,
+                        StdID: data0,
+                        StatusID: data3,
+                        Note: data4,
+                        StatusRe: StatusReCheck,
+                    });
+                });
+                //console.log(result);
+                SaveCheckStd();
+            });
+
+            function SaveCheckStd() {
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("SaveStdCheck", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: '&' + $.param({ model: result }), // ข้อมูลที่ส่ง
+                    traditional: true, // การจดจำข้อมูล
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+
+                        } else {
+                            swal({
+                                title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                type: "success",
+                                showConfirmButton: false,
+                                timer: 1000,
+                                //confirmButtonColor: "#AEDEF4",
+                                //confirmButtonText: "Ok",
+                                closeOnConfirm: false
+                            },
+                                function () {
+                                    location.href = '@Url.Action("ScheduleCheck","Home")', loadSpin();
+                                    //$(location).attr('href', '/../Home/StudentAttendanceCheck');
+                                });
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    },
+                });
+            }
+
+            $('.btn-save').click(function () {
+                var noCheck = LoopCheckRadio();
+                if (noCheck != 0) {
+                    $('#present').html(count - checked);
+                    $('#StdCheckModal').modal('show');
+                }
+                else {
+                    result = [];
+                    $('#StdCheck-table tbody tr').each(function () {
+                        //console.log($(this));
+                        var data = $($(this).find('td #StudyGroupID')).val();
+                        var data0 = $($(this).find('td #StdID')).val();
+                        //var data1 = $($(this).find('td')[1]).html();
+                        //var data2 = $($(this).find('td')[2]).html();
+                        var data4 = $($(this).find('td input[name="Note"]')).val(); // จะเอาอะไรตรงนี้ หมายเหตุ จากtext
+                        var data3 = $($(this).find('#StatusID:checked')).val();
+                        var dataidCheck = $($(this).find('td #StdCheckID')).val();
+                        //if (data3 == null) {
+                        //    data3 = $($('#StdCheckModal .form-group').find('input[id=StatusID]:radio').is(":checked")
+                        //}
+                        result.push({
+                            StdCheckID: dataidCheck,
+                            StudyGroupID: data,
+                            StdID: data0,
+                            StatusID: data3,
+                            Note: data4,
+                            //nickname: data2,
+                        });
+                        //return false;
+                    });
+                    //console.log(result);
+                    SaveCheckStd();
+                }
+                return false;
+            });
+        });
+    </script>
+
+}

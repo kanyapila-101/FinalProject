@@ -1,0 +1,71 @@
+﻿@using Students_Attendance_Project.Models;
+@{
+    ViewBag.Title = "Post Data";
+    Layout = null;
+    var listdata = (List<DataLogin>)ViewBag.DataLogin;
+}
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<HTML xmlns='http://www.w3.org/1999/xhtml'>
+
+<HEAD>
+    <TITLE>RMUTi SSO SP</TITLE>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport" />
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+</HEAD>
+<BODY>
+    <center><h3>You are directly accessing to Single Sign-On script</h3></center><br />
+    - Use this value to add to your IdP:<br />
+    <div style='margin-left: 40px;'>
+        @{
+            if (listdata.Count == 0)
+            {
+                <h2>@ViewBag.Res</h2>
+            }
+            else
+            {
+                var gid = listdata.Where(r => r.Name == "gidNumber").Select(r => r.Value).FirstOrDefault();
+                if (gid != "2500")
+                {
+                    <h2>@ViewBag.notUse</h2>
+                }
+            }
+
+        }
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>SP Entity ID</td><td>"@ViewBag.identityId"</td></tr>
+                <tr><td>AssertionConsumerService</td><td>"@ViewBag.url"/login/ssoLogin</td></tr>
+                <tr><td>SingleLogoutService</td><td>"@ViewBag.url"/login/sls</td></tr>
+                <tr><td>NameIDFormat</td><td>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</td></tr>
+                @{
+
+                    if (listdata.Count > 0)
+                    {
+                        foreach (var r in listdata)
+                        {
+                            <tr>
+                                <td>@r.Name</td>
+                                <td>@r.Value</td>
+                            </tr>
+                        }
+                    }
+
+                }
+            </tbody>
+        </table>
+    </div>
+    <br />
+    "- <a href='@Url.Action("Login","Login")'>Login</a> <i>(Url: "@ViewBag.url"/login/login)</i><br /><br />
+    "- <a href='@Url.Action("Logout","Login")'>Logout</a> <i>(Url: "@ViewBag.url"/login/logout)</i><br />
+    
+    <script src="~/Scripts/bootstrap.min.js"></script>
+</BODY>
+</HTML>

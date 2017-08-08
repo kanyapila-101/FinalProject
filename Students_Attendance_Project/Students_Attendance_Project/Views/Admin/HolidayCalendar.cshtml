@@ -1,0 +1,33 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "HolidayCalendar";
+}
+<div class="googleCalendar">
+    <iframe src="https://calendar.google.com/calendar/embed?src=th.th%23holiday%40group.v.calendar.google.com&ctz=Asia/Bangkok"
+            style="border: 0" width="800" height="600" frameborder="0" scrolling="yes">
+    </iframe>
+</div>
+
+<style>
+    .googleCalendar {
+        position: relative;
+        height: 0;
+        width: 100%;
+        padding-bottom: 80%;
+    }
+
+        .googleCalendar iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;  /**/
+        }
+</style>
+
+@section scripts{
+    <script>
+
+    </script>
+}

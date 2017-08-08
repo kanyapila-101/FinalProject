@@ -1,0 +1,529 @@
+﻿@using Students_Attendance_Project.Models;
+@model Students_Attendance_Project.Models.FilterModel
+@using PagedList.Mvc;
+@using PagedList;
+@{
+    ViewBag.Title = "รายชื่อนักศึกษา";
+    var dataStudyGroup = (List<StudentModel>)ViewBag.StudyGroup;
+}
+
+<style>
+    .text-left {
+        text-align: left;
+    }
+</style>
+
+<section>
+    <!-- /.box table -->
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-10">
+            <!-- BEGIN SAMPLE TABLE PORTLET-->
+            <div class="box">
+                <div class="box-header">
+                    <div class="box-header">
+                        <div class="caption">
+                            <i class="fa fa-cogs"></i> &nbsp;<strong style="font-size: 16px; ">รายชื่อนักศึกษา</strong>  
+                            <button type="button" class="btn btn-primary btn-sm pull-right btn-addstudent"><i class="fa fa-plus"></i>&nbsp;เพิ่มนักศึกษา</button>
+                        </div>
+                        <p>
+                            <hr />
+                            <div class="row col-sm-12">
+                                ปีการศึกษา : @dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.Term).FirstOrDefault()/@dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.Year).FirstOrDefault()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                กลุ่มเรียน : @dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.StudyGroupCode).FirstOrDefault()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                วิชา-หลักสูตร : [@dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.SubjectCode).FirstOrDefault()] @dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.SubjectName).FirstOrDefault()
+                                (@dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.Course).FirstOrDefault())
+                            </div>
+                        </p>
+
+                        @*<div class="row col-sm-5 pull-right">
+                                <form id="form-search" action="#" class="form-horizontal" method="post" enctype="multipart/form-data">
+                                    <div class="input-group">
+                                        <input type="text" name="Query" class="form-control" placeholder="ค้นหา..">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default btn-search" type="submit"><i class="fa fa-search"></i></button>
+                                        </span>
+                                    </div>
+                                </form>
+                            </div>*@
+                    </div>
+                    <div class="portlet-body">
+                        <div class="table-scrolllabel">
+                            <table class="table table-bordered table-hover text-center" id="Subject-table">
+                                <thead>
+                                    <tr class="success">
+                                        <th style="width: 15%"> รหัสนักศึกษา </th>
+                                        <th style="width: 30%"> ชื่อ-นามสกุล (ไทย) </th>
+                                        <th style="width: 35%"> ชื่อ-นามสกุล (อังกฤษ) </th>
+                                        <th style="width: 13%"> สถานะ </th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var entity = (PagedList.IPagedList<StudentShow>)ViewBag.Student;
+                                        if (entity.Count > 0 && entity != null)
+                                        {
+                                            int line = 0;
+                                            foreach (var r in entity)
+                                            {
+                                                <tr class="@(line % 2 != 0 ? "info" : "")">
+                                                    <td>@r.StdCode</td>
+                                                    <td style="text-align:left;">@r.NameTH</td>
+                                                    <td style="text-align:left;">@r.NameEN</td>
+                                                    <td style="color:@(r.StatusID == 6 ? "red":"none" )">@r.StatusName</td>
+
+                                                    <td>
+                                                        <button type="button" class="btn btn-warning btn-xs btn-edit" data-studentid="@r.StdID,@r.StudyGroupID" role="button"
+                                                                data-toggle="tooltip" data-placement="top" title="แก้ไขข้อมูล">
+                                                            <i class="fa fa-pencil"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                                line++;
+                                                            }
+                                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row pull-right" style="margin-right:2px;">
+                            @Html.PagedListPager((IPagedList)ViewBag.Student, page => Url.Action("Student", new { page }))
+                        </div>
+                        <form id="Student-form" class="form-horizontal">
+                            <div class="modal fade" id="StudentModal" role="dialog">
+                                <div class="modal-dialog">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">นักศึกษา</h4>
+                                        </div>
+                                        <div class="modal-body ">
+
+                                            <input type="hidden" name="StdID" id="StdID" value="0">
+                                            <input type="hidden" name="StudyGroupID" id="StudyGroupID" value="@dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.StudyGroupID).FirstOrDefault()">
+
+                                            <div class="form-group fileHidden">
+                                                <label class="col-sm-4 control-label">เพิ่มไฟล์ (.xlsx) :</label>
+                                                <div class="col-sm-6" data-provides="fileinput">
+                                                    <div class="btn-file">
+                                                        <input type="file" id="file" name="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required onchange="HiddenInput()"/>
+                                                    </div>
+                                                    <br />
+                                                    <button type="button" class="btn btn-info btn-xs pull-left btn-fileExam">ตัวอย่างไฟล์</button>
+                                                    @*<span class="fileinput-filename"></span><label class="fileinput-new">No file chosen</label>*@
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group inputhide">
+                                                <label class="col-sm-4 control-label">รหัสนักศึกษา :<span class="isRed"> *</span></label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" class="form-control" id="StdCode" name="StdCode" tabindex="1" placeholder="รหัส นศ. (รวม - )"
+                                                           required minlength="13" maxlength="14" onkeyup="isNumber(this.value, this)" onblur="CheckformatStdCode(this.value, this)">
+                                                    <div id="StdError" style="padding-top: 3px;"></div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group inputhide isPrefix">
+                                                <label class="col-sm-4 control-label">คำนำหน้า :<span class="isRed"> *</span></label>
+                                                <div class="col-sm-3">
+                                                    <select class="form-control" id="Prefix" name="Prefix" tabindex="2" required>
+                                                        <option value="นาย">นาย</option>
+                                                        <option value="นางสาว">นางสาว</option>
+                                                        <option value="ว่าที่ร้อยตรี">ว่าที่ร้อยตรี</option>
+                                                        <option value="ว่าที่ร้อยตรี หญิง">ว่าที่ร้อยตรี หญิง</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group inputhide ">
+                                                <label class="col-sm-4 control-label">ชื่อ-นามสกุล (TH) :<span class="isRed"> *</span></label>
+                                                <div class="col-sm-7">
+                                                    <input type="text" class="form-control" id="NameTH" name="NameTH" tabindex="3"
+                                                           required onkeyup="isThaiChar1(this.value, this)" onchange="CheckInput()">
+                                                </div>
+                                            </div>
+                                            <div class="form-group inputhide isPrefix">
+                                                <label class="col-sm-4 control-label">คำนำหน้า :<span class="isRed"> *</span></label>
+                                                <div class="col-sm-3">
+                                                    <select class="form-control" id="PrefixEN" name="PrefixEN" tabindex="4" required>
+                                                        <option value="Mr.">Mr.</option>
+                                                        <option value="Miss">Miss</option>
+                                                        <option value="ACTING 2, LT.">ACTING 2, LT.</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group inputhide">
+                                                <label class="col-sm-4 control-label">ชื่อ-นามสกุล (EN) :<span class="isRed"> *</span></label>
+                                                <div class="col-sm-7">
+                                                    <input type="text" class="form-control" id="NameEN" name="NameEN" tabindex="5" 
+                                                           required onkeyup="isText(this.value, this)" onchange="CheckInput()">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group inputhide">
+                                                <label class="col-sm-4 control-label">สถานะ :<span class="isRed"> *</span></label>
+                                                <div class="col-sm-3">
+                                                    <select class="form-control" id="StatusID" name="StatusID" tabindex="6" required>
+                                                        <option value="5">ลงทะเบียน</option>
+                                                        <option value="6">ถอนรายวิชา</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">ยกเลิก</button>
+                                            <button type="button" class="btn btn-success pull-right btn-save" data-dismiss="modal">บันทึกข้อมูล</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- END SAMPLE TABLE PORTLET-->
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+    <!-- /.box table -->
+</section>
+<section>
+    <div class="modal fade" id="fileExampleModal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">ตัวอย่างไฟล์</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="center-block" style="padding-left: 10px">
+                        <span class="center">
+                            ไฟล์ที่ใช้ในการอัปโหลดจะต้องเป็นไฟล์นามสกุล .xlsx และประกอบด้วย 3 คอลัมน์ ดังนี้ <br />
+                            &emsp;1. STUDENT_NO<br />
+                            &emsp;2. FULLNAME<br />
+                            &emsp;3. FULLNAME_EN<br />
+                            โดยสามารถดาวน์โหลดได้จากระบบสารสนเทศเพื่อการศึกษา (ESS) <a href="http://ess.rmuti.ac.th" target="_blank">คลิกที่นี่</a>
+                        </span><br /><br />
+                        <img src="~/icon/fileExample.png" class="center-block img-responsive" style="border: solid 1px" />
+                        <br />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts{
+
+    <script>
+        $('.btn-fileExam').click(function () {
+            $('#fileExampleModal').modal("show");
+        })
+
+        $('#Student-form').validate({
+            rules: {
+                StdCode: { required: true, minlength: 13 },
+                NameTH: { required: true },
+                NameEN: { required: true },
+                StatusID: { required: true }
+            },
+            messages: {
+                StdCode: { required: "กรุณาป้อนรหัสนักศึกษา", minlength: "กรุณาป้อนรหัสนักศึกษา 13 หลัก รวม (-)" },
+                NameTH: { required: "กรุณาป้อนชื่อนักศึกษา (ภาษาไทย)" },
+                NameEN: { required: "กรุณาป้อนชื่อนักศึกษา (ภาษาอังกฤษ)" },
+                StatusID: "กรุณาเลือกสถานะ"
+            }
+        });
+
+        var isStdCode = false;
+        function CheckformatStdCode(sText) {
+            var check = "";
+            if (sText.length == 13 || sText.length == 14) {
+                if (sText.length == 14) {
+                    check = sText.substring(12, 13);
+                }
+                else if (sText.length == 13) {
+                    check = sText.substring(11, 12);
+                }
+                //alert(check);
+                if (check != '-') {
+                    isStdCode = false;
+                    $('#StdError').html("รหัสนักศึกษาไม่ถูกต้อง!").addClass("isRed");
+                    $('#Student-form').find('.form-group').find('#StdCode').removeClass('valid').addClass('error');
+                }
+                else {
+                    isStdCode = true;
+                    $('#StdError').html("");
+                    $('#Student-form').find('.form-group').find('#StdCode').removeClass('error').addClass('valid');
+                    CheckStdCode(sText);
+                }
+
+            }
+        }
+
+        function CheckStdCode(sText) {
+            var id = $('#StudyGroupID').val();
+            sendText = sText + "," + id;
+            $.ajax({
+                type: "POST", // method ที่จะส่ง
+                cache: false,
+                url: '@Url.Action("CheckStdCode", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                dataType: "json", // ชนิดข้อมูลที่ส่ง
+                data: { _StdCode: sendText }, // ข้อมูลที่ส่ง
+                traditional: true, // การจดจำข้อมูล
+                beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                    loadSpin();
+                },
+
+                success: function (res) {
+
+                    var status = false;
+                    var message = 'ดำเนินการไม่สำเร็จ';
+                    if (res != null && res != undefined) {
+                        status = res.status;
+                        message = res.message != '' ? res.message : message;
+                    }
+                    if (status == false) {
+                        isStdCode = false;
+                        $('#StdError').html("รหัส " + sText + " ซ้ำ ในกลุ่มเรียนนี้").addClass("isRed");
+                        $('#Student-form').find('.form-group').find('#StdCode').removeClass('valid').addClass('error');
+
+                    } else {
+                        isStdCode = true;
+                        $('#StdError').html("");
+                        $('#Student-form').find('.form-group').find('#StdCode').removeClass('error').addClass('valid');
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    swal("เกิดข้อผิดพลาด", message, "error");
+                    unLoadSpin();
+                },
+                complete: function () {
+                    unLoadSpin();
+                },
+            });
+        }
+
+        function isNumber(sText, obj) {
+            $('#StdError').html("");
+            var ValidChars = "1234567890-";
+            var IsNumber = true;
+            var Char;
+            for (i = 0; i < sText.length && IsNumber == true; i++) {
+                Char = sText.charAt(i);
+                if (ValidChars.indexOf(Char) == -1) {
+                    IsNumber = false;
+                }
+            }
+            if (IsNumber == false) {
+                obj.value = sText.substr(0, sText.length - 1);
+            }
+        }
+
+        function isThaiChar1(sText, obj) {
+            var ValidChars = "ๅภถุึคตจขชๆไำพะัีรนยบลฃฟหกดเ้่าสวงผปแอิืทมใฝฎฑธํ๊ณฯญฐฅฤฆฏโฌ็๋ษศซฉฮฺ์ฒฬฦู ";
+            var IsNumber = true;
+            var Char;
+            for (i = 0; i < sText.length && IsNumber == true; i++) {
+                Char = sText.charAt(i);
+                if (ValidChars.indexOf(Char) == -1) {
+                    IsNumber = false;
+                }
+            }
+            if (IsNumber == false) {
+                obj.value = sText.substr(0, sText.length - 1);
+            }
+        }
+
+        function isText(sText, obj) {
+            var ValidChars = ".QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm ";
+            var IsNumber = true;
+            var Char;
+            for (i = 0; i < sText.length && IsNumber == true; i++) {
+                Char = sText.charAt(i);
+                if (ValidChars.indexOf(Char) == -1) {
+                    IsNumber = false;
+                }
+            }
+            if (IsNumber == false) {
+                obj.value = sText.substr(0, sText.length - 1);
+            }
+        }
+
+        function ResetModal() {
+            $('#StdError').html("");
+            $('#Student-form').find('.form-group').find('label.error').remove();
+            $('#Student-form').find('.form-group').find('.error').removeClass('error');
+            $('#Student-form').find('.form-group').find('.valid').removeClass('valid');
+            $('#file').val("");
+            $('#file').prop('disabled', false);
+            $('.inputhide').show();
+        }
+
+        function HiddenInput() {
+            if ($('#file').val() != null) {
+                $('.inputhide').hide();
+                $('#NameTH').val("");
+                $('#NameEN').val("");
+                $('#StdCode').val("");
+            }
+            isStdCode = true;
+        }
+
+        function CheckInput() {
+            var nameTH = $('#NameTH').val();
+            var nameEN = $('#NameEN').val();
+            var stdCode = $('#StdCode').val();
+            if (nameTH != "" && $('#StdCode').valid() && nameEN != "" && stdCode != "") {
+                $('#file').prop('disabled', true);
+            }
+            else {
+                $('#file').prop('disabled', false);
+            }
+        }
+        
+
+        $(document).ready(function () {
+            $('.sidebar-menu > li').removeClass('active');
+            $('.studyGroup').addClass('active');
+            $('.btn-addstudent').click(function () {
+                $('#StdCode').val("");
+                $('#NameTH').val("");
+                $('#NameEN').val("");
+                $('#StatusID').val("5");
+                $('#StdCode').prop("readonly", false);
+                $('#StdCode').attr("onblur", "CheckformatStdCode(this.value, this)");
+                $('#PrefixEN').val("Mr.");
+                $('#Prefix').val("นาย");
+                $('.isPrefix').show();
+                ResetModal();
+                $('.fileHidden').show();
+                $('#StudentModal').modal("show");
+            });
+
+            $('.btn-save').click(function () {
+                //var id = $('#StudyGroupID').val();
+                //alert(id);
+                var form_data = new FormData($('#Student-form')[0]);
+                if ($('#Student-form').valid() && isStdCode == true) {
+                    $.ajax({
+                        type: "POST", // method ที่จะส่ง
+                        cache: false,
+                        url: '@Url.Action("SaveStudent", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                        dataType: "json", // ชนิดข้อมูลที่ส่ง
+                        //data: $('#Student-form').serialize(), // ข้อมูลที่ส่ง
+                        traditional: true, // การจดจำข้อมูล
+                        contentType: false,
+                        processData: false,
+                        data: form_data, // ข้อมูลที่ส่ง
+                        beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                            loadSpin();
+                        },
+
+                        success: function (res) {
+
+                            var status = false;
+                            var message = 'ดำเนินการไม่สำเร็จ';
+                            if (res != null && res != undefined) {
+                                status = res.status;
+                                //message = res.message != "" ? res.message : message;
+                            }
+                            if (status == false && res.message != "File Incorrect") {
+                                swal("เกิดข้อผิดพลาด", res.message, "error");
+
+                            }
+                            else if (status == false && res.message == "File Incorrect") {
+                                swal("เกิดข้อผิดพลาด", "เนื่องจาก" + message, "error");
+                            }
+                            else if (status == true && res.data != null) {
+                                swal({
+                                    title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                    text: "นักศึกษาเดิม " + res.data.stdDuplicate + " คน \n " + "มีนักศึกษาเพิ่มใหม่ " + res.data.stdNew + " คน",
+                                    type: "success"
+                                }, function () {
+                                    location.reload(true);
+                                });
+                            }
+                            else {
+                                swal({
+                                    title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                    type: "success",
+                                    showConfirmButton: false,
+                                    //confirmButtonColor: "#AEDEF4",
+                                    //confirmButtonText: "Ok",
+                                    timer: 1000,
+                                    closeOnConfirm: false
+                                },
+                                    function () {
+                                        location.reload(true);
+                                    });
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+                            unLoadSpin();
+                        },
+                        complete: function () {
+                            unLoadSpin();
+                        },
+                    });
+                }
+
+                return false;
+            });
+
+            $('.btn-edit').click(function () {
+                $('.fileHidden').hide();
+                isStdCode = true;
+                $("#StdID").val($(this).data("studentid"));
+                //var id = $("#StdID").val();
+                //alert(id);
+                $.ajax({
+
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("UpdateStudent", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: { id: $('#StdID').val() }, // ข้อมูลที่ส่ง
+                    traditional: false, // การจดจำข้อมูล
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+
+                        } else {
+                            $('#StdID').val(res.data.StdID);
+                            $('#StudyGroupID').val(res.data.StudyGroupID);
+                            $('#NameTH').val(res.data.NameTH);
+                            $('#NameEN').val(res.data.NameEN);
+                            $('#StatusID').val(res.data.StatusID);
+                            $('#StdCode').val(res.data.StdCode);
+                            ResetModal();
+                            $('.isPrefix').hide();
+                            $('#StudentModal').modal('show');
+                            $('#StdCode').prop("readonly", true);
+                            $('#StdCode').attr("onblur", "null");
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    }
+                });
+            });
+        });
+    </script>
+
+}

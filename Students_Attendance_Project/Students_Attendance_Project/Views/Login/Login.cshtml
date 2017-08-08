@@ -1,0 +1,441 @@
+﻿@model Students_Attendance_Project.Models.UserMedel
+@using Students_Attendance_Project.Models;
+@using Students_Attendance_Project.Common;
+@{
+    ViewBag.Title = "Login";
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>เข้าสู่ระบบ</title>
+    @*<link rel="icon" href="~/icon/Logo_RMUTI-icon.png" />*@
+    <link rel="shortcut icon" type="image/x-icon" href="~/icon/Logo_RMUTI.ico" />
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <!-- Bootstrap 3.3.6 -->
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="~/Content/login_register.css" />
+    <link rel="stylesheet" href="~/Content/sweetalert.css">
+    <!--Spinner-Loader-->
+    <link href="~/Scripts/spinner/loading.min.css" rel="stylesheet" />
+    <style type="text/css">
+        input.error {
+            border: 1px solid #ff5c33;
+            border-left: 3px solid #ff5c33;
+        }
+
+        input.valid {
+            border: 1px solid #33cc33;
+            border-left: 3px solid #33cc33;
+        }
+
+        label.error {
+            padding-top: 5px;
+            color: #ff5c33;
+            /*font-size: 12px;*/
+        }
+
+        .isRed {
+            color: #ff5c33;
+            font-size: 16px;
+            padding-left: 5px;
+        }
+
+        body {
+            padding-top: 1px;
+            background-image: url('http://172.16.18.9/project/supattra/StudentAttendance/icon/bg.gif');
+            background-attachment: fixed;
+            background-repeat: repeat;
+        }
+
+        /*.navbar-inverse {
+            background-color: #3c8dbc;
+            border-color: #3c8dbc;
+            color: white;
+        }
+
+            .navbar-inverse .navbar-brand {
+                color: #e6e6e6;
+            }*/
+        #logo {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <a href=""><img id="logo" src="~/icon/banner.jpg" /></a>
+    <section><br /><br /><br /></section>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                <div class="panel panel-login">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <a href="#" class="active" id="login-form-link">Login</a>
+                            </div>
+                            <div class="col-xs-6">
+                                <a href="#" id="register-form-link">Register</a>
+                            </div>
+                        </div>
+                        <hr>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <form id="login-form" action="#" method="post" role="form" style="display: block;">
+                                    <div class="form-group">
+                                        <input type="text" name="username" id="username" tabindex="1" class="form-control" placeholder="Username" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Password" required>
+                                    </div>
+                                    <div class="hidden isRed" id="loginFalse" style="font-size:13.5px;padding-left:0px;">
+                                        <span>ไม่พบข้อมูลชื่อผู้ใช้ กรุณาป้อนชื่อผู้ใช้และรหัสผ่านให้ถูกต้อง</span><br /><br />
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-sm-6 col-sm-offset-3">
+                                                <button type="submit" name="login-submit" id="login-submit" tabindex="3" class="form-control btn btn-login" value="">Log In</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <form id="register-form" action="#" method="post" role="form" style="display: none;">
+                                    <div class="form-group">
+                                        @*<span class="isRed">*</span>*@
+                                        <input type="text" name="Username" id="Username" tabindex="1" class="form-control" placeholder="Username" value="" required
+                                               onkeyup="isUsername(this.value,this)" onblur="CheckUsername(this.value)">
+                                        <div id="isavailable" style="padding-top: 3px;"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="Name" id="Name" tabindex="2" class="form-control" placeholder="ชื่อ-สกุล" value="" required
+                                               onkeyup="isThaichar1(this.value,this)">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="NameEN" id="NameEN" tabindex="3" class="form-control" placeholder="Full name" value="" required
+                                               onkeyup="isEngChar(this.value, this)">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" name="Password" id="Password" tabindex="4" class="form-control" placeholder="Password" required minlength="8">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" name="Confirm" id="Confirm" tabindex="5" class="form-control" placeholder="Confirm Password" required minlength="8">
+                                    </div>
+                                    <div class="form-group">
+                                        <select class="form-control input-lg" id="DeptCode" name="DeptCode" tabindex="5" style="font-size:16px;" required>
+                                            @{
+                                                <option value="">-- กรุณาเลือกสาขาวิชา --</option>
+                                                var dept = (List<DepartmentModel>)ViewBag.Department;
+                                                if (dept.Count > 0 && dept != null)
+                                                {
+                                                    foreach (var r in dept)
+                                                    {
+                                                        <option value="@r.DeptCode">@r.DeptName</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-sm-6 col-sm-offset-3">
+                                                <button type="button" name="register-submit" id="register-submit" tabindex="7" class="form-control btn btn-success btn-lg btn-register" value="">Register Now</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <section>
+            <div class="row">
+                <div class="col-md-4"></div>
+                <div class="col-md-4">
+                    <a href="https://rmuti.ac.th" target="_blank" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-new-window pull-left"></span><span> เข้าสู่เว็บไซต์มหาวิทยาลัย</span></a>
+                    <a href="https://ess.rmuti.ac.th/" target="_blank" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-new-window pull-left"></span><span> เข้าสู่เว็บไซต์ระบบสารสนเทศเพื่อการศึกษา (ESS)</span></a>
+                    <a href="~/Usermanual/Usermanual-StudentsAttandance.pdf" download="คู่มือการใช้งานสำหรับอาจารย์ผู้สอน" target="_blank" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-download-alt pull-left"></span><span> คู่มือการใช้งานระบบ</span></a>
+                    <br />
+                </div>
+                <div class="col-md-4"></div>
+            </div>
+        </section>
+    </div>
+    <!-- /.login-box -->
+    <!-- jQuery 2.2.3 -->
+    <!-- iCheck -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Content/sweetalert-dev.js"></script>
+    @*<script src="~/Scripts/jquery-1.10.2.min.js"></script>*@
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    @*<script src="~/AdminLTE-master/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js"></script>*@
+
+    <!--Spinner-Loader-->
+    <script src="~/Scripts/spinner/jquery.loading.min.js"></script>
+    <script>
+        // Spinner-Loading
+        // show
+        function loadSpin() {
+            $.showLoading({ name: 'circle-fade', allowHide: true });
+        }
+        //hide
+        function unLoadSpin() {
+            $.hideLoading();
+        }
+        // Spinner-Loading
+        $(function () {
+            $('#login-form-link').click(function (e) {
+                $("#login-form").delay(100).fadeIn(100);
+                $("#register-form").fadeOut(100);
+                $('#register-form-link').removeClass('active');
+                $(this).addClass('active');
+                $("#register-form").find('.form-group').find('label.error').remove();
+                $("#login-form").find('input').val("");
+                e.preventDefault();
+            });
+            $('#register-form-link').click(function (e) {
+                $("#register-form").delay(100).fadeIn(100);
+                $("#login-form").fadeOut(100);
+                $('#login-form-link').removeClass('active');
+                $("#login-form").find('.form-group').find('label.error').remove();
+                $("#register-form").find('input').val("");
+                $("#register-form").find('#DeptCode').val("");
+                $(this).addClass('active');
+                e.preventDefault();
+            });
+
+        });
+
+        $('#login-form').validate({
+            rules: {
+                username: { required: true },
+                password: { required: true },
+            },
+            messages: {
+                username: "กรุณาป้อน username",
+                password: "กรุณาป้อน password"
+            }
+        });
+
+        $('#register-form').validate({
+            rules: {
+                Username: { required: true },
+                Password: { required: true, minlength: 8 },
+                Confirm: { required: true, minlength: 8, equalTo: '[name="Password"]' },
+                Name: { required: true },
+                NameEN: { required: true },
+                DeptCode: { required: true }
+            },
+            messages: {
+                Username: "กรุณาป้อน username",
+                Confirm: { required: "", minlength: "กรุณาป้อน Password อย่างน้อย 8 ตัวอักษร", equalTo: "Password ไม่ตรงกัน กรุณาป้อนใหม่" },
+                Password: { required: "กรุณาป้อน password", minlength: "กรุณาป้อน Password อย่างน้อย 8 ตัวอักษร" },
+                Name: "กรุณาป้อนชื่อ-สกุล ภาษาไทย",
+                NameEN: "กรุณาป้อนชื่อ-สกุล ภาษาอังกฤษ",
+                DeptCode: "กรุณาเลือกสาขาวิชา"
+            },
+
+        });
+        var isUsername = true;
+        function CheckUsername(username) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("CheckUsername","Admin")',
+                dataType: "json",
+                data: { _username: username },
+                traditional: true,
+                beforeSend: function () {
+                    loadSpin()
+                },
+                success: function (res) {
+                    var status = false;
+                    var message = 'ดำเนินการไม่สำเร็จ';
+                    if (res != null && res != undefined) {
+                        status = res.status;
+                        message = res.message;
+                    }
+                    if (status == false) {
+                        isUsername = false;
+                        $('#isavailable').html(username + " มีผู้ใช้งานแล้ว กรุณาป้อนใหม่").addClass("isRed");
+                    }
+                    else {
+                        isUsername = true;
+                        $('#isavailable').html("");
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    unLoadSpin();
+                },
+                complete: function () {
+                    unLoadSpin();
+                }
+            });
+            return false;
+        }
+
+        $(document).ready(function () {
+
+            $('#login-submit').click(function () {
+                if ($('#login-form').valid()) {
+                    $.ajax({
+                        type: "POST",
+                        cache: false,
+                        url: '@Url.Action("LoginLoad", "Login")',
+                        dataType: "json",
+                        data: { username: $('input[name="username"]').val(), password: $('input[name="password"]').val() },
+                        traditional: true,
+                        beforeSend: function () {
+                            loadSpin();
+                        },
+                        success: function (res) {
+
+                            var status = false;
+                            var message = 'ดำเนินการไม่สำเร็จ';
+                            if (res != null && res != undefined) {
+                                status = res.status;
+                                message = res.Message != '' ? res.Message : message;
+                            }
+                            if (status == false) {
+                                //swal("เกิดข้อผิดพลาด", "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง", "error");
+                                $('#loginFalse').removeClass('hidden');
+                            } else {
+
+                                $('#loginFalse').addClass('hidden');
+                                swal({
+                                    title: "เข้าสู่ระบบเรียบร้อยเเล้ว",
+                                    type: "success",
+                                    showConfirmButton: false,
+                                    timer: 1000,
+                                    closeOnConfirm: false
+                                },
+                                function () {
+                                    $(location).attr("href", "@Url.Action("RedirectLogin", "Login")");
+                                    $("#login-form").find('input').val("");
+                                });
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            unLoadSpin();
+                        },
+                        complete: function () {
+                            unLoadSpin();
+                        },
+                        async: true
+                    });
+
+                }
+                return false;
+            });
+
+            $('.btn-register').click(function () {
+                if ($('#register-form').valid() && isUsername == true) {
+                    $.ajax({
+                        type: "POST", // method ที่จะส่ง
+                        cache: false,
+                        url: '@Url.Action("RegisterSave", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                        dataType: "json", // ชนิดข้อมูลที่ส่ง
+                        data: $('#register-form').serialize(), // ข้อมูลที่ส่ง
+                        traditional: true, // การจดจำข้อมูล
+                        beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                            loadSpin();
+                        },
+                        success: function (res) {
+
+                            var status = false;
+                            var message = 'ดำเนินการไม่สำเร็จ';
+                            if (res != null && res != undefined) {
+                                status = res.status;
+                                message = res.message != '' ? res.message : message;
+                            }
+                            if (status == false) {
+                                swal("เกิดข้อผิดพลาด", message, "error");
+
+                            } else {
+                                swal({
+                                    title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                    type: "success",
+                                    showConfirmButton: false,
+                                    timer: 1000,
+                                    //confirmButtonColor: "#AEDEF4",
+                                    //confirmButtonText: "Ok",
+                                    closeOnConfirm: false
+                                },
+                               function () {
+                                   location.reload(true);
+                               });
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            unLoadSpin();
+                        },
+                        complete: function () {
+                            unLoadSpin();
+                        },
+                    });
+                }
+                return false;
+            });
+        });
+
+        function isUsername(sText, obj) {
+            var ValidChars = ".QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm";
+            var IsNumber = true;
+            var Char;
+            for (i = 0; i < sText.length && IsNumber == true; i++) {
+                Char = sText.charAt(i);
+                if (ValidChars.indexOf(Char) == -1) {
+                    IsNumber = false;
+                }
+            }
+            if (IsNumber == false) {
+                obj.value = sText.substr(0, sText.length - 1);
+            }
+        }
+        function isThaichar1(sText, obj) {
+            var ValidChars = "ๅภถุึคตจขชๆไำพะัีรนยบลฃฟหกดเ้่าสวงผปแอิืทมใฝฎฑธํ๊ณฯญฐฅฤฆฏโฌ็๋ษศซฉฮฺ์ฒฬฦู ";
+            var IsNumber = true;
+            var Char;
+            for (i = 0; i < sText.length && IsNumber == true; i++) {
+                Char = sText.charAt(i);
+                if (ValidChars.indexOf(Char) == -1) {
+                    IsNumber = false;
+                }
+            }
+            if (IsNumber == false) {
+                obj.value = sText.substr(0, sText.length - 1);
+            }
+        }
+        function isEngChar(sText, obj) {
+            var ValidChars = ".QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm ";
+            var IsNumber = true;
+            var Char;
+            for (i = 0; i < sText.length && IsNumber == true; i++) {
+                Char = sText.charAt(i);
+                if (ValidChars.indexOf(Char) == -1) {
+                    IsNumber = false;
+                }
+            }
+            if (IsNumber == false) {
+                obj.value = sText.substr(0, sText.length - 1);
+            }
+        }
+    </script>
+</body>
+</html>

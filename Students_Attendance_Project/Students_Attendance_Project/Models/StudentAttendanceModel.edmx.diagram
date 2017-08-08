@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="d9d66c8a5dda40c790183b1279524709" Name="Diagram1" ShowGrid="true" ZoomLevel="88" DisplayType="false">
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_Building" Width="1.5" PointX="0.75" PointY="20.625" />
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_Faculty" Width="1.5" PointX="1.5" PointY="13" />
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_Holiday" Width="1.5" PointX="2.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_Room" Width="1.5" PointX="3" PointY="20.625" />
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_SchoolYear" Width="1.5" PointX="0.75" PointY="5.375" />
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_Status" Width="1.5" PointX="6" PointY="2" />
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_Student" Width="1.5" PointX="8.25" PointY="5.5" />
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_StudentCheck" Width="1.5" PointX="10.5" PointY="5.5" />
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_Subject" Width="1.5" PointX="0.75" PointY="1" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_Room_Tb_Building" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_Student_Tb_Status" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_StudentCheck_Tb_Status" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_StudentCheck_Tb_Student" />
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_Login" Width="1.5" PointX="3" PointY="16.375" />
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_Schedule" Width="1.5" PointX="5.25" PointY="4.625" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_Schedule_Tb_Room" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_Schedule_Tb_SchoolYear" />
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_NoteTeach" Width="1.5" PointX="5.25" PointY="10.375" />
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_Department" Width="1.5" PointX="0.75" PointY="9.625" />
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_StudyGroup" Width="1.5" PointX="3" PointY="5" />
+        <EntityTypeShape EntityType="Student_AttendanceModel.Tb_User" Width="1.5" PointX="0.75" PointY="15.75" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_Department_Tb_Faculty" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_StudyGroup_Tb_Department" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_User_Tb_Department" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_Login_Tb_User" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_NoteTeach_Tb_StudyGroup" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_Schedule_Tb_StudyGroup" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_Schedule_Tb_User" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_StudyGroup_Tb_SchoolYear" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_Student_Tb_StudyGroup" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_StudentCheck_Tb_StudyGroup" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_StudyGroup_Tb_Subject" />
+        <AssociationConnector Association="Student_AttendanceModel.FK_Tb_StudyGroup_Tb_User" />
+        </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

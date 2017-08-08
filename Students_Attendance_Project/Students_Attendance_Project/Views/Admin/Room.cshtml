@@ -1,0 +1,416 @@
+﻿@model Students_Attendance_Project.Models.FilterModel
+@using Students_Attendance_Project.Models;
+@using PagedList.Mvc;
+@using PagedList;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "ห้องเรียน";
+    var dataBuilding = (List<BuildingModel>)ViewBag.Building;
+    var entity = (PagedList.IPagedList<RoomModel>)ViewBag.BuildingRoom;
+    var nameBuilding = (List<RoomModel>)ViewBag.NameBuilding;
+}
+
+<section>
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-8">
+            <div class="panel panel-primary">
+                <div class="box-header">
+                    <div class="box-header">
+                        <div class="caption">
+                            <i class="fa fa-cogs"></i> &nbsp;<strong style="font-size: 16px;">ข้อมูลห้องเรียน</strong>
+                            <button type="button" class="btn btn-primary btn-sm pull-right btn-addroom"><i class="fa fa-plus"></i>&nbsp;เพิ่มห้องเรียน</button>
+                        </div>
+                        <p>
+                            <hr />
+                        </p>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-8">
+
+                                <form id="form-search" action="" class="form-horizontal" method="post" enctype="multipart/form-data">
+                                    @*<div class="input-group">
+                                            <input type="text" name="Query" class="form-control" placeholder="ค้นหา..">
+
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default btn-search" type="submit"><i class="fa fa-search"></i></button>
+                                            </span>
+                                        </div>*@
+                                    <input type="hidden" id="buildingID" />
+                                    <div class="form-group">
+                                        <div class="col-sm-12 pull-left">
+                                            <select class="form-control" id="Query" name="Query" tabindex="1" onchange="Submit()">
+                                                <option value="">-- ทั้งหมด --</option>
+                                                @{
+                                                    var BuildingEntity = (List<BuildingModel>)ViewBag.Building;
+                                                    if (BuildingEntity.Count > 0 && BuildingEntity != null)
+                                                    {
+                                                        foreach (var r in BuildingEntity)
+                                                        {
+                                                            <option value="@r.BuildingCode">@r.BuildingCode | @r.BuildingName</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-sm-2"></div>
+                        </div>
+                        <p></p>
+                        <div class="row col-sm-12 pull-left buildingText">
+                            อาคารเรียน : <span id="nameBuilding">@nameBuilding.Select(r => r.BuildingCode).FirstOrDefault() @nameBuilding.Select(r => r.BuildingName).FirstOrDefault()</span>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <!-- Teble-->
+                        <div class="table-scrollable">
+                            <table class="table table-bordered table-hover text-center" id="Room-table">
+                                <thead>
+                                    <tr class="success">
+                                        <th style="width: 30%;"> อาคาร</th>
+                                        <th> ห้องเรียน </th>
+                                        <th style="width: 20%;">  </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-left">
+                                    @{
+
+                                        if (entity.Count > 0 && entity != null)
+                                        {
+                                            int line = 0;
+                                            foreach (var r in entity)
+                                            {
+                                                <tr class="@(line % 2 != 0 ? "info":"")">
+                                                    <td>@r.BuildingCode</td>
+                                                    <td>@r.RoomNo</td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-warning btn-xs btn-edit" data-roomid="@r.RoomNo" role="button" data-toggle="tooltip" data-placement="top" title="แก้ไข"><i class="fa fa-pencil"></i></button>
+                                                        <button type="button" class="btn btn-danger btn-xs btn-del" data-roomid="@r.RoomNo" role="button" data-toggle="tooltip" data-placement="top" title="ลบ"><i class="fa fa-remove"></i></button>
+                                                    </td>
+                                                </tr>
+                                                line++;
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row pull-right" style="margin-right:2px;">
+                            @Html.PagedListPager((IPagedList)ViewBag.BuildingRoom, page => Url.Action("Room", new { page, Model.Query }))
+                        </div>
+                        <!-- table-->
+                        <!-- modal User-->
+                        <form id="Room-form" class="form-horizontal">
+                            <div class="modal fade" id="RoomModal" role="dialog">
+                                <div class="modal-dialog">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">ห้องเรียน</h4>
+                                        </div>
+                                        <div class="modal-body ">
+
+                                            <input type="hidden" name="NewRoom" id="NewRoom" value="1">
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">หมายเลขอาคาร :<span class="isRed"> *</span></label>
+                                                <div class="col-sm-6">
+                                                    <select class="form-control" id="BuildingCode" name="BuildingCode" tabindex="1">
+                                                        @{
+                                                            var Entity = (List<BuildingModel>)ViewBag.Building;
+                                                            if (Entity.Count > 0 && Entity != null)
+                                                            {
+                                                                foreach (var r in Entity)
+                                                                {
+                                                                    <option value="@r.BuildingCode">@r.BuildingCode | @r.BuildingName</option>
+                                                                }
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">ห้องเรียน :<span class="isRed"> *</span></label>
+                                                <div class="col-sm-3">
+                                                    <input type="text" class="form-control" id="RoomNo" name="RoomNo" tabindex="2" required
+                                                           onchange="CheckRoomNo()">
+                                                    <div id="isRoomCode" style="padding-top: 3px;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">ยกเลิก</button>
+                                            <button type="button" class="btn btn-success pull-right btn-save" data-dismiss="modal">บันทึกข้อมูล</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- modal CreateUser-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2"></div>
+    </div>
+</section>
+@section scripts{
+    <script>
+        $('#Room-form').validate({
+            rules: {
+                BuildingCode: { required: true },
+                RoomNo: { required: true }
+            },
+            messages: {
+                BuildingCode: "กรุณาเลือกอาคารเรียน",
+                RoomNo: "กรุณาป้อนหมายเลยห้องเรียน"
+            }
+        });
+        var idbuilding;
+
+        function Submit() {
+            $('#form-search').submit();
+        }
+
+        function ResetModal() {
+            $('#isRoomCode').html("");
+            $('#Room-form').find('.form-group').find('label.error').remove();
+            $('#Room-form').find('.form-group').find('.error').removeClass('error');
+            $('#Room-form').find('.form-group').find('.valid').removeClass('valid');
+        }
+
+        var isRoom = false;
+        function CheckRoomNo() {
+            var roomNo = $('#RoomNo').val();
+            var building = $('#BuildingCode').val();
+            var sendData = roomNo + "," + building;
+            //alert(roomNo);
+            if (roomNo != "") {
+                $.ajax({
+                    type: "POST",
+                    cache: false,
+                    url: '@Url.Action("CheckRoomNo", "Admin")',
+                    dataType: "json",
+                    data: { _data: sendData },
+                    traditional: true,
+                    beforeSend: function () {
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message;
+                        }
+                        if (status == false) {
+                            isRoom = false;
+                            $('#isRoomCode').html("ห้องเรียน " + roomNo + " มีแล้ว กรุณาป้อนใหม่").addClass("isRed");
+                            $('#Room-form').find('.form-group').find('#RoomNo').removeClass('valid').addClass('error');
+                        }
+                        else {
+                            isRoom = true;
+                            $('#isRoomCode').html("");
+                            $('#Room-form').find('.form-group').find('#RoomNo').removeClass('error').addClass('valid');
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    }
+                });
+            }
+            else {
+                isRoom = false;
+                $('#isRoomCode').html("");
+                $('#Room-form').find('.form-group').find('#RoomNo').addClass('error').removeClass('valid');
+            }
+        }
+
+        if (@Model.Query+"" == "") {
+            $('#nameBuilding').html("ทั้งหมด");
+        }
+
+        $(document).ready(function () {
+            $('.sidebar-menu > li').removeClass('active');
+            $('.basicMenu').addClass('active');
+            $('.basicMenu > ul > .Room').addClass('active');
+
+            $('.btn-addroom').click(function () {
+                $('#Room-form').find("input").val("");
+                ResetModal();
+                $('#RoomModal').modal('show');
+                $('#BuildingCode').attr("readonly", false);
+                $('#RoomNo').attr("readonly", false);
+                $('#RoomNo').attr("onchange", "CheckRoomNo()");
+            });
+            $('#Query').val(@Model.Query);
+
+            $('.btn-save').click(function () {
+                //fileValidate();
+                if ($('#Room-form').valid() && isRoom == true) {
+                    $.ajax({
+                        type: "POST", // method ที่จะส่ง
+                        cache: false,
+                        url: '@Url.Action("SaveRoom", "Admin")',  // ส่งไปให้ที่ได้ ระบุ
+                        dataType: "json", // ชนิดข้อมูลที่ส่ง
+                        data: $('#Room-form').serialize(), // ข้อมูลที่ส่ง
+                        traditional: true, // การจดจำข้อมูล
+                        beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                            loadSpin();
+                        },
+
+                        success: function (res) {
+
+                            var status = false;
+                            var message = 'ดำเนินการไม่สำเร็จ';
+                            if (res != null && res != undefined) {
+                                status = res.status;
+                                //message = res.message != '' ? res.message : message;
+                            }
+                            if (status == false) {
+                                swal("เกิดข้อผิดพลาด", res.message, "error");
+                            }
+                            else {
+                                swal({
+                                    title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                    type: "success",
+                                    showConfirmButton: false,
+                                    timer: 1000,
+                                    closeOnConfirm: false
+                                },
+                                    function () {
+                                        location.reload(true);
+                                    });
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            sswal("เกิดข้อผิดพลาด", message, "error");
+                            unLoadSpin();
+                        },
+                        complete: function () {
+                            unLoadSpin();
+                        },
+                    });
+                }
+                return false;
+            });
+
+            $('.btn-edit').click(function () {
+                isRoom = true;
+                var roomid = $(this).data("roomid");
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("UpdateRoom", "Admin")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: { _id: roomid }, // ข้อมูลที่ส่ง
+                    traditional: true, // การจดจำข้อมูล
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+
+                        } else {
+                            $('#BuildingCode').val(res.data.BuildingCode);
+                            $('#RoomNo').val(res.data.RoomNo);
+                            ResetModal();
+                            $('#RoomModal').modal('show');
+                            $('#BuildingCode').attr("readonly", true);
+                            $('#RoomNo').attr("onchange", null);
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    }
+                });
+            });
+
+            $('.btn-del').click(function () {
+                var id = $(this).data("roomid");
+                swal({
+                    title: "ลบข้อมูล?",
+                    text: "คุณต้องการจะลบข้อมูลจริงหรือไม่!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "ใช่ !",
+                    cancelButtonText: "ยกเลิก",
+                    closeOnConfirm: false,
+                    closeOnCancel: true
+                },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            type: "POST", // method ที่จะส่ง
+                            cache: false,
+                            url: '@Url.Action("DeleteRoom", "Admin")',  // ส่งไปให้ที่ได้ ระบุ
+                            dataType: "json", // ชนิดข้อมูลที่ส่ง
+                            data: { _id: id }, // ข้อมูลที่ส่ง
+                            traditional: true, // การจดจำข้อมูล
+                            beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                                loadSpin();
+                            },
+                            success: function (res) {
+
+                                var status = false;
+                                var message = 'ดำเนินการไม่สำเร็จ';
+                                if (res != null && res != undefined) {
+                                    status = res.status;
+                                    message = res.message != '' ? res.message : message;
+                                }
+                                if (status == false) {
+                                    swal("เกิดข้อผิดพลาด", message, "error");
+
+                                } else {
+
+                                    swal({
+                                        title: "ลบข้อมูลเรียบร้อยเเล้ว",
+                                        type: "success",
+                                        timer: 2000,
+                                        showConfirmButton: false,
+                                        //confirmButtonColor: "#AEDEF4",
+                                        //confirmButtonText: "Ok",
+                                        closeOnConfirm: false
+                                    },
+                                    function () {
+                                        location.reload(true);
+                                    });
+                                }
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+                                swal("เกิดข้อผิดพลาด", message, "error");
+                                unLoadSpin();
+                            },
+                            complete: function () {
+                                unLoadSpin();
+                            }
+                        });
+
+                    }
+                });
+            });
+        });
+    </script>
+}

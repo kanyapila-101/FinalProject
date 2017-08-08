@@ -1,0 +1,846 @@
+﻿
+@model Students_Attendance_Project.Models.FilterModel
+@using Students_Attendance_Project.Common;
+@using Students_Attendance_Project.Models;
+@using PagedList.Mvc;
+@using PagedList;
+
+<link href="~/AdminLTE-master/pagedlist.css" rel="stylesheet" type="text/css" />
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "ปีการศึกษา";
+}
+<style>
+    .datepicker {
+        z-index: 1151 !important;
+    }
+    .formSchyear{
+        padding-left: 5px;
+    }
+</style>
+
+<section>
+    <div class="row">
+        <div class="col-sm-12">
+            <!-- BEGIN SAMPLE TABLE PORTLET-->
+            <div class="panel panel-primary">
+                <div class="box-header">
+                    <div class="box-header">
+                        <div class="caption">
+                            <i class="fa fa-cogs"></i> &nbsp;<strong style="font-size: 16px; ">ข้อมูลปีการศึกษา</strong>
+                            @*<a href="@Url.Action("CreateSchoolYear","Admin")" class="btn btn-primary btn-sm pull-right" role="button">เพิ่ม</a>*@
+                            <button type="button" class="btn btn-primary btn-sm pull-right btn-addschoolyear"><i class="fa fa-plus"></i>&nbsp;เพิ่มปีการศึกษา</button>
+                        </div>
+                        <p>
+                            <hr />
+                        </p>
+                        <div class="row col-sm-5 pull-right">
+                            <form id="form-search" action="#" class="form-horizontal" method="post" enctype="multipart/form-data">
+                                <div class="input-group">
+                                    <input type="text" name="Query" class="form-control" placeholder="ค้นหา..">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default btn-search" type="submit"><i class="fa fa-search"></i></button>
+                                    </span>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div class="table-scrollable text-center">
+                            <table class="table table-bordered table-hover text-center" id="DetailSchoolYear-table">
+                                <thead class="text-center">
+                                    <tr class="success">
+                                        <th> ภาคการศึกษา</th>
+                                        <th> ปีการศึกษา </th>
+                                        <th> เริ่ม-สิ้นสุด ภาคการศึกษา </th>
+                                        <th> เริ่ม-สิ้นสุด สอบกลางภาค </th>
+                                        <th> เริ่ม-สิ้นสุด สอบปลายภาค </th>
+                                        <th> </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var entity = (PagedList.IPagedList<SchoolYearModel>)ViewBag.SchoolYear;
+                                        if (entity.Count > 0 && entity != null)
+                                        {
+                                            int line = 0;
+                                            foreach (var r in entity)
+                                            {
+                                                <tr class="@(line % 2 != 0 ? "info":"")">
+                                                    <td>@r.Term</td>
+                                                    <td>@r.Year</td>
+                                                    <td>@r.dateStart.ToString("dd/MM/yyyy", Shared.CultureInfoTh) - @r.dateEnd.ToString("dd/MM/yyyy", Shared.CultureInfoTh)</td>
+                                                    <td>@r.dateStartMidterm.ToString("dd/MM/yyyy", Shared.CultureInfoTh) - @r.dateEndMidterm.ToString("dd/MM/yyyy", Shared.CultureInfoTh)</td>
+                                                    <td>@r.dateStartFinal.ToString("dd/MM/yyyy", Shared.CultureInfoTh) - @r.dateEndFinal.ToString("dd/MM/yyyy", Shared.CultureInfoTh)</td>
+                                                    <td>
+                                                        @*<a href="@Url.Action("EditUser","Admin", new { id = r.UserID })" data-code="@r.UserID"></a>*@
+                                                        <button type="button" class="btn btn-warning btn-xs btn-edit" data-schyearid="@r.SchYearID" role="button" data-toggle="tooltip" data-placement="top" title="แก้ไขข้อมูล"><i class="fa fa-pencil"></i></button>
+                                                        @*<button type="button" class="btn btn-danger btn-xs btn-del" data-schyearid="@r.SchYearID" role="button" data-toggle="tooltip" data-placement="left" title="ลบปีการศึกษา"><i class="fa fa-remove"></i></button>*@
+                                                    </td>
+                                                    @*jquery v 1.10 tag data string small always *@
+                                                </tr>
+                                                line++;
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row pull-right" style="margin-right:2px;">
+                            @Html.PagedListPager((IPagedList)ViewBag.SchoolYear, page => Url.Action("SchoolYear", new { page }))
+                        </div>
+
+                        <form id="SchoolYear-form" class="form-horizontal">
+                            <div class="modal fade" id="SchoolYearModal" role="dialog">
+                                <div class="modal-dialog modal-lg">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">ปีการศึกษา</h4>
+                                        </div>
+                                        <div class="modal-body ">
+
+                                            <input type="hidden" name="SchYearID" id="SchYearID" value="0">
+                                            <div class="row">
+                                                <aside class="col-md-6 formSchyear">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-5 control-label">ภาคการศึกษาที่ :<span class="isRed"> *</span></label>
+                                                        <div class="col-sm-4">
+                                                            <select class="form-control" id="Term" name="Term" tabindex="1" required>
+                                                                <option value="1">1</option>
+                                                                <option value="2">2</option>
+                                                                <option value="3">3 (ฤดูร้อน)</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </aside>
+                                                <aside class="col-md-6 formSchyear">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-5 control-label">ปีการศึกษา :<span class="isRed"> *</span></label>
+                                                        <div class="col-sm-4">
+                                                            <input type="text" class="form-control" id="Year" name="Year" tabindex="2" minlength="4" maxlength="4"
+                                                                   required onkeyup="isNumber(this.value, this)" onblur="CheckTermYear()">
+                                                            <div id="isTermYear" style="padding-top: 3px;"></div>
+                                                        </div>
+                                                    </div>
+                                                </aside>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <aside class="col-md-6 formSchyear">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-5 control-label">ว/ด/ป. เริ่ม :<span class="isRed"> *</span></label>
+                                                        <div class="col-sm-6">
+                                                            <div class="input-group date">
+                                                                <input type="text" class="form-control datepicker" id="dateStart" name="dateStart" data-date-language="th-th" tabindex="3"
+                                                                       onchange="ClearEndDate()" onkeyup="isDate(this.value, this)" required>
+                                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                                <input type="hidden" name="StartDate" id="StartDate" style="display:none;">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </aside>
+                                                <aside class="col-md-6 formSchyear">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-5 control-label">ว/ด/ป. สิ้นสุด :<span class="isRed"> *</span></label>
+                                                        <div class="col-sm-6">
+                                                            <div class="input-group date">
+                                                                <input type="text" class="form-control datepicker" id="dateEnd" name="dateEnd" data-date-language="th-th"
+                                                                       onchange="CheckEndDate()" tabindex="4" onkeyup="isDate(this.value, this)" required>
+                                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                                <input type="hidden" name="EndDate" id="EndDate" style="display:none;">
+                                                            </div>
+                                                            <div id="overStartDate" style="padding-top: 3px;"></div>
+                                                        </div>
+                                                    </div>
+                                                </aside>
+                                            </div>
+                                            <div class="row">
+                                                <aside class="col-md-6 formSchyear">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-5 control-label">สอบกลางภาค เริ่ม :<span class="isRed"> *</span></label>
+                                                        <div class="col-sm-6">
+                                                            <div class="input-group date">
+                                                                <input type="text" class="form-control datepicker" id="dateStartMidterm" name="dateStartMidterm" data-date-language="th-th" tabindex="5"
+                                                                       onchange="CheckStartMidterm()" onkeyup="isDate(this.value, this)" required>
+                                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                                <input type="hidden" name="StartMidterm" id="StartMidterm" style="display:none;">
+                                                            </div>
+                                                            <div id="isStartMidterm" style="padding-top: 4px;"></div>
+                                                        </div>
+                                                    </div>
+                                                </aside>
+                                                <aside class="col-md-6 formSchyear">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-5 control-label">สอบกลางภาค สิ้นสุด :<span class="isRed"> *</span></label>
+                                                        <div class="col-sm-6">
+                                                            <div class="input-group date">
+                                                                <input type="text" class="form-control datepicker" id="dateEndMidterm" name="dateEndMidterm" data-date-language="th-th" tabindex="6"
+                                                                       onchange="CheckEndMidterm()" onkeyup="isDate(this.value, this)" required>
+                                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                                <input type="hidden" name="EndMidterm" id="EndMidterm" style="display:none;">
+                                                            </div>
+                                                            <div id="isEndMidterm" style="padding-top: 4px;"></div>
+                                                        </div>
+                                                    </div>
+                                                </aside>
+                                            </div>
+                                            <div class="row">
+                                                <aside class="col-md-6 formSchyear">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-5 control-label">สอบปลายภาค เริ่ม :<span class="isRed"> *</span></label>
+                                                        <div class="col-sm-6">
+                                                            <div class="input-group date">
+                                                                <input type="text" class="form-control datepicker" id="dateStartFinal" name="dateStartFinal" data-date-language="th-th" tabindex="7"
+                                                                       onchange="CheckStartFinal()" onkeyup="isDate(this.value, this)" required>
+                                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                                <input type="hidden" name="StartFinal" id="StartFinal" style="display:none;">
+                                                            </div>
+                                                            <div id="isStartFinal" style="padding-top: 4px;"></div>
+                                                        </div>
+                                                    </div>
+                                                </aside>
+                                                <aside class="col-md-6 formSchyear">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-5 control-label">สอบปลายภาค สิ้นสุด :<span class="isRed"> *</span></label>
+                                                        <div class="col-sm-6">
+                                                            <div class="input-group date">
+                                                                <input type="text" class="form-control datepicker" id="dateEndFinal" name="dateEndFinal" data-date-language="th-th" tabindex="8"
+                                                                       onchange="CheckEndFinal()" onkeyup="isDate(this.value, this)" required>
+                                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                                <input type="hidden" name="EndFinal" id="EndFinal" style="display:none;">
+                                                            </div>
+                                                            <div id="isEndFinal" style="padding-top: 4px;"></div>
+                                                        </div>
+                                                    </div>
+                                                </aside>
+                                            </div>
+                                                                                     
+                                            <div class="visible-xs visible-sm">
+                                                <br /><br /><br /><br /><br /><br />
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal" tabindex="10">ยกเลิก</button>
+                                            <button type="button" class="btn btn-success pull-right btn-save" data-dismiss="modal" tabindex="9">บันทึกข้อมูล</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- END SAMPLE TABLE PORTLET-->
+        </div>
+    </div>
+</section>
+
+@section scripts{
+
+    @*@Scripts.Render("~/bundles/jqueryval")*@
+
+    <script>
+        $(document).ready(function () {
+            $('.sidebar-menu > li').removeClass('active');
+            $('.basicMenu').addClass('active');
+            $('.basicMenu > ul > .SchoolYear').addClass('active');
+        });
+
+        function isDate(sText, obj) {
+            var ValidChars = "1234567890/";
+            var IsNumber = true;
+            var Char;
+            for (i = 0; i < sText.length && IsNumber == true; i++) {
+                Char = sText.charAt(i);
+                if (ValidChars.indexOf(Char) == -1) {
+                    IsNumber = false;
+                }
+            }
+            if (IsNumber == false) {
+                obj.value = sText.substr(0, sText.length - 1);
+            }
+        }
+
+        var isTermYear = false;
+        function CheckTermYear() {
+            var term = $('#Term').val();
+            var year = $('#Year').val();
+            var termyear = term + "," + year;
+            if (year != "" && year.length == 4) {
+                $.ajax({
+                    type: "POST",
+                    cache: false,
+                    url: '@Url.Action("CheckTermYear","Admin")',
+                    dataType: "json",
+                    data: { _termyear: termyear },
+                    traditional: true,
+                    beforeSend: function () {
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message;
+                        }
+                        if (status == false) {
+                            isTermYear = false;
+                            $('#isTermYear').html(term + "/" + year + " ซ้ำ!").addClass("isRed");
+                            $('#SchoolYear-form').find('.form-group').find('#Year').removeClass('valid').addClass('error');
+                        }
+                        else if (status == true) {
+                            isTermYear = true;
+                            $('#isTermYear').html("");
+                            $('#SchoolYear-form').find('.form-group').find('#Year').removeClass('error');
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    }
+                });
+            }
+            else {
+                isTermYear = false;
+                $('#isTermYear').html("");
+            }
+        }
+
+        function CheckEndDate() {
+            $('#isStartMidterm').html("");
+            $('#dateStartMidterm').val("");
+            $('#isStartFinal').html("");
+            $('#dateStartFinal').val("");
+            var startdate = $('#dateStart').val();
+            var enddate = $('#dateEnd').val();
+            $.ajax({
+                type: "POST",
+                cache: false,
+                url: '@Url.Action("CheckEndTerm", "Admin")',
+                dataType: "json",
+                data: { _enddate: enddate, _startdate: startdate },
+                traditional: true,
+                beforeSend: function () {
+                    loadSpin();
+                },
+                success: function (res) {
+                    var status = false;
+                    var message = 'ดำเนินการไม่สำเร็จ';
+                    if (res != null && res != undefined) {
+                        status = res.status;
+                        message = res.message;
+                    }
+                    if (status == false && startdate != "") {
+                        isTermYear = false;
+                        //alert("ไม่ถูกต้อง");
+                        $('#overStartDate').html("ว.ด.ป. สิ้นสุด ไม่ถูกต้อง").addClass("isRed");
+                        $('#SchoolYear-form').find('.form-group').find('#dateEnd').removeClass('valid').addClass('error');
+                    }
+                    else if (status == false && startdate == "") {
+                        isTermYear = false;
+                        $('#overStartDate').html("กรุณาป้อน ว.ด.ป. เริ่ม ก่อน").addClass("isRed");
+                        $('#SchoolYear-form').find('.form-group').find('#dateEnd').removeClass('valid').addClass('error');
+                    }
+                    else if (status == true) {
+                        isTermYear = true;
+                        $('#overStartDate').html("");
+                        $('#SchoolYear-form').find('.form-group').find('#dateEnd').removeClass('error');
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    swal("เกิดข้อผิดพลาด", message, "error");
+                    unLoadSpin();
+                },
+                complete: function () {
+                    unLoadSpin();
+                }
+            });
+        }
+
+        function ClearEndDate() {
+            $('#dateEnd').val("");
+            $('#overStartDate').html("");
+            $('#isStartMidterm').html("");
+            $('#dateStartMidterm').val("");
+            $('#isStartFinal').html("");
+            $('#dateStartFinal').val("");
+            $('#isEndMidterm').html("");
+            $('#dateEndMidterm').val("");
+            $('#isEndFinal').html("");
+            $('#dateEndFinal').val("");
+        }
+
+        function CheckStartMidterm() {
+            $('#isStartFinal').html("");
+            $('#dateStartFinal').val("");
+            $('#isEndMidterm').html("");
+            $('#dateEndMidterm').val("");
+            $('#isEndFinal').html("");
+            $('#dateEndFinal').val("");
+            var startdate = $('#dateStart').val();
+            var enddate = $('#dateEnd').val();
+            var midterm = $('#dateStartMidterm').val();
+            var sendDate = startdate + "," + enddate + "," + midterm;
+            if (startdate != "" || enddate != "") {
+                $.ajax({
+                    type: "POST",
+                    cache: false,
+                    url: '@Url.Action("CheckStartMidterm", "Admin")',
+                    dataType: "json",
+                    data: { _reDate: sendDate },
+                    traditional: true,
+                    beforeSend: function () {
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message;
+                        }
+
+                        if (status == false) {
+                            isTermYear = false;
+                            //alert("ไม่ถูกต้อง");
+                            $('#isStartMidterm').html("ว.ด.ป. เริ่มสอบกลางภาคไม่ถูกต้อง").addClass("isRed");
+                            $('#SchoolYear-form').find('.form-group').find('#dateStartMidterm').removeClass('valid').addClass('error');
+                        }
+                        else {
+                            isTermYear = true;
+                            $('#isStartMidterm').html("");
+                            $('#SchoolYear-form').find('.form-group').find('#dateStartMidterm').removeClass('error');
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    }
+                });
+            }
+            else {
+                isTermYear = false;
+                $('#isStartMidterm').html("กรุณาป้อน ว.ด.ป. เริ่ม-สิ้นสุด ก่อน").addClass("isRed");
+                $('#SchoolYear-form').find('.form-group').find('#dateStartMidterm').removeClass('valid').addClass('error');
+            }
+
+        }
+
+        function CheckEndMidterm() {
+            var startdate = $('#dateStart').val();
+            var enddate = $('#dateEnd').val();
+            var midterm = $('#dateStartMidterm').val();
+            var endmidterm = $('#dateEndMidterm').val();
+            var sendDate = midterm + "," + enddate + "," + endmidterm;
+            if (startdate != "" && enddate != "" && midterm != "") {
+                $.ajax({
+                    type: "POST",
+                    cache: false,
+                    url: '@Url.Action("CheckEndMidterm", "Admin")',
+                    dataType: "json",
+                    data: { _reDate: sendDate },
+                    traditional: true,
+                    beforeSend: function () {
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message;
+                        }
+
+                        if (status == false) {
+                            isTermYear = false;
+                            $('#isEndMidterm').html("ว.ด.ป. สิ้นสุดสอบกลางภาคไม่ถูกต้อง").addClass("isRed");
+                            $('#SchoolYear-form').find('.form-group').find('#dateEndFinal').removeClass('valid').addClass('error');
+                        }
+                        else {
+                            isTermYear = true;
+                            $('#isEndMidterm').html("");
+                            $('#SchoolYear-form').find('.form-group').find('#dateEndFinal').removeClass('error');
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    }
+                });
+            }
+            else {
+                isTermYear = false;
+                $('#isEndMidterm').html("กรุณาป้อน ว.ด.ป. เริ่มสอบกลางภาคก่อน").addClass("isRed");
+                $('#SchoolYear-form').find('.form-group').find('#dateEndFinal').removeClass('valid').addClass('error');
+            }
+        }
+
+        function CheckStartFinal() {
+            var startdate = $('#dateStart').val();
+            var enddate = $('#dateEnd').val();
+            var midterm = $('#dateStartMidterm').val();
+            var endmidterm = $('#dateEndMidterm').val();
+            var final = $('#dateStartFinal').val();
+            var sendDate = enddate + "," + endmidterm + "," + final;
+            if (startdate != "" || enddate != "" && endmidterm != "") {
+                $.ajax({
+                    type: "POST",
+                    cache: false,
+                    url: '@Url.Action("CheckStartFinal", "Admin")',
+                    dataType: "json",
+                    data: { _reDate: sendDate },
+                    traditional: true,
+                    beforeSend: function () {
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message;
+                        }
+                        if (status == false) {
+                            isTermYear = false;
+                            //alert("ไม่ถูกต้อง");
+                            $('#isStartFinal').html("ว.ด.ป. เริ่มสอบปลายภาคไม่ถูกต้อง").addClass("isRed");
+                            $('#SchoolYear-form').find('.form-group').find('#dateStartFinal').removeClass('valid').addClass('error');
+                        }
+                        else {
+                            isTermYear = true;
+                            $('#isStartFinal').html("");
+                            $('#SchoolYear-form').find('.form-group').find('#dateStartFinal').removeClass('error');
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    }
+                });
+            }
+            else {
+                isTermYear = false;
+                $('#isStartFinal').html("กรุณาป้อน ว.ด.ป. สิ้นสุดสอบกลางภาคก่อน").addClass("isRed");
+                $('#SchoolYear-form').find('.form-group').find('#dateStartFinal').removeClass('valid').addClass('error');
+            }
+
+        }
+
+        function CheckEndFinal() {
+            var startdate = $('#dateStart').val();
+            var enddate = $('#dateEnd').val();
+            var final = $('#dateStartFinal').val();
+            var endfinal = $('#dateEndFinal').val();
+            var sendDate = enddate + "," + final + "," + endfinal;
+            if (startdate != "" || enddate != "" && final != "") {
+                $.ajax({
+                    type: "POST",
+                    cache: false,
+                    url: '@Url.Action("CheckEndFinal", "Admin")',
+                    dataType: "json",
+                    data: { _reDate: sendDate },
+                    traditional: true,
+                    beforeSend: function () {
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message;
+                        }
+                        if (status == false) {
+                            isTermYear = false;
+                            //alert("ไม่ถูกต้อง");
+                            $('#isEndFinal').html("ว.ด.ป. สิ้นสุดสอบปลายภาคไม่ถูกต้อง").addClass("isRed");
+                            $('#SchoolYear-form').find('.form-group').find('#dateEndFinal').removeClass('valid').addClass('error');
+                        }
+                        else {
+                            isTermYear = true;
+                            $('#isEndFinal').html("");
+                            $('#SchoolYear-form').find('.form-group').find('#dateEndFinal').removeClass('error');
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    }
+                });
+            }
+            else {
+                isTermYear = true;
+                $('#isEndFinal').html("กรุณาป้อน ว.ด.ป. เริ่มสอบปลายภาคก่อน").addClass("isRed");
+                $('#SchoolYear-form').find('.form-group').find('#dateEndFinal').removeClass('error');
+            }
+        }
+
+        function isNumber(sText, obj) {
+            var ValidChars = "1234567890";
+            var IsNumber = true;
+            var Char;
+            for (i = 0; i < sText.length && IsNumber == true; i++) {
+                Char = sText.charAt(i);
+                if (ValidChars.indexOf(Char) == -1) {
+                    IsNumber = false;
+                }
+            }
+            if (IsNumber == false) {
+                obj.value = sText.substr(0, sText.length - 1);
+            }
+            if ($('#Year').val.length != 4) {
+                $('#isTermYear').html("");
+            }
+        }
+
+        $('#SchoolYear-form').validate({
+            rules: {
+                Term: { required: true },
+                Year: { required: true, minlength: 4 },
+                dateStart: { required: true },
+                dateEnd: { required: true },
+                dateStartMidterm: { required: true },
+                dateEndMidterm: { required: true },
+                dateStartFinal: { required: true },
+                dateEndFinal: { required: true }
+            },
+            messages: {
+                Term: "กรุณาเลือกภาคการศึกาษา",
+                Year: { required: "กรุณาป้อนปีการศึกษา", minlength: "กรุณาป้อนปีการศึกษาเป็นตัวเลข 4 หลัก" },
+                dateStart: "กรุณาป้อน ว.ด.ป. เริ่ม",
+                dateEnd: "กรุณาป้อน ว.ด.ป. สิ้นสุด",
+                dateStartMidterm: "กรุณาป้อน ว.ด.ป. เริ่มสอบกลางภาค",
+                dateEndMidterm: "กรุณาป้อน ว.ด.ป. สิ้นสุดสอบกลางภาค",
+                dateStartFinal: "กรุณาป้อน ว.ด.ป. เริ่มสอบปลายภาค",
+                dateEndFinal: "กรุณาป้อน ว.ด.ป. สิ้นสุดสอบกลางภาค"
+            }
+        });
+
+        $('.datepicker').datepicker({
+            showInputs: false,
+            autoclose: true,
+            disableTouchKeyboard: true,
+            format: 'dd/mm/yyyy',
+
+
+        });
+
+        function ResetModal() {
+            $('#isTermYear').html("");
+            $('#isStartFinal').html("");
+            $('#isStartMidterm').html("");
+            $('#overStartDate').html("");
+            $('#SchoolYear-form').find('.form-group').find('label.error').remove();
+            $('#SchoolYear-form').find('.form-group').find('.error').removeClass('error');
+            $('#SchoolYear-form').find('.form-group').find('.valid').removeClass('valid');
+            $('#isEndMidterm').html("");
+            $('#isEndFinal').html("");
+        }
+
+        $('.btn-addschoolyear').click(function () {
+            $('#SchoolYear-form').find("input").val("");
+            $('#Term').val("1");
+            $('#UserID').val("0");
+            ResetModal();
+            $('#SchoolYearModal').modal('show');
+            $('#Term').prop("readonly", false);
+            $('#Year').prop("readonly", false);
+            $('#Year').attr("onblur", "CheckTermYear()");
+        });
+
+        $('.btn-save').click(function () {
+            $('#StartDate').val($('#dateStart').val());
+            $('#EndDate').val($('#dateEnd').val());
+            $('#StartMidterm').val($('#dateStartMidterm').val());
+            $('#EndMidterm').val($('#dateEndMidterm').val());
+            $('#StartFinal').val($('#dateStartFinal').val());
+            $('#EndFinal').val($('#dateEndFinal').val());
+            if ($('#SchoolYear-form').valid() && isTermYear == true) {
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("SaveSchoolYear", "Admin")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: $('#SchoolYear-form').serialize(), // ข้อมูลที่ส่ง
+                    traditional: true, // การจดจำข้อมูล
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            //alert(res.message);
+                            swal("เกิดข้อผิดพลาด", message, "error");
+
+                        } else {
+                            swal({
+                                title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                type: "success",
+                                showConfirmButton: false,
+                                timer: 1000,
+                                //confirmButtonColor: "#AEDEF4",
+                                //confirmButtonText: "Ok",
+                                closeOnConfirm: false
+                            },
+                                function () {
+                                    location.reload(true);
+                                });
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    },
+                });
+            }
+            return false;
+        });
+
+        $('.btn-edit').click(function () {
+            //var id = $(this).data("schyearid");
+            //alert(id);
+            isTermYear = true;
+            $("#SchYearID").val($(this).data("schyearid"));
+            var tempid = $("#SchYearID").val();
+            $.ajax({
+                type: "POST", // method ที่จะส่ง
+                cache: false,
+                url: '@Url.Action("UpdateSchYear", "Admin")',  // ส่งไปให้ที่ได้ ระบุ
+                dataType: "json", // ชนิดข้อมูลที่ส่ง
+                data: { id: $('#SchYearID').val() }, // ข้อมูลที่ส่ง
+                traditional: false, // การจดจำข้อมูล
+                beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                    loadSpin();
+                },
+                success: function (res) {
+
+                    var status = false;
+                    var message = 'ดำเนินการไม่สำเร็จ';
+                    if (res != null && res != undefined) {
+                        status = res.status;
+                        message = res.message != '' ? res.message : message;
+                    }
+                    if (status == false) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+
+                    } else {
+                        $('#Term').val(res.data.Term);
+                        $('#Year').val(res.data.Year);
+                        $('#dateStart').val(res.data.StartDate);
+                        $('#dateEnd').val(res.data.EndDate);
+                        $('#dateStartMidterm').val(res.data.StartMidterm);
+                        $('#dateEndMidterm').val(res.data.EndMidterm);
+                        $('#dateStartFinal').val(res.data.StartFinal);
+                        $('#dateEndFinal').val(res.data.EndFinal);
+                        ResetModal();
+                        $('#SchoolYearModal').modal('show');
+                        //$('#Term').prop("readonly", true);
+                        $('#Year').prop("readonly", true);
+                        $('#Year').attr("onblur", null);
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    swal("เกิดข้อผิดพลาด", message, "error");
+                    unLoadSpin();
+                },
+                complete: function () {
+                    unLoadSpin();
+                }
+            });
+        });
+
+        $('.btn-del').click(function () {
+            var id = $(this).data("schyearid");
+            //alert(id);
+            swal({
+                title: "ลบข้อมูล?",
+                text: "คุณต้องการจะลบข้อมูลจริงหรือไม่!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "ใช่ !",
+                cancelButtonText: "ยกเลิก",
+                closeOnConfirm: false,
+                closeOnCancel: true
+            },
+            function (isConfirm) {
+                if (isConfirm) {
+                    $.ajax({
+                        type: "POST", // method ที่จะส่ง
+                        cache: false,
+                        url: '@Url.Action("DeleteSchoolYear", "Admin")',  // ส่งไปให้ที่ได้ ระบุ
+                        dataType: "json", // ชนิดข้อมูลที่ส่ง
+                        data: { id: id }, // ข้อมูลที่ส่ง
+                        traditional: true, // การจดจำข้อมูล
+                        beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                            loadSpin();
+                        },
+                        success: function (res) {
+
+                            var status = false;
+                            var message = 'ดำเนินการไม่สำเร็จ';
+                            if (res != null && res != undefined) {
+                                status = res.status;
+                                message = res.message != '' ? res.message : message;
+                            }
+                            if (status == false) {
+                                swal("เกิดข้อผิดพลาด", message, "error");
+
+                            } else {
+
+                                swal({
+                                    title: "ลบข้อมูลเรียบร้อยเเล้ว",
+                                    type: "success",
+                                    showConfirmButton: false,
+                                    timer: 1000,
+                                    //confirmButtonColor: "#AEDEF4",
+                                    //confirmButtonText: "Ok",
+                                    closeOnConfirm: false
+                                },
+                                function () {
+                                    location.reload(true);
+                                });
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+                            unLoadSpin();
+                        },
+                        complete: function () {
+                            unLoadSpin();
+                        }
+                    });
+
+                }
+            });
+        });
+    </script>
+}
