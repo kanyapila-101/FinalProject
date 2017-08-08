@@ -24,7 +24,7 @@ namespace Students_Attendance_Project.Controllers
             auth.ProcessResponse();
             var res = string.Empty;
             var name = string.Empty;
-            var value = string.Empty;
+            var ssoValue = string.Empty;
 
             var username = string.Empty;
             var gidNumber = string.Empty;
@@ -59,31 +59,31 @@ namespace Students_Attendance_Project.Controllers
                     foreach (XmlNode node in userXmlDoc.FirstChild.ChildNodes)
                     {
                         name = node.Attributes["Name"].Value;
-                        value = node.FirstChild.InnerText;
+                        ssoValue = node.FirstChild.InnerText;
                         listData.Add(new DataLogin
                         {
                             Name = name,
-                            Value = value
+                            Value = ssoValue
                         });
                         switch (name)
                         {
                             case "uid":
-                                username = value;
+                                username = ssoValue;
                                 break;
                             case "gidNumber":
-                                gidNumber = value;
+                                gidNumber = ssoValue;
                                 break;
                             case "firstNameThai":
-                                nameTHFull = value;
+                                nameTHFull = ssoValue;
                                 break;
                             case "lasttNameThai":
-                                nameTHFull += " " + value;
+                                nameTHFull += " " + ssoValue;
                                 break;
                             case "program":
-                                deptName = value;
+                                deptName = ssoValue;
                                 break;
                             case "gecos":
-                                nameENFull = value;
+                                nameENFull = ssoValue;
                                 break;
                             default:
                                 break;
