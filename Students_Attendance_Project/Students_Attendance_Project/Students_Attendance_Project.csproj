@@ -157,6 +157,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Common\JsonServiceStackValueProviderFactory.cs" />
+    <Compile Include="Common\Log.cs" />
     <Compile Include="Common\Saml.cs" />
     <Compile Include="Common\Shared.cs" />
     <Compile Include="Controllers\AdminController.cs" />

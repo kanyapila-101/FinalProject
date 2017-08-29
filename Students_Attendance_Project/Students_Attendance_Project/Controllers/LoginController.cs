@@ -223,7 +223,7 @@ namespace Students_Attendance_Project.Controllers
         {
             AppSettings appSettings = new AppSettings();
             OneLogin.Auth auth = new Auth(appSettings);
-
+            Log.Error(Request.QueryString["redirect"].ToString());
             string redirect = "";
             if (Request.QueryString["redirect"] != null)
             {
