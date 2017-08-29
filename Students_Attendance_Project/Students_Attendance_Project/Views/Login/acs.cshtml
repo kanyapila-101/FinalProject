@@ -1,0 +1,102 @@
+﻿@using Students_Attendance_Project.Models;
+@{
+    ViewBag.Title = "Post Data";
+    Layout = null;
+    var listdata = (List<DataLogin>)ViewBag.DataLogin;
+}
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<HTML xmlns='http://www.w3.org/1999/xhtml'>
+
+    <HEAD>
+        <TITLE>RMUTi SSO SP</TITLE>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport" />
+        <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+        @*<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />*@
+    </HEAD>
+    <BODY>
+        <style>
+            th {
+                text-align: left;
+            }
+
+            ul {
+                margin: 0px;
+            }
+
+            li {
+                padding: 0px;
+            }
+        </style>
+
+        @{
+            if (!ViewBag.ssoValid)
+            {
+                <h2>@ViewBag.Res</h2><br />
+            }
+        }
+        <center><h3>You are directly accessing to Single Sign-On script</h3></center><br />
+        <div class="content" style="padding-left:20px">
+            - Use this value to add to your IdP:<br />
+            <div style='margin-left: 40px;'>
+                <table style='padding-top: 5px'>
+                    <thead>
+                        <tr>
+                            <th width="200px">Name</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @*<tr><td>SP Metadata URL&nbsp;</td><td>@ViewBag.url/metadata.php</td></tr>*@
+                        <tr><td>SP Entity ID&nbsp;</td><td>@ViewBag.identityId</td></tr>
+                        <tr><td>AssertionConsumerService&nbsp;</td><td>@ViewBag.url/acs</td></tr>
+                        <tr><td>SingleLogoutService&nbsp;</td><td>@ViewBag.url/sls</td></tr>
+                        <tr><td>NameIDFormat&nbsp;</td><td>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style='margin-left: 40px;'>
+                @{
+                    if (listdata.Count != 0)
+                    {
+                        var gid = listdata.Where(r => r.Name == "gidNumber").Select(r => r.Value).FirstOrDefault();
+                        if (gid != "2500")
+                        {
+                            <h2>@ViewBag.notUse</h2>
+                        }
+                    }
+                }
+                @{
+                    if (listdata.Count > 0)
+                    {
+                        <span>-You are logged in -- You have the following attributes from Session["ssoUserData"] :</span><br /><br />
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th width="200px">Name</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var r in listdata)
+                                {
+                                    <tr>
+                                        <td>@r.Name</td>
+                                        <td><ul><li>@r.Value</li></ul></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                }
+            </div>
+            <br />
+            - <a href='@Url.Action("Login","Login")'>Login</a> <i>(Url: @ViewBag.url/login)</i><br /><br />
+            - <a href='@Url.Action("Logout","Login")'>Logout</a> <i>(Url: @ViewBag.url/logout)</i><br />
+        </div>
+        <script src="~/Scripts/bootstrap.min.js"></script>
+
+        @*<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>*@
+    </BODY>
+</HTML>

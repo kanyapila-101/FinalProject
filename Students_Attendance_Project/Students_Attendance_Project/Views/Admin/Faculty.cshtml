@@ -26,7 +26,7 @@
                             <hr />
                         </p>
                         <div class="row col-sm-5 pull-right">
-                            <form id="form-search" action="#" class="form-horizontal" method="post" enctype="multipart/form-data">
+                            <form id="form-search" action="" class="form-horizontal" method="post" enctype="multipart/form-data">
                                 <div class="input-group">
                                     <input type="text" name="Query" class="form-control" placeholder="ค้นหา..">
                                     <span class="input-group-btn">
@@ -59,9 +59,7 @@
                                                     <td>@r.FacultyCode</td>
                                                     <td style="text-align:left;">@r.FacultyName</td>
                                                     <td>
-                                                        @*<a href="@Url.Action("EditUser","Admin", new { id = r.UserID })" data-code="@r.UserID"></a>*@
                                                         <button type="button" class="btn btn-warning btn-xs btn-edit" data-facultyid="@r.FacultyCode" role="button" data-toggle="tooltip" data-placement="top" title="แก้ไขข้อมูล"><i class="fa fa-pencil"></i></button>
-                                                        @*<button type="button" class="btn btn-danger btn-xs btn-del" data-facultyid="@r.FacultyCode" role="button" data-toggle="tooltip" data-placement="left" title="ลบคณะ"><i class="fa fa-remove"></i></button>*@
                                                     </td>
                                                 </tr>
                                                 line++;

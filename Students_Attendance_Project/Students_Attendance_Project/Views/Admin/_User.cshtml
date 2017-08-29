@@ -16,15 +16,13 @@
                     <div class="box-header">
                         <div class="caption">
                             <i class="fa fa-cogs"></i> &nbsp;<strong style="font-size: 16px; ">ข้อมูลบัญชีผู้ใช้ระบบ</strong>
-                            @*<a href="@Url.Action("CreateUser","Admin")" class="btn btn-primary btn-sm pull-right" role="button">เพิ่ม</a>*@
-
                             <button type="button" class="btn btn-primary btn-sm pull-right btn-adduser"><i class="fa fa-user-plus"></i>&nbsp;เพิ่มบัญชีผู้ใช้</button>
                         </div>
                         <p>
                             <hr />
                         </p>
-                        <div class="row col-sm-5 pull-right">
-                            <form id="form-search" action="#" class="form-horizontal" method="post" enctype="multipart/form-data">
+                        <div class="row col-sm-3 pull-right">
+                            <form id="form-search" action="" class="form-horizontal" method="post" enctype="multipart/form-data">
                                 <div class="input-group">
                                     <input type="text" name="Query" class="form-control" placeholder="ค้นหา..">
                                     <span class="input-group-btn">
@@ -42,9 +40,9 @@
                                     <tr class="success">
                                         <th> Username</th>
                                         @*<th> Password </th>*@
-                                        <th> ชื่อไทย </th>
-                                        <th> ชื่ออังกฤษ </th>
-                                        <th> สังกัด </th>
+                                        <th> ชื่อ-นามสกุล </th>
+                                        <th> Email </th>
+                                        <th> สาขาวิชา </th>
                                         <th> สิทธิ์ </th>
                                         <th> </th>
                                     </tr>
@@ -57,12 +55,15 @@
                                             int line = 0;
                                             foreach (var r in entity)
                                             {
-                                                <tr class="@(line % 2 != 0 ? "info":"")">
-                                                    <td style="text-align:left">@r.Username</td>
+                                                var user = r.Username == null || r.Username == "" ? "ไม่พบข้อมูล" : r.Username;
+                                                var deptname = r.DeptName== null || r.DeptName == "" ? "ไม่พบข้อมูล" : r.DeptName;
+                                                var email = r.Email == null ? "ไม่พบข้อมูล" : r.Email;
+                                                <tr class="@(line % 2 != 0 ? "info" : "")">
+                                                    <td style="text-align:left">@user</td>
                                                     @*<td style="text-align:left">@r.Password</td>*@
                                                     <td style="text-align:left">@r.Name</td>
-                                                    <td style="text-align:left">@r.NameEN</td>
-                                                    <td style="text-align:left">@r.DeptName</td>
+                                                    <td style="text-align:left">@email</td>
+                                                    <td style="text-align:left">@deptname</td>
                                                     <td>@r.Role</td>
                                                     <td>
                                                         <button type="button" class="btn btn-warning btn-xs btn-edit" data-userid="@r.UserID" role="button" data-toggle="tooltip" data-placement="right" title="แก้ไข"><i class="fa fa-pencil"></i></button>
@@ -112,7 +113,7 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <label class="col-sm-4 control-label">ชื่อไทย :<span class="isRed"> *</span></label>
+                                                <label class="col-sm-4 control-label">ชื่อ-นามสกุล :<span class="isRed"> *</span></label>
                                                 <div class="col-sm-4">
                                                     <input type="text" class="form-control" id="Name" name="Name" tabindex="3" required
                                                            onkeyup="isThaichar1(this.value, this)">
@@ -120,10 +121,10 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <label class="col-sm-4 control-label">ชื่ออังกฤษ :<span class="isRed"> *</span></label>
+                                                <label class="col-sm-4 control-label">Email :<span class="isRed"> *</span></label>
                                                 <div class="col-sm-4">
-                                                    <input type="text" class="form-control" id="NameEN" name="NameEN" tabindex="4" required
-                                                           onkeyup="isUsername(this.value, this)">
+                                                    <input type="email" class="form-control" id="Email" name="Email" tabindex="4" required onblur="CheckEmail()">
+                                                    <div id="isEmail" style="padding-top: 3px;"></div>
                                                 </div>
                                             </div>
                                             <div class="form-group">
@@ -152,7 +153,6 @@
                                                         <option value="">-- กรุณาเลือก --</option>
                                                         <option value="user">user</option>
                                                         <option value="admin">admin</option>
-                                                        <option value="superadmin">superadmin</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -283,12 +283,12 @@
                         }
                         if (status == false) {
                             isEmail = false;
-                            $('#isEmail1').html("ที่อยู่อีเมล์นี้ มีผู้ใช้งานแล้ว กรุณาป้อนใหม่").addClass("isRed");
+                            $('#isEmail').html("ที่อยู่อีเมลนี้ ถูกใช้งานแล้ว กรุณาป้อนใหม่").addClass("isRed");
                             $('#User-form').find('.form-group').find('#Email').removeClass('valid').addClass('error');
                         }
                         else {
                             isEmail = true;
-                            $('#isEmail1').html("");
+                            $('#isEmail').html("");
                         }
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
@@ -309,15 +309,15 @@
                 Username: { required: true, },
                 Password: { required: true, minlength: 8 },
                 Name: { required: true },
-                NameEN: { required: true },
+                Email: { required: true },
                 DeptCode: { required: true, },
                 Role: { required: true },
             },
             messages: {
                 Username: { required: "กรุณาป้อน Username" },
                 Password: { required: "กรุณาป้อน Password", minlength: "กรุณาป้อน Password อย่างน้อย 8-16 ตัวอักษร" },
-                Name: "กรุณาป้อนชื่อให้ถูกต้อง",
-                NameEN: "กรุณาป้อนชื่ออังกฤษให้ถูกต้อง",
+                Name: "กรุณาป้อนชื่อนามสกุลให้ถูกต้อง",
+                Email: "กรุณาป้อน Email ให้ถูกต้อง",
                 DeptCode: "กรุณาเลือกสาขาวิชา",
                 Role: { required: "กรุณาป้อนเลือกสิทธิ์การใช้งาน" },
             },
@@ -325,7 +325,7 @@
 
         function ResetModal() {
             $('#isavailable').html("");
-            $('#isEmail1').html("");
+            $('#isEmail').html("");
             $('#User-form').find('.form-group').find('label.error').remove();
             $('#User-form').find('.form-group').find('.error').removeClass('error');
             $('#User-form').find('.form-group').find('.valid').removeClass('valid');
@@ -343,8 +343,10 @@
                 ResetModal();
                 $('#UserModal').modal('show');
                 $('#Username').attr("readonly", false);
+                $('#Email').attr("readonly", false);
                 $('#DeptCode').attr("disabled", false);
                 $('#Username').attr("onblur", "CheckUsername()");
+                $('#Email').attr("onblur", "CheckEmail()");
             });
 
             $('.btn-del').click(function () {
@@ -440,18 +442,24 @@
                             swal("เกิดข้อผิดพลาด", message, "error");
 
                         } else {
-                            $('#Username').val(res.data.Username);
+                            if (res.data.Username == null || res.data.Username == "") {
+                                $('#Username').val("ไม่พบข้อมูล");
+                            } else {
+                                $('#Username').val(res.data.Username);
+                            }
                             $('#Password').val(res.data.Password);
                             $('#Name').val(res.data.Name);
-                            $('#NameEN').val(res.data.NameEN);
+                            $('#Email').val(res.data.Email);
                             //$('#Department').find('option').remove();
                             $('#DeptCode').val(res.data.DeptCode);
                             $('#Role').val(res.data.Role);
                             ResetModal();
                             $('#UserModal').modal('show');
                             $('#Username').attr("readonly", true);
-                            $('#DeptCode').attr("disabled", true);
+                            $('#Email').attr("readonly", true);
+                            //$('#DeptCode').attr("disabled", true);
                             $('#Username').attr("onblur", null);
+                            $('#Email').attr("onblur", null);
                         }
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
@@ -465,11 +473,9 @@
             });
 
             $('.btn-save').click(function () {
-                console.log(isEmail);
-                console.log(isUsernamebool);
-                if ($('#User-form').valid() && isUsernamebool == true) {
-
-                    //alert("OKOK");
+                //console.log(isEmail);
+                //console.log(isUsernamebool);
+                if ($('#User-form').valid() && isUsernamebool == true && isEmail == true) {
                     $.ajax({
                         type: "POST", // method ที่จะส่ง
                         cache: false,
@@ -515,9 +521,6 @@
                             unLoadSpin();
                         },
                     });
-                }
-                else if (isUsernamebool == false) {
-                    $('#User-form').find('.form-group').find('#Username').removeClass('valid').addClass('error');
                 }
                 return false;
             });

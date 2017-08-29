@@ -1271,6 +1271,7 @@
     <Content Include="icon\icon_schedule.png" />
     <Content Include="icon\Logo_RMUTI.ico" />
     <Content Include="icon\Logo_RMUTI_128X235.png" />
+    <Content Include="icon\qrcode.jpg" />
     <Content Include="icon\UserNull.png" />
     <Content Include="Models\StudentAttendanceModel.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -1646,9 +1647,9 @@
     <Content Include="Views\Home\DetailSummaryListCheck.cshtml" />
     <Content Include="Views\Admin\Holiday.cshtml" />
     <Content Include="Views\Admin\_Profile.cshtml" />
+    <Content Include="Views\Login\acs.cshtml" />
     <Content Include="Usermanual\AdminManual.pdf" />
     <Content Include="Usermanual\Usermanual-StudentsAttandance.pdf" />
-    <Content Include="Views\Login\ssoLogin.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

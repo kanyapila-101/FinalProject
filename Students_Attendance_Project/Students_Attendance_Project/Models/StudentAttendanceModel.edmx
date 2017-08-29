@@ -157,12 +157,13 @@
             <PropertyRef Name="UserID" />
           </Key>
           <Property Name="UserID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="Username" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Username" Type="nvarchar" MaxLength="50" />
           <Property Name="Password" Type="nvarchar" MaxLength="50" />
           <Property Name="Name" Type="nvarchar" MaxLength="50" />
           <Property Name="NameEN" Type="nvarchar" MaxLength="50" />
           <Property Name="DeptCode" Type="int" />
           <Property Name="Role" Type="nvarchar" MaxLength="50" />
+          <Property Name="Email" Type="nvarchar" MaxLength="50" />
         </EntityType>
         <Association Name="FK_Tb_Department_Tb_Faculty">
           <End Role="Tb_Faculty" Type="Self.Tb_Faculty" Multiplicity="1" />
@@ -520,7 +521,6 @@
           <EntitySet Name="Tb_NoteTeach" EntityType="Student_AttendanceModel.Tb_NoteTeach" />
           <EntitySet Name="Tb_Department" EntityType="Student_AttendanceModel.Tb_Department" />
           <EntitySet Name="Tb_StudyGroup" EntityType="Student_AttendanceModel.Tb_StudyGroup" />
-          <EntitySet Name="Tb_User" EntityType="Student_AttendanceModel.Tb_User" />
           <AssociationSet Name="FK_Tb_Department_Tb_Faculty" Association="Student_AttendanceModel.FK_Tb_Department_Tb_Faculty">
             <End Role="Tb_Faculty" EntitySet="Tb_Faculty" />
             <End Role="Tb_Department" EntitySet="Tb_Department" />
@@ -529,24 +529,12 @@
             <End Role="Tb_Department" EntitySet="Tb_Department" />
             <End Role="Tb_StudyGroup" EntitySet="Tb_StudyGroup" />
           </AssociationSet>
-          <AssociationSet Name="FK_Tb_User_Tb_Department" Association="Student_AttendanceModel.FK_Tb_User_Tb_Department">
-            <End Role="Tb_Department" EntitySet="Tb_Department" />
-            <End Role="Tb_User" EntitySet="Tb_User" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Tb_Login_Tb_User" Association="Student_AttendanceModel.FK_Tb_Login_Tb_User">
-            <End Role="Tb_User" EntitySet="Tb_User" />
-            <End Role="Tb_Login" EntitySet="Tb_Login" />
-          </AssociationSet>
           <AssociationSet Name="FK_Tb_NoteTeach_Tb_StudyGroup" Association="Student_AttendanceModel.FK_Tb_NoteTeach_Tb_StudyGroup">
             <End Role="Tb_StudyGroup" EntitySet="Tb_StudyGroup" />
             <End Role="Tb_NoteTeach" EntitySet="Tb_NoteTeach" />
           </AssociationSet>
           <AssociationSet Name="FK_Tb_Schedule_Tb_StudyGroup" Association="Student_AttendanceModel.FK_Tb_Schedule_Tb_StudyGroup">
             <End Role="Tb_StudyGroup" EntitySet="Tb_StudyGroup" />
-            <End Role="Tb_Schedule" EntitySet="Tb_Schedule" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Tb_Schedule_Tb_User" Association="Student_AttendanceModel.FK_Tb_Schedule_Tb_User">
-            <End Role="Tb_User" EntitySet="Tb_User" />
             <End Role="Tb_Schedule" EntitySet="Tb_Schedule" />
           </AssociationSet>
           <AssociationSet Name="FK_Tb_StudyGroup_Tb_SchoolYear" Association="Student_AttendanceModel.FK_Tb_StudyGroup_Tb_SchoolYear">
@@ -564,6 +552,19 @@
           <AssociationSet Name="FK_Tb_StudyGroup_Tb_Subject" Association="Student_AttendanceModel.FK_Tb_StudyGroup_Tb_Subject">
             <End Role="Tb_Subject" EntitySet="Tb_Subject" />
             <End Role="Tb_StudyGroup" EntitySet="Tb_StudyGroup" />
+          </AssociationSet>
+          <EntitySet Name="Tb_User" EntityType="Student_AttendanceModel.Tb_User" />
+          <AssociationSet Name="FK_Tb_User_Tb_Department" Association="Student_AttendanceModel.FK_Tb_User_Tb_Department">
+            <End Role="Tb_Department" EntitySet="Tb_Department" />
+            <End Role="Tb_User" EntitySet="Tb_User" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tb_Login_Tb_User" Association="Student_AttendanceModel.FK_Tb_Login_Tb_User">
+            <End Role="Tb_User" EntitySet="Tb_User" />
+            <End Role="Tb_Login" EntitySet="Tb_Login" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tb_Schedule_Tb_User" Association="Student_AttendanceModel.FK_Tb_Schedule_Tb_User">
+            <End Role="Tb_User" EntitySet="Tb_User" />
+            <End Role="Tb_Schedule" EntitySet="Tb_Schedule" />
           </AssociationSet>
           <AssociationSet Name="FK_Tb_StudyGroup_Tb_User" Association="Student_AttendanceModel.FK_Tb_StudyGroup_Tb_User">
             <End Role="Tb_User" EntitySet="Tb_User" />
@@ -821,22 +822,6 @@
           <NavigationProperty Name="Tb_Subject" Relationship="Student_AttendanceModel.FK_Tb_StudyGroup_Tb_Subject" FromRole="Tb_StudyGroup" ToRole="Tb_Subject" />
           <NavigationProperty Name="Tb_User" Relationship="Student_AttendanceModel.FK_Tb_StudyGroup_Tb_User" FromRole="Tb_StudyGroup" ToRole="Tb_User" />
         </EntityType>
-        <EntityType Name="Tb_User">
-          <Key>
-            <PropertyRef Name="UserID" />
-          </Key>
-          <Property Name="UserID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Username" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="Password" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="NameEN" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="DeptCode" Type="Int32" />
-          <Property Name="Role" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="Tb_Department" Relationship="Student_AttendanceModel.FK_Tb_User_Tb_Department" FromRole="Tb_User" ToRole="Tb_Department" />
-          <NavigationProperty Name="Tb_Login" Relationship="Student_AttendanceModel.FK_Tb_Login_Tb_User" FromRole="Tb_User" ToRole="Tb_Login" />
-          <NavigationProperty Name="Tb_Schedule" Relationship="Student_AttendanceModel.FK_Tb_Schedule_Tb_User" FromRole="Tb_User" ToRole="Tb_Schedule" />
-          <NavigationProperty Name="Tb_StudyGroup" Relationship="Student_AttendanceModel.FK_Tb_StudyGroup_Tb_User" FromRole="Tb_User" ToRole="Tb_StudyGroup" />
-        </EntityType>
         <Association Name="FK_Tb_Department_Tb_Faculty">
           <End Type="Student_AttendanceModel.Tb_Faculty" Role="Tb_Faculty" Multiplicity="1" />
           <End Type="Student_AttendanceModel.Tb_Department" Role="Tb_Department" Multiplicity="*" />
@@ -863,32 +848,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Tb_User_Tb_Department">
-          <End Type="Student_AttendanceModel.Tb_Department" Role="Tb_Department" Multiplicity="0..1">
-            <OnDelete Action="Cascade" />
-          </End>
-          <End Type="Student_AttendanceModel.Tb_User" Role="Tb_User" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Tb_Department">
-              <PropertyRef Name="DeptCode" />
-            </Principal>
-            <Dependent Role="Tb_User">
-              <PropertyRef Name="DeptCode" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Tb_Login_Tb_User">
-          <End Type="Student_AttendanceModel.Tb_User" Role="Tb_User" Multiplicity="0..1" />
-          <End Type="Student_AttendanceModel.Tb_Login" Role="Tb_Login" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Tb_User">
-              <PropertyRef Name="UserID" />
-            </Principal>
-            <Dependent Role="Tb_Login">
-              <PropertyRef Name="UserID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Tb_NoteTeach_Tb_StudyGroup">
           <End Type="Student_AttendanceModel.Tb_StudyGroup" Role="Tb_StudyGroup" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -912,18 +871,6 @@
             </Principal>
             <Dependent Role="Tb_Schedule">
               <PropertyRef Name="StudyGroupID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Tb_Schedule_Tb_User">
-          <End Type="Student_AttendanceModel.Tb_User" Role="Tb_User" Multiplicity="1" />
-          <End Type="Student_AttendanceModel.Tb_Schedule" Role="Tb_Schedule" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Tb_User">
-              <PropertyRef Name="UserID" />
-            </Principal>
-            <Dependent Role="Tb_Schedule">
-              <PropertyRef Name="UserID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -974,6 +921,61 @@
             <Dependent Role="Tb_StudyGroup">
               <PropertyRef Name="SubjectCode" />
               <PropertyRef Name="Course" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Tb_User">
+          <Key>
+            <PropertyRef Name="UserID" />
+          </Key>
+          <Property Name="UserID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Username" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Password" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="NameEN" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="DeptCode" Type="Int32" />
+          <Property Name="Role" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Tb_Department" Relationship="Student_AttendanceModel.FK_Tb_User_Tb_Department" FromRole="Tb_User" ToRole="Tb_Department" />
+          <NavigationProperty Name="Tb_Login" Relationship="Student_AttendanceModel.FK_Tb_Login_Tb_User" FromRole="Tb_User" ToRole="Tb_Login" />
+          <NavigationProperty Name="Tb_Schedule" Relationship="Student_AttendanceModel.FK_Tb_Schedule_Tb_User" FromRole="Tb_User" ToRole="Tb_Schedule" />
+          <NavigationProperty Name="Tb_StudyGroup" Relationship="Student_AttendanceModel.FK_Tb_StudyGroup_Tb_User" FromRole="Tb_User" ToRole="Tb_StudyGroup" />
+        </EntityType>
+        <Association Name="FK_Tb_User_Tb_Department">
+          <End Type="Student_AttendanceModel.Tb_Department" Role="Tb_Department" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="Student_AttendanceModel.Tb_User" Role="Tb_User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tb_Department">
+              <PropertyRef Name="DeptCode" />
+            </Principal>
+            <Dependent Role="Tb_User">
+              <PropertyRef Name="DeptCode" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tb_Login_Tb_User">
+          <End Type="Student_AttendanceModel.Tb_User" Role="Tb_User" Multiplicity="0..1" />
+          <End Type="Student_AttendanceModel.Tb_Login" Role="Tb_Login" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tb_User">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="Tb_Login">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tb_Schedule_Tb_User">
+          <End Type="Student_AttendanceModel.Tb_User" Role="Tb_User" Multiplicity="1" />
+          <End Type="Student_AttendanceModel.Tb_Schedule" Role="Tb_Schedule" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tb_User">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="Tb_Schedule">
+              <PropertyRef Name="UserID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1158,6 +1160,7 @@
           <EntitySetMapping Name="Tb_User">
             <EntityTypeMapping TypeName="Student_AttendanceModel.Tb_User">
               <MappingFragment StoreEntitySet="Tb_User">
+                <ScalarProperty Name="Email" ColumnName="Email" />
                 <ScalarProperty Name="Role" ColumnName="Role" />
                 <ScalarProperty Name="DeptCode" ColumnName="DeptCode" />
                 <ScalarProperty Name="NameEN" ColumnName="NameEN" />

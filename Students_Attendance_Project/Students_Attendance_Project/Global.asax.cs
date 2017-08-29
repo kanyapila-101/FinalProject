@@ -48,11 +48,11 @@ namespace Students_Attendance_Project
             }
         }
 
-        //protected void Application_BeginRequest()
-        //{
-        //    Response.Cache.SetCacheability(HttpCacheability.NoCache);
-        //    Response.Cache.SetExpires(DateTime.UtcNow.AddHours(-1));
-        //    Response.Cache.SetNoStore();
-        //}
+        /* protected void Application_BeginRequest()
+        {
+           Response.Cache.SetCacheability(HttpCacheability.NoCache);
+           Response.Cache.SetExpires(DateTime.UtcNow.AddHours(-1));
+           Response.Cache.SetNoStore();
+        } */
     }
 }

@@ -36,34 +36,28 @@ namespace Students_Attendance_Project.Controllers
         {
             var jsonReturn = new JsonResponse();
             try
-            { // ตอนแรกผมไม่ได้เปลีย่น id form มันเกกี่ยวกันไหม คือ view profile มี 2 
+            { 
                 using (var db = new Student_AttendanceEntities())
                 {
-                    if (model.Username != "")
+                    var data = db.Tb_User.Where(r => r.UserID == model.UserID).FirstOrDefault();
+                    if (data != null)
                     {
-                        var data = db.Tb_User.Where(r => r.Username == model.Username).FirstOrDefault();
-                        if (data != null)
+                        db.Tb_User.Where(r => r.UserID == model.UserID).ForEach(r =>
                         {
-                            //var id = db.Tb_UserRole.Where(r => r.UserRoleName == "Admin").Select(r => r.UserRoleID).FirstOrDefault();
-                            db.Tb_User.Where(r => r.UserID == model.UserID).ForEach(r =>
-                            {
-                                r.Password = model.Password;
-                                r.Name = model.Name;
-                                r.NameEN = model.NameEN;
-                            });
-                            db.SaveChanges();
-                            jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อยเเล้ว" };
-                        }
+                            r.Password = model.Password;
+                            r.Name = model.Name;
+                            r.Email = model.Email;
+                        });
+                        db.SaveChanges();
+                        jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อยเเล้ว" };
                     }
                 }
             }
             catch (Exception ex)
             {
                 // error do something
-                var str = (string.IsNullOrEmpty(ex.InnerException.ToString())) ? ex.Message : ex.InnerException.ToString();
-                jsonReturn = new JsonResponse { status = false, message = "เกิดข้อผิดพลาด : " + str };
+                jsonReturn = new JsonResponse { status = false, message = "เกิดข้อผิดพลาด : " + ex.Message };
             }
-
             return Json(jsonReturn);
         }
 
@@ -224,7 +218,6 @@ namespace Students_Attendance_Project.Controllers
                     try
                     {
                         DataSet ds = new DataSet();
-                        var list = new List<StudentModel>();
                         bool isID = true;
                         int countStd = 0;
                         var path = "~/FileUpload/";
@@ -250,7 +243,7 @@ namespace Students_Attendance_Project.Controllers
                                     string excelConnectionString = string.Empty;
                                     excelConnectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" +
                                     fileLocation + ";Extended Properties=\"Excel 12.0;HDR=Yes;IMEX=2\"";
-                                
+
                                     if (fileExtension == ".xlsx")
                                     {
                                         excelConnectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" +
@@ -260,7 +253,7 @@ namespace Students_Attendance_Project.Controllers
                                     OleDbConnection excelConnection = new OleDbConnection(excelConnectionString);
                                     excelConnection.Open();
                                     DataTable dt = new DataTable();
-                                    string colHeader = string.Format("Select * from [Sheet1$A1:C]");
+                                    //string colHeader = string.Format("Select * from [Sheet1$A1:C]");
 
                                     dt = excelConnection.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
                                     if (dt == null)
@@ -326,7 +319,6 @@ namespace Students_Attendance_Project.Controllers
                                 db.SaveChanges();
                                 for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
                                 {
-                                    //string col1 = ds.Tables[0].Columns.
                                     string id = ds.Tables[0].Rows[i][0].ToString();
                                     string nameTH = ds.Tables[0].Rows[i][1].ToString();
                                     string nameEN = ds.Tables[0].Rows[i][2].ToString();
@@ -369,11 +361,12 @@ namespace Students_Attendance_Project.Controllers
                                     db.Tb_StudyGroup.Where(r => r.StudyGroupID == model.StudyGroupID).ForEach(r =>
                                     {
                                         r.StudyGroupCode = model.StudyGroupCode;
+                                        r.SubjectCode = model.SubjectCode;
                                         r.Course = model.Course;
                                     });
                                     db.SaveChanges();
                                     tran.Commit();
-                                    jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อยเล้ว" };
+                                    jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อยแล้ว" };
                                 }
                             }
                         }
@@ -597,6 +590,7 @@ namespace Students_Attendance_Project.Controllers
                                 bool isFileCorrect = true;
                                 int stdDuplicate = 0;
                                 int stdNew = 0;
+                                int stdTotal = 0;
                                 var path = "~/FileUpload/";
                                 if (Request.Files["file"].ContentLength > 0)
                                 {
@@ -681,7 +675,7 @@ namespace Students_Attendance_Project.Controllers
                                 }
                                 if (jsonReturn.status == true)
                                 {
-
+                                    //var notstd = new List<string>();
                                     for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
                                     {
                                         string id = ds.Tables[0].Rows[i][0].ToString();
@@ -698,6 +692,7 @@ namespace Students_Attendance_Project.Controllers
                                             if (data != null)
                                             {
                                                 stdDuplicate++;
+                                                //notstd.Add(id);
                                                 continue;
                                             }
                                             else
@@ -715,11 +710,18 @@ namespace Students_Attendance_Project.Controllers
                                             }
                                         }
                                     }
+                                    var Scode = db.Tb_Student.Where(r => r.StudyGroupID == model.StudyGroupID).Select(r => r.StdCode).ToList();
+                                    stdTotal = Scode.Count();
+                                    //if (stdDuplicate < stdTotal)
+                                    //{
+                                    //    var stdcode = Scode.Where(r => !notstd.Contains(r)).ToList();
+                                    //}
                                     if (isFileCorrect == true)
                                     {
                                         db.SaveChanges();
                                         tran.Commit();
-                                        jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อยเล้ว", data = new { stdDuplicate, stdNew } };
+                                        
+                                        jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อยเล้ว", data = new { stdDuplicate, stdNew, stdTotal } };
                                     }
                                     else
                                     {
@@ -1465,10 +1467,8 @@ namespace Students_Attendance_Project.Controllers
                                         r.StatusID = r.StatusID == null ? r.StatusRe : r.StatusID;
                                         db.Tb_StudentCheck.Where(x => x.StdCheckID == r.StdCheckID).ForEach(x =>
                                         {
-                                            x.StdCheckID = r.StdCheckID;
                                             x.StdID = int.Parse(r.StdID);
                                             x.StatusID = int.Parse(r.StatusID);
-                                            x.StudyGroupID = int.Parse(r.StudyGroupID);
                                             x.Note = r.Note;
                                         });
                                     }
@@ -1482,7 +1482,7 @@ namespace Students_Attendance_Project.Controllers
                         {
                             jsonReturn = new JsonResponse { status = false, message = "เกิดข้อผิดพลาด" };
                         }
-                        jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อย" };
+                        jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อยแล้ว" };
                     }
                     catch (Exception ex)
                     {
@@ -2026,8 +2026,7 @@ namespace Students_Attendance_Project.Controllers
             var dataHeader = new object();
             int countDate = 0;
             int countStudent = 0;
-            //var dataDetail = new object();
-            //SummaryModel data = new SummaryModel();
+
             using (var db = new Student_AttendanceEntities())
             {
                 dataHeader = (from t1 in db.Tb_SchoolYear
@@ -2092,6 +2091,7 @@ namespace Students_Attendance_Project.Controllers
                     ws.Cells["G7:L7"].Value = "กลุ่มเรียน " + item.StudyGroupCode;
                     ws.Cells["G7:L7"].Merge = true;
                     ws.Cells["G7:L7"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                    break;
                 }
                 //End Header Page 
 
@@ -2558,7 +2558,7 @@ namespace Students_Attendance_Project.Controllers
             ViewBag.Message = "Your contact page.";
             return View();
         }
-
+        
         // CRUD LINQ EXAMPLE
         public JsonResult RegisterSave(RegisterModel model) // บันทึกข้อมูลการสมัครใช้งานระบบ Register
         {

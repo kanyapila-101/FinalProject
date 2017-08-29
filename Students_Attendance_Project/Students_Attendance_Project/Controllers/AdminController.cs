@@ -13,8 +13,6 @@ namespace Students_Attendance_Project.Controllers
 {
     public class AdminController : BaseController
     {
-
-        // GET: Admin
         public ActionResult Index()
         {
             return View();
@@ -30,10 +28,30 @@ namespace Students_Attendance_Project.Controllers
         public ActionResult _User(FilterModel model)
         {
             using (var db = new Student_AttendanceEntities())
-            {
+            {   
+                // inner join
+                //var data = (from r in db.Tb_User
+                //            join d in db.Tb_Department on r.DeptCode.Value equals d.DeptCode
+                //            where (string.IsNullOrEmpty(model.Query) || r.Username.Contains(model.Query) || r.Name.Contains(model.Query) || r.Email.Contains(model.Query))
+                //            orderby r.UserID
+                //            select new UserMedel
+                //            {
+                //                UserID = r.UserID,
+                //                Username = r.Username,
+                //                Password = r.Password,
+                //                Name = r.Name,
+                //                NameEN = r.NameEN,
+                //                DeptCode = r.DeptCode.Value,
+                //                DeptName = d.DeptName,
+                //                Role = r.Role,
+                //                Email = r.Email
+                //            }).ToPagedList(model.page, 20);
+
+                // left outer join
                 var data = (from r in db.Tb_User
-                            join d in db.Tb_Department on r.DeptCode.Value equals d.DeptCode
-                            where (string.IsNullOrEmpty(model.Query) || r.Username.Contains(model.Query) || r.Name.Contains(model.Query) || r.NameEN.Contains(model.Query))
+                            join d in db.Tb_Department on r.DeptCode equals d.DeptCode into left
+                            from j in left.DefaultIfEmpty()
+                            where (string.IsNullOrEmpty(model.Query) || r.Username.Contains(model.Query) || r.Name.Contains(model.Query) || r.Email.Contains(model.Query))
                             orderby r.UserID
                             select new UserMedel
                             {
@@ -41,11 +59,11 @@ namespace Students_Attendance_Project.Controllers
                                 Username = r.Username,
                                 Password = r.Password,
                                 Name = r.Name,
-                                NameEN = r.NameEN,
-                                DeptCode = r.DeptCode.Value,
-                                DeptName = d.DeptName,
                                 Role = r.Role,
-                            }).ToPagedList(model.page, 10);
+                                Email = r.Email,
+                                DeptCode = j.DeptCode,
+                                DeptName = j.DeptName
+                            }).ToPagedList(model.page, 30);
                 ViewBag.DetailUser = data;
 
                 ViewBag.department = (from r in db.Tb_Department
@@ -76,9 +94,9 @@ namespace Students_Attendance_Project.Controllers
                                 Username = model.Username,
                                 Password = model.Password,
                                 Name = model.Name,
-                                NameEN = model.NameEN,
                                 DeptCode = model.DeptCode,
                                 Role = model.Role,
+                                Email = model.Email
                             });
                             db.SaveChanges();
                             jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อยเเล้ว" };
@@ -97,10 +115,8 @@ namespace Students_Attendance_Project.Controllers
                             //var id = db.Tb_UserRole.Where(r => r.UserRoleName == "Admin").Select(r => r.UserRoleID).FirstOrDefault();
                             db.Tb_User.Where(r => r.UserID == model.UserID).ForEach(r =>
                             {
-                                r.UserID = model.UserID;
-                                r.Password = model.Password;
+                                r.DeptCode = model.DeptCode;
                                 r.Name = model.Name;
-                                r.NameEN = model.NameEN;
                                 r.Role = model.Role;
                             });
                             db.SaveChanges();
@@ -134,6 +150,7 @@ namespace Students_Attendance_Project.Controllers
                         r.NameEN,
                         r.DeptCode,
                         r.Role,
+                        r.Email
                     }).FirstOrDefault();
                     if (data == null)
                     {
@@ -406,7 +423,6 @@ namespace Students_Attendance_Project.Controllers
                         {
                             db.Tb_Faculty.Where(r => r.FacultyCode == model.FacultyCode).ForEach(r =>
                             {
-                                r.FacultyCode = model.FacultyCode;
                                 r.FacultyName = model.FacultyName;
                             });
                             db.SaveChanges();
@@ -417,8 +433,7 @@ namespace Students_Attendance_Project.Controllers
             }
             catch (Exception ex)
             {
-                var str = (string.IsNullOrEmpty(ex.InnerException.ToString())) ? ex.Message : ex.InnerException.ToString();
-                jsonReturn = new JsonResponse { status = false, message = "error" };
+                jsonReturn = new JsonResponse { status = false, message = "error" + ex.Message };
             }
             return Json(jsonReturn);
         }
@@ -437,7 +452,7 @@ namespace Students_Attendance_Project.Controllers
                     }).FirstOrDefault();
                     if (data == null)
                     {
-                        jsonReturn = new JsonResponse { status = true, message = "fail" };
+                        jsonReturn = new JsonResponse { status = false, message = "fail" };
                     }
                     else
                     {
@@ -1282,30 +1297,30 @@ namespace Students_Attendance_Project.Controllers
             return Json(jsonReturn);
         }
 
-        //public JsonResult CheckEmail(string _email)
-        //{
-        //    var jsonReturn = new JsonResponse();
-        //    try
-        //    {
-        //        using (var db = new Student_AttendanceEntities())
-        //        {
-        //            var data = db.Tb_User.Where(r => r.Email == _email).FirstOrDefault();
-        //            if (data != null)
-        //            {
-        //                jsonReturn = new JsonResponse { status = false, message = _email + "นี้ มีผู้ใช้งานแล้ว กรุณาป้อนใหม่" };
-        //            }
-        //            else
-        //            {
-        //                jsonReturn = new JsonResponse { status = true, message = _email + " นี้ สามารถใช้งานได้" };
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        jsonReturn = new JsonResponse { status = false, message = "error" + ex.Message };
-        //    }
-        //    return Json(jsonReturn);
-        //}
+        public JsonResult CheckEmail(string _email)
+        {
+            var jsonReturn = new JsonResponse();
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var data = db.Tb_User.Where(r => r.Email == _email).FirstOrDefault();
+                    if (data != null)
+                    {
+                        jsonReturn = new JsonResponse { status = false, message = _email + "นี้ มีผู้ใช้งานแล้ว กรุณาป้อนใหม่" };
+                    }
+                    else
+                    {
+                        jsonReturn = new JsonResponse { status = true, message = _email + " นี้ สามารถใช้งานได้" };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = "error" + ex.Message };
+            }
+            return Json(jsonReturn);
+        }
 
         public JsonResult CheckFacultyCode(string _facultyCode)
         {

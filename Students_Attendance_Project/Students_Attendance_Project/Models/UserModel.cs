@@ -27,9 +27,10 @@ namespace Students_Attendance_Project.Models
         public string Password { get; set; }
         public string Name { get; set; }
         public string NameEN { get; set; }
-        public int DeptCode { get; set; }
+        public int? DeptCode { get; set; }
         public string DeptName { get; set; }
         public string Role { get; set; }
+        public string Email { get; set; }
     }
     public class RegisterModel
     {
@@ -42,6 +43,7 @@ namespace Students_Attendance_Project.Models
         public int DeptCode { get; set; }
         public string DeptName { get; set; }
         public string Role { get; set; }
+        public string Email { get; set; }
     }
    
 

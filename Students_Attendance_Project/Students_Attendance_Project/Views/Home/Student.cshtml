@@ -436,13 +436,25 @@
                                 swal("เกิดข้อผิดพลาด", "เนื่องจาก" + message, "error");
                             }
                             else if (status == true && res.data != null) {
-                                swal({
-                                    title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
-                                    text: "นักศึกษาเดิม " + res.data.stdDuplicate + " คน \n " + "มีนักศึกษาเพิ่มใหม่ " + res.data.stdNew + " คน",
-                                    type: "success"
-                                }, function () {
-                                    location.reload(true);
-                                });
+                                if (res.data.stdDuplicate < res.data.stdTotal) {
+                                    var stdDif = res.data.stdTotal - res.data.stdDuplicate;
+                                    swal({
+                                        title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                        text: "รายชื่อนักศึกษาในกลุ่มเรียนนี้ลดลง " + stdDif + " คน \n " + "กรุณาตรวจสอบรายชื่อนักศึกษาที่ถอนรายวิชา",
+                                        type: "success"
+                                    }, function () {
+                                        location.reload(true);
+                                    });
+                                }
+                                else {
+                                    swal({
+                                        title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                        text: "นักศึกษาเดิม " + res.data.stdDuplicate + " คน \n " + "มีนักศึกษาเพิ่มใหม่ " + res.data.stdNew + " คน",
+                                        type: "success"
+                                    }, function () {
+                                        location.reload(true);
+                                    });
+                                }
                             }
                             else {
                                 swal({

@@ -27,7 +27,7 @@ namespace Students_Attendance_Project.Controllers
             int userid = userReq != null ? userReq.UserID : 0;
             string controller = System.Web.HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString().ToLower();
             string action = System.Web.HttpContext.Current.Request.RequestContext.RouteData.Values["action"].ToString().ToLower();
-            var actionlist = new string[] { "login", "loginload", "registersave", "checkusername", "ssoLogin", "sls" };
+            var actionlist = new string[] { "login", "loginload", "registersave", "acs", "sls", "redirectsso" };
             if (!actionlist.Contains(action))
             {
                 using (var db = new Student_AttendanceEntities())
@@ -36,18 +36,20 @@ namespace Students_Attendance_Project.Controllers
                     UserIsLogin = db.Tb_Login.Where(r => r.UserID == userid).FirstOrDefault();
                 }
                 
-                Session.Timeout = 15;
+                Session.Timeout = 20;
                 Session["sessionID"] = HttpContext.Session.SessionID;
                 var sessionid = Session["sessionID"].ToString();
                 if (UserLogon == null || UserIsLogin.sessionID != sessionid)
                 {
+                    //string urlLogout = "http://cpe.rmuti.ac.th/project/StudentAttendance/Login/Logout";
+                    //filterContext.Result = new RedirectResult("~/Login/Login"); 
                     filterContext.Result = new RedirectResult(MainUrl);
                 }
                 else
                 {
                     if (UserLogon.Role == "user" && controller.ToLower() == "admin")
                     {
-                        filterContext.Result = new RedirectResult("~/Home/index");
+                        filterContext.Result = new RedirectResult(MainUrl + "/Home/index");
                     }
                 }
             }

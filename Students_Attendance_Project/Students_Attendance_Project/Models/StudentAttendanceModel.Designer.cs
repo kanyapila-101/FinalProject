@@ -1,4 +1,4 @@
-﻿// T4 code generation is enabled for model 'D:\GitHub\Final-Project-CPE-RMUTI2560\StudentAttendance\Students_Attendance_Project\Students_Attendance_Project\Models\StudentAttendanceModel.edmx'. 
+﻿// T4 code generation is enabled for model 'D:\GitHub\FinalProject\Students_Attendance_Project\Students_Attendance_Project\Models\StudentAttendanceModel.edmx'. 
 // To enable legacy code generation, change the value of the 'Code Generation Strategy' designer
 // property to 'Legacy ObjectContext'. This property is available in the Properties Window when the model
 // is open in the designer.

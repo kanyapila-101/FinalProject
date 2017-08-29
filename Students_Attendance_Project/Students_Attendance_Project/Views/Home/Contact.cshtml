@@ -1,21 +1,52 @@
 ﻿@{
     ViewBag.Title = "Contact";
 }
-<h2>@ViewBag.Title.</h2>
-<h3>@ViewBag.Message</h3>
-<br />
-<h3>ดาวน์โหลด <a href="~/Usermanual/Usermanual-StudentsAttandance.pdf" download="คู่มือการใช้งานสำหรับอาจารย์ผู้สอน">คู่มือการใช้งานสำหรับอาจารย์ผู้สอน</a></h3>
+<style>
+    figure.item {
+        /* To correctly align image, regardless of content height: */
+        vertical-align: top;
+        display: inline-block;
+        /* To horizontally center images and caption */
+        text-align: center;
+        /* The width of the container also implies margin around the images. */
+        width: 300px; /*ความกว้างของข้อความ ควรเท่ากับความกว้างของรูป*/
+    }
 
-
-<address>
+    .caption {
+        /* Make the caption a block so it occupies its own line. */
+        display: block;
+    }
+</style>
+<div class="content">
+    <h2>@ViewBag.Title.</h2>
+    <h3>@ViewBag.Message</h3>
     <br />
-    <b>ระบบเช็คชื่อการเข้าเรียนของนักศึกษาออนไลน์</b><br />
-    <a href="http://www.cpe.rmuti.ac.th/2016/" target="_blank">สาขาวิชาวิศวกรรมคอมพิวเตอร์</a><br />
-    <a href="http://www.ea.rmuti.ac.th" target="_blank">คณะวิศวกรรมศาสตร์และสถาปัตยกรรมศาสตร์</a><br />
-    <a href="http://www.rmuti.ac.th/" target="_blank">มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน ศูนย์กลางนครราชสีมา</a> 
-</address>
 
-<address>
-    <strong>Contact Admin :</strong>   <span>A. Supattra Kerdmec by CPE RMUTI</span><br />
-    <strong>Developed by :</strong> <a href="https://www.cpe.rmuti.ac.th" target="_blank">CPE.</a>
-</address>
+    <div class="img-responsive">
+        <figure class="item">
+            <img src="~/icon/qrcode.jpg" /><br />
+            
+        </figure>
+        
+        <br /><br /><span>สแกน QR Code หรือคลิกที่ลิงค์ <a href="http://line.me/R/ti/g/LzTAV8vvLG">http://line.me/R/ti/g/LzTAV8vvLG</a> เพื่อรับการแจ้งเตือนการเข้าสู่ระบบ หรือติดต่อผู้ดูแลระบบ  </span>
+        
+        
+    </div>
+
+    <h3>ดาวน์โหลด <a href="~/Usermanual/Usermanual-StudentsAttandance.pdf" download="คู่มือการใช้งานสำหรับอาจารย์ผู้สอน">คู่มือการใช้งานสำหรับอาจารย์ผู้สอน</a></h3>
+
+
+
+    <address>
+        <br />
+        <b>ระบบเช็คชื่อการเข้าเรียนของนักศึกษาออนไลน์</b><br />
+        <a href="http://www.cpe.rmuti.ac.th/2016/" target="_blank">สาขาวิชาวิศวกรรมคอมพิวเตอร์</a><br />
+        <a href="http://www.ea.rmuti.ac.th" target="_blank">คณะวิศวกรรมศาสตร์และสถาปัตยกรรมศาสตร์</a><br />
+        <a href="http://www.rmuti.ac.th/" target="_blank">มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน ศูนย์กลางนครราชสีมา</a>
+    </address>
+
+    <address>
+        <strong>Contact Admin :</strong>   <span>A. Supattra Kerdmec by CPE RMUTI</span><br />
+        <strong>Developed by :</strong> <a href="https://www.cpe.rmuti.ac.th" target="_blank">CPE.</a>
+    </address>
+</div>

@@ -10,7 +10,8 @@ namespace Students_Attendance_Project.Models
 
     }
 
-    public class JsonResponse {
+    public class JsonResponse
+    {
         public bool status { get; set; }
         public object data { get; set; }
         public string message { get; set; }
