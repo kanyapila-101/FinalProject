@@ -28,7 +28,7 @@ namespace OneLogin
         public string certificate = "-----BEGIN CERTIFICATE-----\nMIIFvTCCBKWgAwIBAgIJAJVWKDnYZN16MA0GCSqGSIb3DQEBBQUAMIHuMQswCQYD\nVQQGEwJUSDEaMBgGA1UECBMRTmFraG9uIFJhdGNoYXNpbWExDjAMBgNVBAcTBU11\nYW5nMTIwMAYDVQQKEylSYWphbWFuZ2FsYSBVbml2ZXJzaXR5IG9mIFRlY2hub2xv\nZ3kgSXNhbjFAMD4GA1UECxM3T2ZmaWNlIG9mIEFjYWRlbWljIFJlc291cmNlcyBh\nbmQgSW5mb3JtYXRpb24gVGVjaG5vbG9neTEdMBsGA1UEAxMUUk1VVGkgU2luZ2xl\nIHNpZ24tb24xHjAcBgkqhkiG9w0BCQEWD25vY0BybXV0aS5hYy50aDAeFw0xNTA5\nMjIxODE2NTFaFw0yNTA5MjExODE2NTFaMIHuMQswCQYDVQQGEwJUSDEaMBgGA1UE\nCBMRTmFraG9uIFJhdGNoYXNpbWExDjAMBgNVBAcTBU11YW5nMTIwMAYDVQQKEylS\nYWphbWFuZ2FsYSBVbml2ZXJzaXR5IG9mIFRlY2hub2xvZ3kgSXNhbjFAMD4GA1UE\nCxM3T2ZmaWNlIG9mIEFjYWRlbWljIFJlc291cmNlcyBhbmQgSW5mb3JtYXRpb24g\nVGVjaG5vbG9neTEdMBsGA1UEAxMUUk1VVGkgU2luZ2xlIHNpZ24tb24xHjAcBgkq\nhkiG9w0BCQEWD25vY0BybXV0aS5hYy50aDCCASIwDQYJKoZIhvcNAQEBBQADggEP\nADCCAQoCggEBAJilVrEQJ2xdAfrsdHyevNThzAjbXpiX4KvetI6TYyq/9jfSCYqm\nJqTHD9yRvtzEUUOySR7KTi9K2ATUD1R9w8DLaDHjEwJWpfwFGoidNjZfhm7IJtHF\nh7G2Z4Y7QpkBqhqTk8WKDwygGooQB7yDPMCUw+Ld/Z0wxFgGmrb6IHJyDQAplNpz\n8jND65mq3Sir/dcVBuiXF9Uj75a1uvyECPWGJpyVwSlyZKlZuGJP//ZrHBLvWvT2\no3bMTtaelKXNPjYHV2kuQmvi3QlOcSd3c0GhnwNmc6n9ady0Vskt8SIMORqFM2eZ\n4Jzb1JXobRNYuf7R8WWew8gQ1kbU/jM6yZECAwEAAaOCAVowggFWMB0GA1UdDgQW\nBBTmfvFkLPIo0dUjZbRMrPylrmkTrDCCASUGA1UdIwSCARwwggEYgBTmfvFkLPIo\n0dUjZbRMrPylrmkTrKGB9KSB8TCB7jELMAkGA1UEBhMCVEgxGjAYBgNVBAgTEU5h\na2hvbiBSYXRjaGFzaW1hMQ4wDAYDVQQHEwVNdWFuZzEyMDAGA1UEChMpUmFqYW1h\nbmdhbGEgVW5pdmVyc2l0eSBvZiBUZWNobm9sb2d5IElzYW4xQDA+BgNVBAsTN09m\nZmljZSBvZiBBY2FkZW1pYyBSZXNvdXJjZXMgYW5kIEluZm9ybWF0aW9uIFRlY2hu\nb2xvZ3kxHTAbBgNVBAMTFFJNVVRpIFNpbmdsZSBzaWduLW9uMR4wHAYJKoZIhvcN\nAQkBFg9ub2NAcm11dGkuYWMudGiCCQCVVig52GTdejAMBgNVHRMEBTADAQH/MA0G\nCSqGSIb3DQEBBQUAA4IBAQAZjxqYuPyRaUKO728ZEHpRfW2nEX5jvAXV97cST7Bw\nikJhmDtp5bVy4O7KaxiyRn0HMbFWjI/TKa2aWq5c1eL0HEgmgtPOu4GOMgQ7vZ08\nLDv3vTxmiNa5J719r3IjFrYyxlV2JONqFvLM2eRIbAiezaS6Ssqn5RRQRCqpN9yU\nOUOlasihH1PApBoTEWW2/JoDFtpDDhsMB61k78l5EDyMZglueWPfW4ZLbFp24Xv7\nkNwg823o0gTRyP7qvY/3nhneRPQ9Og7UKgY/IlU6NlK5h/9aIZvlPcK6AJ9/RMtQ\nNsgT9WzXnYzqyx0/2BhTcWnkFVuzatN4bowMTWhO7ID6\n-----END CERTIFICATE-----";
 
         public string assertionConsumerServiceUrl = "http://cpe.rmuti.ac.th/project/StudentAttendance/Login/acs.cshtml"; // แก้ตรงนี้ url หน้าแรกที่ลอกอินได้
-        public string identityId = "http://cpe.rmuti.ac.th/project/StudentAttendance"; //ตรงนี้url project ตรงนี้มันถูกใช่ไหม
+        public string identityId = "www.cpe.rmuti.ac.th/project/StudentAttendance"; //ตรงนี้url project
     }
 
     public enum RequestFormat
@@ -427,19 +427,21 @@ namespace OneLogin
             Login("");
         }
 
-        public string Login(String returnTo)
+        public void Login(String returnTo)
         {
             String Url;
             if (returnTo == "")
             {
                 Url = this.Settings.idp_sso_url + "?SAMLRequest=" + this.Context.Server.UrlEncode(this.Request.GetAuthRequest());
+                Log.Error("Url Null "+Url);
             }
             else
             {
                 Url = this.Settings.idp_sso_url + "?SAMLRequest=" + this.Context.Server.UrlEncode(this.Request.GetAuthRequest()) + "&RelayState=" + returnTo;
+                Log.Error("Url Not null " + Url);
             }
-            //this.Context.Response.Redirect(Url);
-            return Url;
+            this.Context.Response.Redirect(Url);
+            //return Url;
         }
 
         public void ProcessResponse()

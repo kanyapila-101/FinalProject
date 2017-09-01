@@ -25,7 +25,7 @@
 }
 <section class="content">
     <!-- /.box table -->
-    
+
     <div class="row">
         <div class="col-12">
             <!-- Horizontal Form -->
@@ -165,64 +165,60 @@
                                                                                             </div>
                                                                                             <div class="pull-left">
                                                                                                 <!-- เช็คชื่อ  -->
-                                                                                                <button class="btn btn-success btn-xs btn-Check" type="button"
-                                                                                                        value="@dataSubj.Where(x => x.StudyGroupID == r.StudyGroupID).Select(x => x.StudyGroupID).FirstOrDefault()">
-                                                                                                    <span aria-hidden="true">เช็คชื่อ</span>
-                                                                                                </button>
-
+                                                                                                <a href="@Url.Action("StdCheck","Home", new { id = r.StudyGroupID, id2 = r.SchYearID })" class="btn btn-success btn-xs">เช็คชื่อ</a>
                                                                                             </div>
                                                                                         </td>
                                                                                     </tr>
                                                                                 </tbody>
                                                                             </table>
                                                                         </td>
-                                                                        temp = (int)r.EndTimeInt;
-                                                                        j = temp;
-                                                                        if (roudcount != result.Count())
-                                                                        {
-                                                                            break;
-                                                                        }
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        <td align="right">
-                                                                            <table border="0" style="width: 100%">
-                                                                                <tbody>
-                                                                                    <tr>
-                                                                                        <td align="Left">
-                                                                                            <span id="">
-                                                                                            </span>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    <tr>
-                                                                                        <td align="Left">
-                                                                                            <span id="">
-                                                                                            </span>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    <tr>
-                                                                                        <td align="Left">
-                                                                                            <span id="">
-                                                                                            </span>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    <tr>
-                                                                                        <td align="Left">
-                                                                                            <span id="">
-                                                                                            </span>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </td>
-                                                                    }
-                                                                }
-                                                                roudcount++;
-                                                            }
-                                                        }
+                                                                                                        temp = (int)r.EndTimeInt;
+                                                                                                        j = temp;
+                                                                                                        if (roudcount != result.Count())
+                                                                                                        {
+                                                                                                            break;
+                                                                                                        }
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        <td align="right">
+                                                                                                            <table border="0" style="width: 100%">
+                                                                                                                <tbody>
+                                                                                                                    <tr>
+                                                                                                                        <td align="Left">
+                                                                                                                            <span id="">
+                                                                                                                            </span>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                    <tr>
+                                                                                                                        <td align="Left">
+                                                                                                                            <span id="">
+                                                                                                                            </span>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                    <tr>
+                                                                                                                        <td align="Left">
+                                                                                                                            <span id="">
+                                                                                                                            </span>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                    <tr>
+                                                                                                                        <td align="Left">
+                                                                                                                            <span id="">
+                                                                                                                            </span>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                </tbody>
+                                                                                                            </table>
+                                                                                                        </td>
+                                                                                                                }
+                                                                                                            }
+                                                                                                            roudcount++;
+                                                                                                        }
+                                                                                                    }
                                                     }
                                                 </tr>
-                                                        }
+                                                                                                    }
                                         }
                                     </tbody>
                                 </table>
@@ -504,8 +500,9 @@
                     } else {
                         unLoadSpin();
                         @*location.href = @Url.Action("StdCheck", "Home")?id=""+checkID;*@
-                        //window.location.href = "/Home/StdCheck/" + checkID;
-                        $(location).attr("href", "@Url.Action("StdCheck", "Home")/" + checkID);
+                        window.location.href = "/Home/StdCheck/" + checkID;
+                        @*location.href(@Url.Action("Student", "Home", new { id = dataSubj.Select(r => r.StudyGroupID) });*@
+                        @*$(location).attr("href", "@Url.Action("StdCheck", "Home")/" + checkID);*@
                     }
                 },
                 error: function (xhr, ajaxOptions, thrownError) {

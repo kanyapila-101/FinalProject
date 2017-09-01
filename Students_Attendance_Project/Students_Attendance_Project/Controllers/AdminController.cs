@@ -20,6 +20,10 @@ namespace Students_Attendance_Project.Controllers
 
         public ActionResult _Profile()
         {
+            using (var db = new Student_AttendanceEntities())
+            {
+                ViewBag.Dept = db.Tb_Department.Select(r => new DepartmentModel { DeptCode = r.DeptCode, DeptName = r.DeptName }).ToList();
+            }
             return View();
         }
 

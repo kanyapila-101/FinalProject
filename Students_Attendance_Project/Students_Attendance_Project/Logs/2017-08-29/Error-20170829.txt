@@ -1,0 +1,19 @@
+29/08/2017-16:45:30 | Url Null https://login.rmuti.ac.th/idp/saml2/SSOService.php?SAMLRequest=nVPbjtowEP0Vy%2b%2b5wAJLRgSJsqqKRNsI0j70pXKcYXGV2Kln0qV%2fXwfYikoVUvtkaXxmzsXjBam26WDV89Hu8HuPxGLzlMuv81Gl6sPjPDqMZzqaVNk0yrCaRJMZVtnoYTpT1VSKz%2bjJOJvLcZxKsSHqcWOJleVQSkePUTqPxlmZZjCZwkP6RYrCO3baNW%2bMrY19zmXvLThFhsCqFglYw371fgthIlQXEMG7siyi4uO%2blGJFhJ4D6dpZ6lv0e%2fQ%2fjMZPu20uj8wdJInuMPZtzyZWOuZj0nn3DTUne%2b5rtLxiRlsrqzHZumdjE6Up1nTktpHi1DaW4BzLfXHd1YlcLgY0nN37m%2f777erVh1z%2bq%2bpFckN4Ye%2fgQ2DYPBWuMfqneOt8q%2fi%2bgKFi6uhwhgJ7ZckEmpBw07iXtUfFmEv2PUqRvLJcdwTr88aEJ2A8sVi7tlPe0LAJeFKaf3fALW7dBNM7PPxPRndhGvQwOpSLcLw4Xw9rFrLDuhx8dc7zNbS%2f6Vle7v78Bstf
+29/08/2017-17:23:46 | 1
+29/08/2017-17:23:46 | 2
+29/08/2017-17:23:46 | 2.2
+29/08/2017-17:23:46 | Url Not null https://login.rmuti.ac.th/idp/saml2/SSOService.php?SAMLRequest=nVPbTuMwEP0Vy%2b%2b5NJSEWk2lUoS2UoGozfLAC3KdKTVK7KxnAuXvcdqy6kqrSvBkaXxmzsXjMcqmbsW0o61Zwp8OkNj8JufP6SDeXA6Hl0GWbUbBMFunwQguskCtk3SdVFeQDFLOHsGhtibnSRhzNkfsYG6QpCFfigdZEF8FyagcxCK5EMP0ibPCWbLK1tfaVNq85LxzRliJGoWRDaAgJVbTu4XwE8X6AELxqyyLoHhYlZxNEcGRJ51Zg10DbgXuTSv4vVzkfEvUiihSLYSu6UiHUoW0jVpnX0FRtKKuAkNTIjCVNAqihX3RJpIKQ4VbamrOdk1tUOxjOS%2buPTrhk3GPFnv37qT%2ffLv88sEn31U9jk4ID%2bytuPcM85vC1lp9sFvrGknnBfQVXQWbPVSQkwa1p%2fEJ17V9nzmQBDkn1wFn0RfLcUeg2m%2bMfwKCHbGZbVrpNPabADup6G%2bHOMXNam96CZufZHQWpoTqR%2fty4Y9366p%2bzXx2UJW9r9Y6Oob2Pz2Tw92%2f32DyCQ%3d%3d&RelayState=http://localhost/
+29/08/2017-17:23:46 | 3
+29/08/2017-17:23:46 | Redirect => http://localhost/
+29/08/2017-17:26:03 | 1
+29/08/2017-17:26:05 | 2
+29/08/2017-17:26:15 | 3
+29/08/2017-17:26:15 | Redirect => 
+29/08/2017-17:26:22 | Url Null https://login.rmuti.ac.th/idp/saml2/SSOService.php?SAMLRequest=nVPbauMwEP0VoXffQq4iDqQppYHs1iTuPuxLUaRJo2JLrmbcZv9%2b5SQtKZTA7pNgdGbORaMpyrpqxLylvV3DawtIbHmb86fBrg%2bTgdbRuA866mfDSSSzbS8aZcPxVg%2by0USNOPsFHo2zOe%2fFKWdLxBaWFklaCqU0G0XpOOpNyiwVvaFI%2b785K7wjp1x1Y6w29jnnrbfCSTQorKwBBSmxmf9YiTBRbE8gFPdlWUTFw6bkbI4IngLpwllsa%2fAb8G9GweN6lfM9USOSRDUQ%2b7olE0sV0z5pvHsBRcmGWg2W5kRgtbQKkpV7NjaRCmOFe6orzg51ZVEcY7kurjk74bNphxZH9%2f6i%2f3q7%2fPDBZ%2f%2bqeppcEJ7YG%2fEzMCxvC1cZ9YfdOV9Lui6gqxgd7Y5QQV5aNIEmJFxV7n3hQRLknHwLnCUfLOcdAX3cmPAEBAdiC1c30hvsNgEOUtFnh7jELapgeg27%2f8noKkwJ1Y0O5SIc787rbs1CdqDLzlfjPJ1D%2b07P7HT39RvM%2fgI%3d
+29/08/2017-18:10:40 | 1
+29/08/2017-18:10:40 | 2
+29/08/2017-18:10:40 | 2.2
+29/08/2017-18:10:40 | 3
+29/08/2017-18:10:40 | Redirect => http://localhost/
+29/08/2017-18:10:40 | Url Not null https://login.rmuti.ac.th/idp/saml2/SSOService.php?SAMLRequest=nVPbahsxEP0Vofe9so4b4TW4DqEGt13sTR%2fyEmRpHCvsSlvNbOP8fbS%2bFBeKIXkSjM7MuWg0Qdk2nZj1tLMr%2bN0DElvclfxprHVWjNObKNd6ExV5Nopudb6JUlWMdDHaqiK94ewXeDTOljyPU84WiD0sLJK0FEppNo7SL1F%2bW2eZyFJRpI%2bcVd6RU675aqw29rnkvbfCSTQorGwBBSmxnn1fijBRbI4gFN%2fquoqqn%2buasxkieAqkc2exb8Gvwf8xCh5Wy5LviDqRJKqD2Lc9mViqmHZJ590LKErW1GuwNCMCq6VVkCzds7GJVBgr3FHbcLZvG4viEMt1cd3JCZ9OBrQ4uPcX%2fdfb5dkHn35U9SS5IDyyd%2bJHYFjcVa4x6o3dO99Kui5gqBgdbQ9QQV5aNIEmJNw07nXuQRKUnHwPnCVnltOOgD5sTHgCgj2xuWs76Q0OmwB7qehvh7jEzZtgegXbz2R0FaaEGkaHchWOV%2bf1sGYhO9D14Ktznk6h%2fU%2fP9Hj37zeYvgM%3d&RelayState=http://localhost/
+29/08/2017-23:31:05 | Url Null https://login.rmuti.ac.th/idp/saml2/SSOService.php?SAMLRequest=nVNdi9swEPwrQu%2f%2bvLR1RBxIcxwNpK1J3D7cy6FIm4sOW3K16zr995WTXEmhhHJPEqvZnZ1hNEPZNp1Y9HSwG%2fjRAxJb3Zf8Kd%2bn0yyfFlGq97tooid5tMsKGRWTItwnaS6nBWffwaNxtuR5nHK2QuxhZZGkpVBKsw9RWkT5tM7ei7tMpO8eOau8I6dc89FYbexzyXtvhZNoUFjZAgpSYrv4vBZhotidQSg%2b1XUVVV%2b3NWcLRPAUSJfOYt%2bC34L%2faRR826xLfiDqRJKoDmLf9mRiqWI6JJ13L6Ao2VKvwdKCCKyWVkGyds%2fGJlJhrPBAbcPZsW0sipMtt5frLkr4fDaixUm9v%2bq%2f3S5fdfD5MAzxf688S67YztSd%2bBLGr%2b4r1xj1iz0430q6zT5WjI72J6ggLy2aQBPsbRo3LD1IgpKT74Gz5JXlEhDQp7gE%2fwmOxJau7aQ3OMYAjlLRnw5xjVs2QfEG9m8x6CZMCTWODuUqHIPzesxY8A50PerqnKeLaf%2faZ35%2b%2b%2fsPzH8D

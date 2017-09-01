@@ -110,6 +110,7 @@
                                             var count = entity.Where(x => x.StatusID == 7).Count(); <!-- จำนวนสถานะที่ = ชดเชย -->
                                             foreach (var r in entity)
                                             {
+                                                var status = r.StatusID;
                                                 <tr class="@(line % 2 != 0 ? "info" : "")">
                                                     <td class="hidden">
                                                         <input type="hidden" value="@r.StudyGroupID" id="StudyGroupID" />
@@ -121,10 +122,10 @@
                                                     <td style="text-align: left">@r.StdCode</td>
                                                     <td style="text-align: left">@r.NameTH</td>
                                                     <td>
-                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="1" @((r.StatusID == 1) ? "checked" : (r.StatusID == 7) ? "disabled" : "")>มา</label>
-                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="2" @((r.StatusID == 2) ? "checked" : (r.StatusID == 7) ? "disabled" : "")>สาย</label>
-                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="3" @((r.StatusID == 3) ? "checked" : (r.StatusID == 7) ? "disabled" : "")>ลา</label>
-                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="4" @((r.StatusID == 4) ? "checked" : (r.StatusID == 7) ? "disabled" : "")>ขาด</label>
+                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="1" @(status == 1 ? "checked" : status == 7 ? "disabled" : "")>มา</label>
+                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="2" @(status == 2 ? "checked" : status == 7 ? "disabled" : "")>สาย</label>
+                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="3" @(status == 3 ? "checked" : status == 7 ? "disabled" : "")>ลา</label>
+                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="4" @(status == 4 ? "checked" : status == 7 ? "disabled" : "")>ขาด</label>
                                                     </td>
                                                     <td>
                                                         <input type="text" class="col-sm-12 Note" name="Note" value="@r.Note" @((r.StatusID == 7) ? "readonly" : "") />
@@ -142,7 +143,7 @@
                                     disabled>
                                 บันทึกข้อมูล
                             </button>
-                            <button class="btn btn-default pull-left" onclick="location.href='@Url.Action("ScheduleCheck", "Home")', loadSpin();">ยกเลิก</button>
+                            <button class="btn btn-default pull-left" onclick="location.href='@Url.Action("ScheduleCheck", "Home")'">ยกเลิก</button>
                         </div>
                     </div>
                 </div>
@@ -259,7 +260,7 @@
                     data: { id: groupID }, // ข้อมูลที่ส่ง
                     traditional: true, // การจดจำข้อมูล
                     beforeSend: function () { // ก่องส่ง data จะให้ทำไร
-                        loadSpin();
+                        //loadSpin();
                     },
                     success: function (res) {
 
@@ -293,7 +294,7 @@
                         swal("เกิดข้อผิดพลาด", message, "error");
                     },
                     complete: function () {
-                        unLoadSpin();
+                        //unLoadSpin();
                         btnDelAppend(groupID);
                         btnEditAppend(groupID);
                     },

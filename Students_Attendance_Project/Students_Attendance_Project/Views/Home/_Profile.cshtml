@@ -2,15 +2,16 @@
 @using Students_Attendance_Project.Common;
 @{
     var user = (Tb_User)Shared.getUserLogon();
+
     ViewBag.Title = "ข้อมูลส่วนตัว";
 }
 
 <!-- Main content -->
 <section>
     <!-- /.box table -->
-    <div class="row">
-        <div class="col-lg-2"></div>
-        <div class="col-lg-8">
+    <div class="row center" style="padding-top:50px">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
             <!-- BEGIN SAMPLE TABLE PORTLET-->
             <div class="box box-primary">
                 <div class="box-header">
@@ -23,54 +24,77 @@
                 </div>
                 <div class="portlet-body">
                     <div class="box-body">
-                        <form id="Profileform" class="form-horizontal">
-                            <input type="hidden" name="UserID" id="UserID" value="@user.UserID">
+                        @{ var dept = (List<DepartmentModel>)ViewBag.dept;
+                            var deptname = dept.Where(r => r.DeptCode == user.DeptCode).Select(r => r.DeptName).SingleOrDefault();
+                            if (deptname == null)
+                            {
+                                deptname = "-";
+                            }
+                        }
+                        <div style="padding-left:50px;">
+                            <dl class="dl-horizontal">
+                                <dt>Username : </dt>
+                                <dd style="padding: 0px 1px 1px 4px; margin-bottom: 5px;">@user.Username</dd>
+                                <dt>Name : </dt>
+                                <dd style="padding: 0px 1px 1px 4px; margin-bottom: 5px;">@user.Name</dd>
+                                <dt>Personal Id : </dt>
+                                <dd style="padding: 0px 1px 1px 4px; margin-bottom: 5px;">@user.Password</dd>
+                                <dt>Email : </dt>
+                                <dd style="padding: 0px 1px 1px 4px; margin-bottom: 5px;">@user.Email</dd>
+                                <dt>Department : </dt>
+                                <dd style="padding: 0px 1px 1px 4px; margin-bottom: 5px;">@deptname</dd>
+                            </dl>
+                        </div>
 
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label">Username :</label>
-                                <div class="col-sm-4">
-                                    <input type="text" class="form-control" id="Username" name="Username" tabindex="1" value="@user.Username">
-                                </div>
-                            </div>
 
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label">Password :</label>
-                                <div class="col-sm-4">
-                                    <input type="password" class="form-control" id="Password" name="Password" tabindex="2" value="@user.Password" required>
-                                </div>
-                            </div>
+                        @*<form id="Profileform" class="form-horizontal">
+                                <input type="hidden" name="UserID" id="UserID" value="@user.UserID">
 
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label">ชื่อ-สกุล :</label>
-                                <div class="col-sm-5">
-                                    <input type="text" class="form-control" id="Name" name="Name" tabindex="3" value="@user.Name" required>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">Username :</label>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="form-control" id="Username" name="Username" tabindex="1" value="@user.Username">
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label">Email :</label>
-                                <div class="col-sm-5">
-                                    <input type="email" class="form-control" id="Email" name="Email" tabindex="4" value="@user.Email" required>
+                                <div class="form-group hidden">
+                                    <label class="col-sm-3 control-label">Password :</label>
+                                    <div class="col-sm-4">
+                                        <input type="password" class="form-control" id="Password" name="Password" tabindex="2" value="@user.Password" required>
+                                    </div>
                                 </div>
-                            </div>
-                            @*<div class="form-group">
-                                <label class="col-sm-3 control-label">สาขาวิชา :</label>
-                                <div class="col-sm-6">
-                                    <input type="text" class="form-control" id="Department" name="Department" tabindex="5" value="@user.DeptCode" required>
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">ชื่อ-สกุล :</label>
+                                    <div class="col-sm-5">
+                                        <input type="text" class="form-control" id="Name" name="Name" tabindex="3" value="@user.Name" required>
+                                    </div>
                                 </div>
-                            </div>*@
-                            <div class="box-footer">
-                                <div class="row col-lg-2 pull-right">
-                                    <button type="button" class="btn btn-success center-block btn-save">บันทึก</button>
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">Email :</label>
+                                    <div class="col-sm-5">
+                                        <input type="email" class="form-control" id="Email" name="Email" tabindex="4" value="@user.Email" required>
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
+                                <div class="form-group">
+                                        <label class="col-sm-3 control-label">สาขาวิชา :</label>
+                                        <div class="col-sm-6">
+                                            <input type="text" class="form-control" id="Department" name="Department" tabindex="5" value="@user.DeptCode" required>
+                                        </div>
+                                    </div>
+                                <div class="box-footer">
+                                    <div class="row col-lg-2 pull-right">
+                                        <button type="button" class="btn btn-success center-block btn-save">บันทึก</button>
+                                    </div>
+                                </div>
+                            </form>*@
                     </div>
                 </div>
             </div>
             <!-- END SAMPLE TABLE PORTLET-->
         </div>
-        <div class="col-lg-2"></div>
+        <div class="col-md-3"></div>
     </div>
     <!-- /.box table -->
 </section>
@@ -82,7 +106,6 @@
             var id = $('#UserID').val();
             $('#Username').attr('readonly', true);
             $('#Password').password();
-           
         });
 
         $('#Profileform').validate({

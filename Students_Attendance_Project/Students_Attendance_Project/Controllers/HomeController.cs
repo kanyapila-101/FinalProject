@@ -17,7 +17,9 @@ using System.Data.Entity;
 using Newtonsoft.Json;
 using System.Collections;
 using OfficeOpenXml;
+using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Style;
+using System.Drawing;
 
 namespace Students_Attendance_Project.Controllers
 {
@@ -36,7 +38,7 @@ namespace Students_Attendance_Project.Controllers
         {
             var jsonReturn = new JsonResponse();
             try
-            { 
+            {
                 using (var db = new Student_AttendanceEntities())
                 {
                     var data = db.Tb_User.Where(r => r.UserID == model.UserID).FirstOrDefault();
@@ -100,7 +102,7 @@ namespace Students_Attendance_Project.Controllers
                 var data = (from c in db.Tb_StudyGroup
                             join d in db.Tb_Department on c.DeptCode equals d.DeptCode
                             join sy in db.Tb_SchoolYear on c.SchYearID equals sy.SchYearID
-                            join s in db.Tb_Subject on c.SubjectCode equals s.SubjectCode
+                            join s in db.Tb_Subject on new { c.SubjectCode, c.Course } equals new { s.SubjectCode, s.Course }
                             where (string.IsNullOrEmpty(model.Query) || c.StudyGroupCode.Contains(model.Query) || sy.Year.Contains(model.Query) || s.SubjectCode.Contains(model.Query) || s.SubjectName.Contains(model.Query))
                             where c.UserID == UserLogon.UserID
                             orderby c.StudyGroupID descending, sy.Year descending
@@ -675,7 +677,7 @@ namespace Students_Attendance_Project.Controllers
                                 }
                                 if (jsonReturn.status == true)
                                 {
-                                    //var notstd = new List<string>();
+                                    var notstd = new List<string>();
                                     for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
                                     {
                                         string id = ds.Tables[0].Rows[i][0].ToString();
@@ -692,7 +694,7 @@ namespace Students_Attendance_Project.Controllers
                                             if (data != null)
                                             {
                                                 stdDuplicate++;
-                                                //notstd.Add(id);
+                                                notstd.Add(id);
                                                 continue;
                                             }
                                             else
@@ -712,16 +714,22 @@ namespace Students_Attendance_Project.Controllers
                                     }
                                     var Scode = db.Tb_Student.Where(r => r.StudyGroupID == model.StudyGroupID).Select(r => r.StdCode).ToList();
                                     stdTotal = Scode.Count();
-                                    //if (stdDuplicate < stdTotal)
-                                    //{
-                                    //    var stdcode = Scode.Where(r => !notstd.Contains(r)).ToList();
-                                    //}
+                                    var dataS = new object();
+                                    if (stdDuplicate < stdTotal)
+                                    {
+                                        var stdcode = Scode.Where(r => !notstd.Contains(r)).ToList();
+                                        dataS = db.Tb_Student.Where(r => stdcode.Contains(r.StdCode)).Select(r => new
+                                        {
+                                            r.StdID,
+                                            r.NameTH,
+                                            r.StdCode
+                                        }).ToList();
+                                    }
                                     if (isFileCorrect == true)
                                     {
                                         db.SaveChanges();
                                         tran.Commit();
-                                        
-                                        jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อยเล้ว", data = new { stdDuplicate, stdNew, stdTotal } };
+                                        jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อยเล้ว", data = new { stdDuplicate, stdNew, stdTotal, dataS } };
                                     }
                                     else
                                     {
@@ -751,6 +759,35 @@ namespace Students_Attendance_Project.Controllers
             }
             return Json(jsonReturn);
         } // บันทึกข้อมูลข้อมูลนักศึกษาที่ Upload from Excel และ การเพิ่มที่ละคน
+
+        public JsonResult SaveStdChangeStatus(List<StudentModel> model)
+        {
+            var jsonReturn = new JsonResponse();
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    if (model != null)
+                    {
+                        foreach (var r in model)
+                        {
+                            db.Tb_Student.Where(x => x.StdID == r.StdID).ForEach(x =>
+                            {
+                                x.StatusID = r.StatusID;
+                            });
+                        }
+                        db.SaveChanges();
+                    }
+                }
+                jsonReturn = new JsonResponse { status = true };
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = ex.Message };
+            }
+
+            return Json(jsonReturn);
+        } //บันทีกการเปลี่ยนแปลงสถานะถอนรายวิชา เมื่อ import file รายชื่อ < หรือไม่ตรง
 
         public JsonResult CheckStdCode(string _StdCode)
         {
@@ -810,7 +847,7 @@ namespace Students_Attendance_Project.Controllers
                 if (model.Query == null)
                 {
                     var dataSubject = (from s in db.Tb_Subject
-                                       join s1 in db.Tb_StudyGroup on s.SubjectCode equals s1.SubjectCode
+                                       join s1 in db.Tb_StudyGroup on new { s.SubjectCode, s.Course } equals new { s1.SubjectCode, s1.Course }
                                        join s2 in db.Tb_SchoolYear on s1.SchYearID equals s2.SchYearID
                                        //where s2.SchYearID == int.Parse(model.Query)
                                        where DateTime.Now >= s2.StartDate && DateTime.Now <= s2.EndDate && s1.UserID == UserLogon.UserID
@@ -836,7 +873,7 @@ namespace Students_Attendance_Project.Controllers
                 {
                     int schYearID = int.Parse(model.Query);
                     var dataSubject1 = (from s in db.Tb_Subject
-                                        join s1 in db.Tb_StudyGroup on s.SubjectCode equals s1.SubjectCode
+                                        join s1 in db.Tb_StudyGroup on new { s.SubjectCode, s.Course } equals new { s1.SubjectCode, s1.Course }
                                         join s2 in db.Tb_SchoolYear on s1.SchYearID equals s2.SchYearID
                                         where s2.SchYearID == schYearID && s1.UserID == UserLogon.UserID
                                         //where DateTime.Now > s2.StartDate && DateTime.Now < s2.EndDate
@@ -1216,7 +1253,7 @@ namespace Students_Attendance_Project.Controllers
                 ViewBag.SchYear = dataSchYear;
 
                 var dataSubject = (from s in db.Tb_Subject
-                                   join s1 in db.Tb_StudyGroup on s.SubjectCode equals s1.SubjectCode
+                                   join s1 in db.Tb_StudyGroup on new { s.SubjectCode, s.Course } equals new { s1.SubjectCode, s1.Course }
                                    join s2 in db.Tb_SchoolYear on s1.SchYearID equals s2.SchYearID
                                    where DateTime.Now > s2.StartDate && DateTime.Now < s2.EndDate && s1.UserID == UserLogon.UserID
                                    select new StudyGroupModel()
@@ -1362,69 +1399,118 @@ namespace Students_Attendance_Project.Controllers
             return Json(jsonReturn);
         } // delete วันสอนชดเชย ลบออกจากตารางการเช็คชื่อ ตามกลุ่มเรียนนั้น และให้วันที่เรียนปกติ มีสถานะ รอการเช็คชื่อ(9) , Note = ""
 
-        public ActionResult StdCheck(FilterModel model, int id)
-        {
+        public ActionResult StdCheck(FilterModel model, int id, int id2)
+        {   // id = studygroupID id2 = schoolyearID
             using (var db = new Student_AttendanceEntities())
             {
-                // Query เอาข้อมูลนักศึกษาทุกคนที่ยังไม่ได้เช็คชื่อวันนี้ เพิ่อเอาไปเช็คชื่อครั้งใหม่ ในวันที่นอกเหนือจาก วันที่สอนปกติ
-                var dataNoCheck = (from sg in db.Tb_StudyGroup
-                                   join st in db.Tb_Student on sg.StudyGroupID equals st.StudyGroupID
-                                   where sg.StudyGroupID == id && st.StatusID == 5  // 5 = สถานะลงทะเบียน เท่านั้นที่มีสิทธิ์เช็คชื่อ
-                                   orderby st.StdCode
-                                   select new StudentCheckModel
-                                   {
-                                       StudyGroupID = sg.StudyGroupID,
-                                       StdID = st.StdID,
-                                       StdCode = st.StdCode,
-                                       NameTH = st.NameTH,
-                                   }).ToList();
-                //var today = "06/29/2017";
-                var today = DateTime.Now.ToString("MM/dd/yyyy");
-                DateTime date = DateTime.Parse(today);
-                // Query เอาข้อมูลการเช็คชื่อนักศึกษาทุกคนที่ได้เช็คชื่อวันนี้ เพิ่อเอาไปแก้การเช็คชื่อ ถ้ามีคนลงทะเบียนเพิ่มในวันนี้หลังจากเช็คชื่อไปแล้ว ไม่สามารถเช็คชื่อได้ ต้องรอให้พ้นวันนี้ไปก่อน
-                var dataIscheck = (from t1 in db.Tb_Student
-                                   join t3 in db.Tb_StudentCheck on t1.StdID equals t3.StdID
-                                   orderby t1.StdCode
-                                   where t3.DateCheck == date && t3.StudyGroupID == id && t1.StatusID == 5
-                                   select new StudentCheckModel()
-                                   {
-                                       StdCheckID = t3.StdCheckID,
-                                       StudyGroupID = t3.StudyGroupID,
-                                       StdID = t3.StdID,
-                                       StdCode = t1.StdCode,
-                                       NameTH = t1.NameTH,
-                                       StatusID = t3.StatusID,
-                                       Note = t3.Note
-                                   }).ToList();
+                try
+                {
+                    var data = (from r in db.Tb_SchoolYear
+                                where r.SchYearID == id2
+                                select new
+                                {
+                                    r
+                                }).FirstOrDefault();
 
-                var datastatus = (from t1 in db.Tb_StudentCheck      // Query เอาสถานะการเช็คชื่อของวันนี้ ว่าเป็น มา สาย ลา ขาด ไหม เพิ่อเอาไปแก้การเช็คชื่อ
-                                  join t2 in db.Tb_Student on t1.StdID equals t2.StdID
-                                  where t1.StudyGroupID == id && t1.DateCheck == date
-                                  select t1.StatusID).ToList();
-                if (datastatus.Count > 0 && datastatus != null) // ถ้าวันนี้มีการเช็คชื่อแล้วไปแล้วอย่างน้อย 1 ครั้ง
-                {
-                    ViewBag.StdCheck = dataIscheck;             // ส่งข้อมูล Query dataIscheck ไปแก้ไขการเช็คชื่อ
+                    var today = DateTime.Now.ToShortDateString();
+                    DateTime Today = DateTime.Parse(today);
+                    var dataholiday = db.Tb_Holiday.Select(r => new
+                    {
+                        date = r.HolidayDate,
+                        datename = r.HolidayName
+                    }).ToList();
+                    var holiday = dataholiday.Where(r => r.date.ToShortDateString() == today).FirstOrDefault();
+                    var message = new object();
+                    if (Today >= data.r.StartMidterm && Today <= data.r.EndMidterm)
+                    {
+                        message = "ขออภัย! ไม่สามารถเช็คชื่อได้ เนื่องจากอยู่ในช่วง สอบกลางภาค";
+                        return RedirectToAction("Exceptions", "Home", new { message = message });
+                    }
+                    else if (Today >= data.r.StartFinal && Today <= data.r.EndFinal)
+                    {
+                        message = "ขออภัย! ไม่สามารถเช็คชื่อได้ เนื่องจากอยู่ในช่วง สอบปลายภาค";
+                        return RedirectToAction("Exceptions", "Home", new { message = message });
+                    }
+                    else if (holiday != null )
+                    {
+                        message = "ขออภัย! ไม่สามารถเช็คชื่อได้ เนื่องจากตรงกับ " + holiday.datename;
+                        return RedirectToAction("Exceptions", "Home", new { message = message });
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    ViewBag.StdCheck = dataNoCheck;             // มิฉะนั้นแล้ว ส่งข้อมูล Query dataNoCheck ไปการเช็คชื่อครั้งใหม่
+                    RedirectToAction("Exceptions", "Home", new { message = "holiday" });
                 }
-                var dataHeader = (from sg in db.Tb_StudyGroup        // Query เอาข้อมูลกลุ่มเรียน ไปแสดง ใน Header
-                                  join sj in db.Tb_Subject on sg.SubjectCode equals sj.SubjectCode
-                                  join sy in db.Tb_SchoolYear on sg.SchYearID equals sy.SchYearID
-                                  where sg.StudyGroupID == id
-                                  select new StudyGroupModel
-                                  {
-                                      StudyGroupID = sg.StudyGroupID,
-                                      StudyGroupCode = sg.StudyGroupCode,
-                                      SchYearID = sy.SchYearID,
-                                      Term = sy.Term,
-                                      Year = sy.Year,
-                                      SubjectCode = sj.SubjectCode,
-                                      SubjectName = sj.SubjectName,
-                                      Course = sj.Course
-                                  }).ToList();
-                ViewBag.StudyGroup = dataHeader;
+            }
+
+            using (var db = new Student_AttendanceEntities())
+            {
+                try
+                {
+                    // Query เอาข้อมูลนักศึกษาทุกคนที่ยังไม่ได้เช็คชื่อวันนี้ เพิ่อเอาไปเช็คชื่อครั้งใหม่ ในวันที่นอกเหนือจาก วันที่สอนปกติ
+                    var dataNoCheck = (from sg in db.Tb_StudyGroup
+                                       join st in db.Tb_Student on sg.StudyGroupID equals st.StudyGroupID
+                                       where sg.StudyGroupID == id && st.StatusID == 5  // 5 = สถานะลงทะเบียน เท่านั้นที่มีสิทธิ์เช็คชื่อ
+                                       orderby st.StdCode
+                                       select new StudentCheckModel
+                                       {
+                                           StudyGroupID = sg.StudyGroupID,
+                                           StdID = st.StdID,
+                                           StdCode = st.StdCode,
+                                           NameTH = st.NameTH,
+                                       }).ToList();
+                    //var today = "06/29/2017";
+                    var today = DateTime.Now.ToString("MM/dd/yyyy");
+                    DateTime date = DateTime.Parse(today);
+                    // Query เอาข้อมูลการเช็คชื่อนักศึกษาทุกคนที่ได้เช็คชื่อวันนี้ เพิ่อเอาไปแก้การเช็คชื่อ ถ้ามีคนลงทะเบียนเพิ่มในวันนี้หลังจากเช็คชื่อไปแล้ว ไม่สามารถเช็คชื่อได้ ต้องรอให้พ้นวันนี้ไปก่อน
+                    var dataIscheck = (from t1 in db.Tb_Student
+                                       join t3 in db.Tb_StudentCheck on t1.StdID equals t3.StdID
+                                       orderby t1.StdCode
+                                       where t3.DateCheck == date && t3.StudyGroupID == id && t1.StatusID == 5
+                                       select new StudentCheckModel()
+                                       {
+                                           StdCheckID = t3.StdCheckID,
+                                           StudyGroupID = t3.StudyGroupID,
+                                           StdID = t3.StdID,
+                                           StdCode = t1.StdCode,
+                                           NameTH = t1.NameTH,
+                                           StatusID = t3.StatusID,
+                                           Note = t3.Note
+                                       }).ToList();
+
+                    var datastatus = (from t1 in db.Tb_StudentCheck      // Query เอาสถานะการเช็คชื่อของวันนี้ ว่าเป็น มา สาย ลา ขาด ไหม เพิ่อเอาไปแก้การเช็คชื่อ
+                                      join t2 in db.Tb_Student on t1.StdID equals t2.StdID
+                                      where t1.StudyGroupID == id && t1.DateCheck == date
+                                      select t1.StatusID).ToList();
+                    if (datastatus.Count > 0) // ถ้าวันนี้มีการเช็คชื่อแล้วไปแล้วอย่างน้อย 1 ครั้ง
+                    {
+                        ViewBag.StdCheck = dataIscheck;             // ส่งข้อมูล Query dataIscheck ไปแก้ไขการเช็คชื่อ
+                    }
+                    //else
+                    //{
+                    //    ViewBag.StdCheck = dataNoCheck;             // มิฉะนั้นแล้ว ส่งข้อมูล Query dataNoCheck ไปการเช็คชื่อครั้งใหม่
+                    //}
+                    var dataHeader = (from sg in db.Tb_StudyGroup        // Query เอาข้อมูลกลุ่มเรียน ไปแสดง ใน Header
+                                      join sj in db.Tb_Subject on new { sg.SubjectCode, sg.Course} equals new { sj.SubjectCode, sj.Course }
+                                      join sy in db.Tb_SchoolYear on sg.SchYearID equals sy.SchYearID
+                                      where sg.StudyGroupID == id
+                                      select new StudyGroupModel
+                                      {
+                                          StudyGroupID = sg.StudyGroupID,
+                                          StudyGroupCode = sg.StudyGroupCode,
+                                          SchYearID = sy.SchYearID,
+                                          Term = sy.Term,
+                                          Year = sy.Year,
+                                          SubjectCode = sj.SubjectCode,
+                                          SubjectName = sj.SubjectName,
+                                          Course = sj.Course
+                                      }).ToList();
+                    ViewBag.StudyGroup = dataHeader;
+                }
+                catch (Exception ex)
+                {
+                    RedirectToAction("Exceptions", "Home", new { message = "query" });
+                }
             }
             return View(model);
         } // นำข้อมูลที่มีการเช็คชื่อแล้วในวันนี้ หรือ ยังไม่ได้เช็คชื่อในวันนี้ไปแสดง เพื่อทำการเช็คชื่อ ใหม่ หรือ แก้ไขการเช็คชื่อ
@@ -1583,6 +1669,7 @@ namespace Students_Attendance_Project.Controllers
         public JsonResult CheckHoliday(int _id)
         {
             var jsonReturn = new JsonResponse();
+            var error = "ก่อนquery";
             try
             {
                 using (var db = new Student_AttendanceEntities())
@@ -1596,10 +1683,18 @@ namespace Students_Attendance_Project.Controllers
 
                     //var today = "07/10/2017";
 
-                    var today = DateTime.Now.ToString("MM/dd/yyyy");
+                    var today = DateTime.Now.ToShortDateString();
                     DateTime Today = DateTime.Parse(today);
-                    var dataholiday = db.Tb_Holiday.Where(r => r.HolidayDate == Today).Select(r => new { r.HolidayDate, r.HolidayName }).FirstOrDefault();
+                    //var Today = DateTime.ParseExact(today, "dd/MM/yyyy", Shared.CultureInfoTh);
+                    //DateTime Today = DateTime.Now;
+                    var dataholiday = db.Tb_Holiday.Select(r => new
+                    {
+                        date = r.HolidayDate,
+                        datename = r.HolidayName
+                    }).ToList();
+                    var holiday = dataholiday.Where(r => r.date.ToShortDateString() == today).FirstOrDefault();
 
+                    error = "หลังquery";
                     if (Today >= data.r.StartMidterm && Today <= data.r.EndMidterm)
                     {
                         jsonReturn = new JsonResponse { status = false, message = "อยู่ในช่วง สอบกลางภาค" };
@@ -1608,9 +1703,9 @@ namespace Students_Attendance_Project.Controllers
                     {
                         jsonReturn = new JsonResponse { status = false, message = "อยู่ในช่วง สอบปลายภาค" };
                     }
-                    else if (dataholiday != null /*|| dataholiday.HolidayDate == Today*/)
+                    else if (holiday != null /*|| dataholiday.HolidayDate == Today*/)
                     {
-                        jsonReturn = new JsonResponse { status = false, message = "เป็นวัน " + dataholiday.HolidayName };
+                        jsonReturn = new JsonResponse { status = false, message = "เป็นวัน " + holiday.datename };
                     }
                     else
                     {
@@ -1620,7 +1715,7 @@ namespace Students_Attendance_Project.Controllers
             }
             catch (Exception ex)
             {
-                jsonReturn = new JsonResponse { status = false, message = ex.Message };
+                jsonReturn = new JsonResponse { status = false, message = ex.Message + error };
             }
             return Json(jsonReturn);
         } // รับค่า เพื่อเช็คว่าวันนี้ เป็นวันหยุด หรือ เป็นวันเรียนปกติที่มีการชดเชยไปแล้ว เพื่อจะไม่ให้มรการเช็คชื่อในวันนี้
@@ -1834,7 +1929,7 @@ namespace Students_Attendance_Project.Controllers
                 {
                     var dataSummaryNoExam = (from r in db.Tb_StudyGroup
                                              join d in db.Tb_Department on r.DeptCode equals d.DeptCode
-                                             join s in db.Tb_Subject on r.SubjectCode equals s.SubjectCode
+                                             join s in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { s.SubjectCode, s.Course }
                                              join y in db.Tb_SchoolYear on r.SchYearID equals y.SchYearID
                                              where (string.IsNullOrEmpty(model.Query) || y.SchYearID.ToString().Contains(model.Query))
                                              where (DateTime.Now >= y.StartDate && DateTime.Now <= endDate) && r.UserID == UserLogon.UserID
@@ -1860,7 +1955,7 @@ namespace Students_Attendance_Project.Controllers
                     int schYear = int.Parse(model.Query);
                     var dataSummaryNoExam = (from r in db.Tb_StudyGroup
                                              join d in db.Tb_Department on r.DeptCode equals d.DeptCode
-                                             join s in db.Tb_Subject on r.SubjectCode equals s.SubjectCode
+                                             join s in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { s.SubjectCode, s.Course }
                                              join y in db.Tb_SchoolYear on r.SchYearID equals y.SchYearID
                                              orderby r.StudyGroupCode ascending
                                              where r.SchYearID == schYear && r.UserID == UserLogon.UserID
@@ -1902,7 +1997,7 @@ namespace Students_Attendance_Project.Controllers
                 {
                     var dataSummaryCheck = (from r in db.Tb_StudyGroup
                                             join d in db.Tb_Department on r.DeptCode equals d.DeptCode
-                                            join s in db.Tb_Subject on r.SubjectCode equals s.SubjectCode
+                                            join s in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { s.SubjectCode, s.Course }
                                             join y in db.Tb_SchoolYear on r.SchYearID equals y.SchYearID
                                             where (string.IsNullOrEmpty(model.Query) || y.SchYearID.ToString().Contains(model.Query))
                                             where (DateTime.Now >= y.StartDate && DateTime.Now <= endDate) && r.UserID == UserLogon.UserID
@@ -1928,7 +2023,7 @@ namespace Students_Attendance_Project.Controllers
                     int schYear = int.Parse(model.Query);
                     var dataSummaryCheck = (from r in db.Tb_StudyGroup
                                             join d in db.Tb_Department on r.DeptCode equals d.DeptCode
-                                            join s in db.Tb_Subject on r.SubjectCode equals s.SubjectCode
+                                            join s in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { s.SubjectCode, s.Course }
                                             join y in db.Tb_SchoolYear on r.SchYearID equals y.SchYearID
                                             orderby r.StudyGroupCode ascending
                                             where r.SchYearID == schYear && r.UserID == UserLogon.UserID
@@ -2053,20 +2148,26 @@ namespace Students_Attendance_Project.Controllers
                 package.Workbook.Worksheets.Add("Sheet1");
                 ExcelWorksheet ws = package.Workbook.Worksheets[1];
                 // ws.Name = "Test"; //Setting Sheet's name
-                ws.Cells.Style.Font.Size = 16; //Default font size for whole sheet
+                ws.Cells.Style.Font.Size = 14; //Default font size for whole sheet
                 ws.Cells.Style.Font.Name = "TH SarabunPSK"; //Default Font name for whole sheet
 
                 //ws.Cells[1, 1].Value = "Sample DataTable Export"; // Heading Name
                 //ws.Cells[1, 1, 1, 10].Merge = true; //Merge columns start and end range
                 //ws.Cells[1, 1, 1, 10].Style.Font.Bold = true; //Font should be bold
                 //ws.Cells[1, 1, 1, 10].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center; // Aligmnet is center
+                var imgPath = Server.MapPath("~/icon/Logo_RMUTI_128X235.png");
+                Bitmap image = new Bitmap(imgPath);
+                ExcelPicture pic = ws.Drawings.AddPicture("Logo_RMUTI", image);
+                pic.SetPosition(5, 5);
+                pic.SetSize(48, (int)(235 * 0.347));
+
 
                 //Header Page 
-                ws.Cells["A1:I1"].Value = "มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน";
+                ws.Cells["A1:I1"].Value = "                มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน";
                 ws.Cells["A1:I1"].Merge = true;                                                 // Merge = ผสานเซลล์และจัดกึ่งกลาง
                 ws.Cells["A1:I1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;    // จัดตำแหน่งอักษรแนวนอน 
 
-                ws.Cells["A2:I2"].Value = "ศูนย์กลางมหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน";
+                ws.Cells["A2:I2"].Value = "                ศูนย์กลางมหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน";
                 ws.Cells["A2:I2"].Merge = true;
                 ws.Cells["A2:I2"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 
@@ -2113,7 +2214,7 @@ namespace Students_Attendance_Project.Controllers
                     {
                         ws.Cells[rowIndex, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                         ws.Cells[rowIndex, col].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                        ws.Cells[rowIndex, col].Style.Font.Bold = true;
+                        //ws.Cells[rowIndex, col].Style.Font.Bold = false;
                         //ws.Cells[rowIndex, col].AutoFitColumns();
                         switch (col)
                         {
@@ -2174,10 +2275,10 @@ namespace Students_Attendance_Project.Controllers
                         int cols = 3;
                         ws.Cells[rows, 1].Value = x.StdCode;
                         ws.Cells[rows, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-                        ws.Cells[rows, 1].AutoFitColumns(17);
+                        ws.Cells[rows, 1].AutoFitColumns(16);
                         ws.Cells[rows, 2].Value = x.NameTH;
                         ws.Cells[rows, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-                        ws.Cells[rows, 2].AutoFitColumns(30);
+                        ws.Cells[rows, 2].AutoFitColumns(28);
                         foreach (var r in dataStatus)
                         {
                             var status = (from t in db.Tb_StudentCheck
@@ -2278,20 +2379,25 @@ namespace Students_Attendance_Project.Controllers
                 package.Workbook.Worksheets.Add("Sheet1");
                 ExcelWorksheet ws = package.Workbook.Worksheets[1];
                 // ws.Name = "Test"; //Setting Sheet's name
-                ws.Cells.Style.Font.Size = 16; //Default font size for whole sheet
+                ws.Cells.Style.Font.Size = 14; //Default font size for whole sheet
                 ws.Cells.Style.Font.Name = "TH SarabunPSK"; //Default Font name for whole sheet
 
                 //ws.Cells[1, 1].Value = "Sample DataTable Export"; // Heading Name
                 //ws.Cells[1, 1, 1, 10].Merge = true; //Merge columns start and end range
                 //ws.Cells[1, 1, 1, 10].Style.Font.Bold = true; //Font should be bold
                 //ws.Cells[1, 1, 1, 10].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center; // Aligmnet is center
+                var imgPath = Server.MapPath("~/icon/Logo_RMUTI_128X235.png");
+                Bitmap image = new Bitmap(imgPath);
+                ExcelPicture pic = ws.Drawings.AddPicture("Logo_RMUTI", image);
+                pic.SetPosition(5, 5);
+                pic.SetSize(48, (int)(235 * 0.347));
 
                 //Header Page 
-                ws.Cells["A1:E1"].Value = "มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน";
+                ws.Cells["A1:E1"].Value = "                มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน";
                 ws.Cells["A1:E1"].Merge = true;                                                 // Merge = ผสานเซลล์และจัดกึ่งกลาง
                 ws.Cells["A1:E1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;    // จัดตำแหน่งอักษรแนวนอน 
 
-                ws.Cells["A2:E2"].Value = "ศูนย์กลางมหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน";
+                ws.Cells["A2:E2"].Value = "                ศูนย์กลางมหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน";
                 ws.Cells["A2:E2"].Merge = true;
                 ws.Cells["A2:E2"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 
@@ -2336,7 +2442,7 @@ namespace Students_Attendance_Project.Controllers
                     {
                         ws.Cells[rowIndex, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                         ws.Cells[rowIndex, col].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                        ws.Cells[rowIndex, col].Style.Font.Bold = true;
+                        //ws.Cells[rowIndex, col].Style.Font.Bold = true;
                         //ws.Cells[rowIndex, col].AutoFitColumns();
                         switch (col)
                         {
@@ -2398,11 +2504,11 @@ namespace Students_Attendance_Project.Controllers
                             {
                                 case 1:
                                     ws.Cells[row, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-                                    ws.Cells[row, col].AutoFitColumns(17);
+                                    ws.Cells[row, col].AutoFitColumns(16);
                                     break;
                                 case 2:
                                     ws.Cells[row, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-                                    ws.Cells[row, col].AutoFitColumns(30);
+                                    ws.Cells[row, col].AutoFitColumns(28);
                                     break;
                                 case 3:
                                     ws.Cells[row, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
@@ -2438,111 +2544,9 @@ namespace Students_Attendance_Project.Controllers
             return View();
         } // ปฏิทินวันหยุดประจำปี จาก Google API
 
-        public ActionResult test()
+        public ActionResult Exceptions(string message)
         {
-            // Add Student file 
-            //DataSet ds = new DataSet();
-            //var list = new List<StudentModel>();
-            //bool isID = true;
-            //if (Request.Files["file"].ContentLength > 0)
-            //{
-            //    string fileExtension = Path.GetExtension(Request.Files["file"].FileName);
-
-            //    if (fileExtension == ".xls" || fileExtension == ".xlsx")
-            //    {
-            //        string fileLocation = Server.MapPath("~/FileUpload/") + Request.Files["file"].FileName;
-            //        if (System.IO.File.Exists(fileLocation))
-            //        {
-            //            System.IO.File.Delete(fileLocation);
-            //        }
-            //        Request.Files["file"].SaveAs(fileLocation);
-            //        string excelConnectionString = string.Empty;
-            //        excelConnectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" +
-            //        fileLocation + ";Extended Properties=\"Excel 12.0;HDR=Yes;IMEX=2\"";
-            //        //connection String for xls file format.
-            //        if (fileExtension == ".xls")
-            //        {
-            //            excelConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" +
-            //            fileLocation + ";Extended Properties=\"Excel 8.0;HDR=Yes;IMEX=2\"";
-            //        }
-            //        //connection String for xlsx file format.
-            //        else if (fileExtension == ".xlsx")
-            //        {
-            //            excelConnectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" +
-            //            fileLocation + ";Extended Properties=\"Excel 12.0;HDR=Yes;IMEX=2\"";
-            //        }
-            //        //Create Connection to Excel work book and add oledb namespace
-            //        OleDbConnection excelConnection = new OleDbConnection(excelConnectionString);
-            //        excelConnection.Open();
-            //        DataTable dt = new DataTable();
-
-            //        dt = excelConnection.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
-            //        if (dt == null)
-            //        {
-            //            return null;
-            //        }
-
-            //        String[] excelSheets = new String[dt.Rows.Count];
-            //        int t = 0;
-            //        //excel data saves in temp file here.
-            //        foreach (DataRow row in dt.Rows)
-            //        {
-            //            excelSheets[t] = row["TABLE_NAME"].ToString();
-            //            t++;
-            //        }
-            //        OleDbConnection excelConnection1 = new OleDbConnection(excelConnectionString);
-
-
-            //        string query = string.Format("Select * from [{0}]", excelSheets[0]);
-            //        using (OleDbDataAdapter dataAdapter = new OleDbDataAdapter(query, excelConnection1))
-            //        {
-            //            dataAdapter.Fill(ds);
-            //        }
-
-            //        for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
-            //        {
-            //            string id = ds.Tables[0].Rows[i][0].ToString();
-            //            string nameTH = ds.Tables[0].Rows[i][1].ToString();
-            //            string nameEN = ds.Tables[0].Rows[i][2].ToString();
-            //            if (id.Length < 13 || id.Length > 14) 
-            //            {
-            //                isID = false;
-            //                break;
-            //            }
-            //            else
-            //            {
-            //                isID = true;
-            //                db.Tb_Student.Add(new Tb_Student
-            //                {
-            //                    StdCode = id,
-            //                    NameTH = nameTH,
-            //                    NameEN = nameEN,
-            //                    StudyGroupID = data.StudyGroupID
-            //                });
-            //            }
-            //        }
-            //        excelConnection.Close();
-            //        if (isID == true)
-            //        {
-            //            //db.SaveChanges();
-            //            tran.Commit();
-            //            jsonReturn = new JsonResponse { status = true, messege = "บันทึกข้อมูลเรียบร้อยเล้ว" };
-            //        }
-            //        else
-            //        {
-            //            tran.Rollback();
-            //            jsonReturn = new JsonResponse { status = false, messege = "fail", data = "File Incorrect" };
-            //        }
-            //    }
-            //    else
-            //    {
-            //        jsonReturn = new JsonResponse { status = false, messege = "fail" };
-            //    }
-            //}
-            //else
-            //{
-            //    jsonReturn = new JsonResponse { status = false, messege = "fail" };
-            //}
+            ViewBag.message = message;
             return View();
         }
 
@@ -2558,7 +2562,7 @@ namespace Students_Attendance_Project.Controllers
             ViewBag.Message = "Your contact page.";
             return View();
         }
-        
+
         // CRUD LINQ EXAMPLE
         public JsonResult RegisterSave(RegisterModel model) // บันทึกข้อมูลการสมัครใช้งานระบบ Register
         {

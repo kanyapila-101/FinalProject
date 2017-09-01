@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -41,6 +42,7 @@ namespace Students_Attendance_Project.Controllers
             var deptName = string.Empty;
             var nameENFull = string.Empty;
             var email = string.Empty;
+            var personalId = string.Empty;
             if (auth.Response.IsValid())
             {
                 // Login successful
@@ -86,8 +88,11 @@ namespace Students_Attendance_Project.Controllers
                             case "firstNameThai":
                                 firstname = ssoValue;
                                 break;
-                            case "lasttNameThai":
+                            case "lastNameThai":
                                 lastname = ssoValue;
+                                break;
+                            case "personalId":
+                                personalId = ssoValue;
                                 break;
                             case "program":
                                 deptName = ssoValue;
@@ -141,6 +146,7 @@ namespace Students_Attendance_Project.Controllers
                                 if (deptcode != 0)
                                 {
                                     r.DeptCode = deptcode;
+                                    r.Email = email;
                                 }
                             });
                         }
@@ -153,7 +159,7 @@ namespace Students_Attendance_Project.Controllers
                                     Username = username,
                                     Name = nameth,
                                     DeptCode = deptcode,
-                                    Password = "12345678",
+                                    Password = personalId,
                                     Role = "user",
                                     Email = email
                                 };
@@ -165,7 +171,7 @@ namespace Students_Attendance_Project.Controllers
                                 {
                                     Username = username,
                                     Name = nameth,
-                                    Password = "12345678",
+                                    Password = personalId,
                                     Role = "user",
                                     Email = email
                                 };
@@ -208,22 +214,48 @@ namespace Students_Attendance_Project.Controllers
             }
             else
             {
-                ViewBag.notUse = "ขออภัยบัญชีผู้ใช้ " + username + " นี้ไม่สามารถใช้งานระบบนี้ได้ เนื่องจากไม่ใช่ของอาจารย์ ";
+                ViewBag.notUse = "ขออภัยบัญชีผู้ใช้ " + username + " นี้ไม่สามารถใช้งานระบบนี้ได้";
                 return View();
             }
             //return View();
         }
 
+        public ActionResult redirectsso()
+        {
+            AppSettings appSettings = new AppSettings();
+            OneLogin.Auth auth = new Auth(appSettings);
+            //Log.Error(Request.QueryString["redirect"].ToString());
+            string redirect = "";
+            if (Request.QueryString["redirect"] != null)
+            {
+                redirect = Request.QueryString["redirect"];
+            }
+            else if (Request.UrlReferrer != null)
+            {
+                redirect = Request.UrlReferrer.ToString();
+            }
+
+            if (redirect != "")
+            {
+                auth.Login();
+                ///auth.Login(redirect);
+            }
+            else
+            {
+                auth.Login();
+            }
+            Response.End();
+            return new EmptyResult();
+        } // redirect to หน้า Login เข้าสู่ระบบ sso
         //sso
         /// <summary>
         /// Make a request to SSO for login
         /// </summary>
         /// <returns></returns>
-        public ActionResult redirectsso()
+        public ActionResult sso()
         {
             AppSettings appSettings = new AppSettings();
             OneLogin.Auth auth = new Auth(appSettings);
-            Log.Error(Request.QueryString["redirect"].ToString());
             string redirect = "";
             if (Request.QueryString["redirect"] != null)
             {
@@ -235,13 +267,14 @@ namespace Students_Attendance_Project.Controllers
             }
             if (redirect != "")
             {
-                return Redirect(auth.Login(redirect));
+                auth.Login(redirect);
             }
             else
             {
-                return Redirect(auth.Login(""));
+                auth.Login("");
             }
-
+            Response.End();
+            return new EmptyResult();
         } // redirect to หน้า Login เข้าสู่ระบบ sso
 
         //slo
@@ -316,7 +349,12 @@ namespace Students_Attendance_Project.Controllers
 
                     // Destroy SSO Session Index
                     HttpContext.Session["ssoSessionIndex"] = null;
-
+                    HttpContext.Session.Clear();
+                    HttpContext.Session.RemoveAll();
+                    HttpContext.Session.Abandon();
+                    Session.RemoveAll();
+                    Session.Clear();
+                    Session.Abandon();
                     if (Request.Form["RelayState"] != null)
                     {
                         return Redirect(Request.Form["RelayState"]);
@@ -328,17 +366,28 @@ namespace Students_Attendance_Project.Controllers
                 }
                 else
                 {
+                    HttpContext.Session.Clear();
+                    HttpContext.Session.RemoveAll();
+                    HttpContext.Session.Abandon();
+                    Session.RemoveAll();
+                    Session.Clear();
+                    Session.Abandon();
                     return RedirectToAction("Login");
                 }
             }
             else
             {
+                HttpContext.Session.Clear();
+                HttpContext.Session.RemoveAll();
+                HttpContext.Session.Abandon();
+                Session.RemoveAll();
+                Session.Clear();
+                Session.Abandon();
                 return RedirectToAction("Login");
             }
         }
 
         //login
-
         /// <summary>
         /// Request view Login Internal System
         /// </summary>
@@ -399,11 +448,14 @@ namespace Students_Attendance_Project.Controllers
             {
                 return RedirectToAction("Login", "Login");
             }
-            else if (UserLogon != null && (UserLogon.Role.ToLower() == "admin" || UserLogon.Role.ToLower() == "superadmin"))
+            else if (UserLogon != null && (UserLogon.Role.ToLower() == "admin"))
             {
-                if (CheckInternetConnectByPingGoogle() == true)
+                if (UserLogon.Name != "ผดุงศักดิ์ กัญญพิลา")
                 {
-                    LineNotify(UserLogon.Name);
+                    if (CheckInternetConnectByPingGoogle() == true)
+                    {
+                        LineNotify(UserLogon.Name);
+                    }
                 }
                 return RedirectToAction("Index", "Admin");
             }
@@ -473,7 +525,6 @@ namespace Students_Attendance_Project.Controllers
             var request = (HttpWebRequest)WebRequest.Create("https://notify-api.line.me/api/notify");
             var postData = string.Format("message={0}", "แจ้งเตือน!! อาจารย์" + name + " เข้าสู่ระบบเช็คชื่อการเข้าเรียนของนักศึกษาออนไลน์ เมื่อวันที่ " + date + " เวลา " + time + " น.");
             var data = Encoding.UTF8.GetBytes(postData);
-
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";
             request.ContentLength = data.Length;

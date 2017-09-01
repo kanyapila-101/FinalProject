@@ -23,7 +23,7 @@
                 <div class="box-header">
                     <div class="box-header">
                         <div class="caption">
-                            <i class="fa fa-cogs"></i> &nbsp;<strong style="font-size: 16px; ">รายชื่อนักศึกษา</strong>  
+                            <i class="fa fa-cogs"></i> &nbsp;<strong style="font-size: 16px; ">รายชื่อนักศึกษา</strong>
                             <button type="button" class="btn btn-primary btn-sm pull-right btn-addstudent"><i class="fa fa-plus"></i>&nbsp;เพิ่มนักศึกษา</button>
                         </div>
                         <p>
@@ -67,19 +67,19 @@
                                             int line = 0;
                                             foreach (var r in entity)
                                             {
-                                                <tr class="@(line % 2 != 0 ? "info" : "")">
-                                                    <td>@r.StdCode</td>
-                                                    <td style="text-align:left;">@r.NameTH</td>
-                                                    <td style="text-align:left;">@r.NameEN</td>
-                                                    <td style="color:@(r.StatusID == 6 ? "red":"none" )">@r.StatusName</td>
+                                    <tr class="@(line % 2 != 0 ? "info" : "")">
+                                        <td>@r.StdCode</td>
+                                        <td style="text-align:left;">@r.NameTH</td>
+                                        <td style="text-align:left;">@r.NameEN</td>
+                                        <td style="color:@(r.StatusID == 6 ? "red":"none" )">@r.StatusName</td>
 
-                                                    <td>
-                                                        <button type="button" class="btn btn-warning btn-xs btn-edit" data-studentid="@r.StdID,@r.StudyGroupID" role="button"
-                                                                data-toggle="tooltip" data-placement="top" title="แก้ไขข้อมูล">
-                                                            <i class="fa fa-pencil"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
+                                        <td>
+                                            <button type="button" class="btn btn-warning btn-xs btn-edit" data-studentid="@r.StdID,@r.StudyGroupID" role="button"
+                                                    data-toggle="tooltip" data-placement="top" title="แก้ไขข้อมูล">
+                                                <i class="fa fa-pencil"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
                                                                 line++;
                                                             }
                                                         }
@@ -108,7 +108,7 @@
                                                 <label class="col-sm-4 control-label">เพิ่มไฟล์ (.xlsx) :</label>
                                                 <div class="col-sm-6" data-provides="fileinput">
                                                     <div class="btn-file">
-                                                        <input type="file" id="file" name="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required onchange="HiddenInput()"/>
+                                                        <input type="file" id="file" name="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required onchange="HiddenInput()" />
                                                     </div>
                                                     <br />
                                                     <button type="button" class="btn btn-info btn-xs pull-left btn-fileExam">ตัวอย่างไฟล์</button>
@@ -155,7 +155,7 @@
                                             <div class="form-group inputhide">
                                                 <label class="col-sm-4 control-label">ชื่อ-นามสกุล (EN) :<span class="isRed"> *</span></label>
                                                 <div class="col-sm-7">
-                                                    <input type="text" class="form-control" id="NameEN" name="NameEN" tabindex="5" 
+                                                    <input type="text" class="form-control" id="NameEN" name="NameEN" tabindex="5"
                                                            required onkeyup="isText(this.value, this)" onchange="CheckInput()">
                                                 </div>
                                             </div>
@@ -208,6 +208,52 @@
                         <img src="~/icon/fileExample.png" class="center-block img-responsive" style="border: solid 1px" />
                         <br />
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section>
+    <div class="modal fade" id="addStdModal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header success">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">การเพิ่มรายชื่อนักศึกษา</h4>
+                </div>
+                <div class="modal-body info" style="max-height: calc(100% - 120px); overflow-y: auto;">
+                    <div class="row">
+                        <div class="col-sm-8 col-sm-offset-2">
+                            <div class="form-group">
+                                <strong>มีรายชื่อนักศึกษาที่เพิ่มใหม่ลดลง หรือไม่ตรงกับรายชื่อนักศึกษาเดิมในกลุ่มเรียน : <span id="present">...</span>   รายชื่อ</strong>
+                            </div>
+                            <span>ถ้าต้องการเปลี่ยนสถานะ ลงทะเบียนเรียน เป็น <span class="isRed">ถอนรายวิชา</span> กรุณาเลือกสถานะ </span><br /><br />
+                            <div class="form-group">
+                                <label class="radio-inline pull-left"><input type="radio" name="StatusID[]" id="StatusID" value="6">เปลี่ยนตอนนี้</label>
+                                <label class="radio-inline pull-left"><input type="radio" name="StatusID[]" id="StatusID" value="1">ภายหลัง</label>
+                            </div><br />
+                            <div class="table-scrolllabel">
+                                <table id="NotStd-table" class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr class="info" style="text-align:center;">
+                                            <td width="20%">รหัสนักศึกษา</td>
+                                            <td width="35%">ชื่อ-สกุล</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    @*<button type="button" class="btn btn-default pull-left" data-dismiss="modal"></button>*@
+                    <button type="button" class="btn btn-success pull-right btn-save2" data-dismiss="modal">ตกลง</button>
                 </div>
             </div>
         </div>
@@ -381,7 +427,7 @@
                 $('#file').prop('disabled', false);
             }
         }
-        
+
 
         $(document).ready(function () {
             $('.sidebar-menu > li').removeClass('active');
@@ -400,7 +446,7 @@
                 $('.fileHidden').show();
                 $('#StudentModal').modal("show");
             });
-
+            var stdcodeNomat = new Array();
             $('.btn-save').click(function () {
                 //var id = $('#StudyGroupID').val();
                 //alert(id);
@@ -437,14 +483,24 @@
                             }
                             else if (status == true && res.data != null) {
                                 if (res.data.stdDuplicate < res.data.stdTotal) {
+                                    stdcodeNomat = [];
                                     var stdDif = res.data.stdTotal - res.data.stdDuplicate;
-                                    swal({
-                                        title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
-                                        text: "รายชื่อนักศึกษาในกลุ่มเรียนนี้ลดลง " + stdDif + " คน \n " + "กรุณาตรวจสอบรายชื่อนักศึกษาที่ถอนรายวิชา",
-                                        type: "success"
-                                    }, function () {
-                                        location.reload(true);
-                                    });
+                                    $('#present').html(stdDif);
+                                    $('#NotStd-table').find('tbody').find('tr').remove();
+                                    if (res.data.dataS != null) {
+                                        $.each(res.data.dataS, function (i, e) {
+                                            stdcodeNomat.push({
+                                                StdID: e.StdID,
+                                                StatusID: 6
+                                            });
+                                            $('#NotStd-table').find('tbody').append(
+                                                '<tr>' +
+                                                '<td style="text-align:left">' + e.StdCode + '</td>' +
+                                                '<td style="text-align:left">' + e.NameTH + '</td>' +
+                                                '</tr>');
+                                        });
+                                    }
+                                    $('#addStdModal').modal("show");
                                 }
                                 else {
                                     swal({
@@ -461,8 +517,6 @@
                                     title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
                                     type: "success",
                                     showConfirmButton: false,
-                                    //confirmButtonColor: "#AEDEF4",
-                                    //confirmButtonText: "Ok",
                                     timer: 1000,
                                     closeOnConfirm: false
                                 },
@@ -482,6 +536,88 @@
                 }
 
                 return false;
+            });
+            
+            $('#addStdModal').on('hidden.bs.modal', function () {
+                if (hide != 1) {
+                    $('#addStdModal').find("input[type=radio]").attr('checked', false);
+                    swal({
+                        title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                        type: "success",
+                        showConfirmButton: false,
+                        timer: 1000,
+                        closeOnConfirm: false
+                    },
+                   function () {
+                       location.reload(true);
+                   });
+                    //location.reload(true);
+                }
+            })
+            //$('#addStdModal').modal("show");
+            var hide = 0;
+            $('.btn-save2').click(function () {
+                hide = 1;
+                var StatusR = $('#addStdModal').find("input[type=radio]:checked").val();
+                if (StatusR != '6') {
+                    swal({
+                        title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                        type: "success",
+                        showConfirmButton: false,
+                        timer: 1000,
+                        closeOnConfirm: false
+                    },
+                    function () {
+                        location.reload(true);
+                    });
+                }
+                else if (StatusR == '6') {
+                    $.ajax({
+                        type: "POST", // method ที่จะส่ง
+                        cache: false,
+                        url: '@Url.Action("SaveStdChangeStatus", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                        dataType: "json", // ชนิดข้อมูลที่ส่ง
+                        data: '&' + $.param({ model: stdcodeNomat }), // ข้อมูลที่ส่ง
+                        traditional: true, 
+                        beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                            loadSpin();
+                        },
+                        success: function (res) {
+
+                            var status = false;
+                            var message = 'ดำเนินการไม่สำเร็จ';
+                            if (res != null && res != undefined) {
+                                status = res.status;
+                                message = res.message != '' ? res.message : message;
+                            }
+                            if (status == false) {
+                                alert(1111);
+                                swal("เกิดข้อผิดพลาด", message, "error");
+
+                            } else {
+                                swal({
+                                    title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                    type: "success",
+                                    showConfirmButton: false,
+                                    timer: 1000,
+                                   
+                                    closeOnConfirm: false
+                                },
+                                    function () {
+                                        location.reload(true), loadSpin();
+                                    });
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            alert(1);
+                            swal("เกิดข้อผิดพลาด", message, "error");
+                            unLoadSpin();
+                        },
+                        complete: function () {
+                            unLoadSpin();
+                        },
+                    });
+                }
             });
 
             $('.btn-edit').click(function () {
