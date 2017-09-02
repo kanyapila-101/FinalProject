@@ -1285,7 +1285,7 @@ namespace Students_Attendance_Project.Controllers
                            select t).ToList();
                 ViewBag.Day = Day;
 
-                ViewBag.Haveschedule = db.Tb_Schedule.Count();
+                ViewBag.Haveschedule = db.Tb_Schedule.Where(r => r.UserID == UserLogon.UserID).Count();
             }
             return View(model);
         }  // แสดงตารางการเช็คชื่อ ตามภาคการศึกษาปัจจุบันเท่านั้น
@@ -1439,7 +1439,7 @@ namespace Students_Attendance_Project.Controllers
                 }
                 catch (Exception ex)
                 {
-                    RedirectToAction("Exceptions", "Home", new { message = "holiday" });
+                    RedirectToAction("Exceptions", "Home", new { message = ex.Message });
                 }
             }
 
@@ -1460,7 +1460,8 @@ namespace Students_Attendance_Project.Controllers
                                            NameTH = st.NameTH,
                                        }).ToList();
                     //var today = "06/29/2017";
-                    var today = DateTime.Now.ToString("MM/dd/yyyy");
+                    //var today = DateTime.Now.ToString("MM/dd/yyyy");
+                    var today = DateTime.Now.ToShortDateString();
                     DateTime date = DateTime.Parse(today);
                     // Query เอาข้อมูลการเช็คชื่อนักศึกษาทุกคนที่ได้เช็คชื่อวันนี้ เพิ่อเอาไปแก้การเช็คชื่อ ถ้ามีคนลงทะเบียนเพิ่มในวันนี้หลังจากเช็คชื่อไปแล้ว ไม่สามารถเช็คชื่อได้ ต้องรอให้พ้นวันนี้ไปก่อน
                     var dataIscheck = (from t1 in db.Tb_Student
@@ -1486,30 +1487,52 @@ namespace Students_Attendance_Project.Controllers
                     {
                         ViewBag.StdCheck = dataIscheck;             // ส่งข้อมูล Query dataIscheck ไปแก้ไขการเช็คชื่อ
                     }
-                    //else
-                    //{
-                    //    ViewBag.StdCheck = dataNoCheck;             // มิฉะนั้นแล้ว ส่งข้อมูล Query dataNoCheck ไปการเช็คชื่อครั้งใหม่
-                    //}
+                    else
+                    {
+                        ViewBag.StdCheck = dataNoCheck;             // มิฉะนั้นแล้ว ส่งข้อมูล Query dataNoCheck ไปการเช็คชื่อครั้งใหม่
+                    }
+                    //var dataHeader = (from sg in db.Tb_StudyGroup        // Query เอาข้อมูลกลุ่มเรียน ไปแสดง ใน Header
+                    //                  join sj in db.Tb_Subject on new { sg.SubjectCode, sg.Course} equals new { sj.SubjectCode, sj.Course }
+                    //                  join sy in db.Tb_SchoolYear on sg.SchYearID equals sy.SchYearID
+                    //                  where sg.StudyGroupID == id
+                    //                  select new StudyGroupModel()
+                    //                  {
+                    //                      StudyGroupID = sg.StudyGroupID,
+                    //                      StudyGroupCode = sg.StudyGroupCode,
+                    //                      SchYearID = sy.SchYearID,
+                    //                      Term = sy.Term,
+                    //                      Year = sy.Year,
+                    //                      SubjectCode = sj.SubjectCode,
+                    //                      SubjectName = sj.SubjectName,
+                    //                      Course = sj.Course
+                    //                  }).ToList();
                     var dataHeader = (from sg in db.Tb_StudyGroup        // Query เอาข้อมูลกลุ่มเรียน ไปแสดง ใน Header
-                                      join sj in db.Tb_Subject on new { sg.SubjectCode, sg.Course} equals new { sj.SubjectCode, sj.Course }
-                                      join sy in db.Tb_SchoolYear on sg.SchYearID equals sy.SchYearID
-                                      where sg.StudyGroupID == id
-                                      select new StudyGroupModel
-                                      {
-                                          StudyGroupID = sg.StudyGroupID,
-                                          StudyGroupCode = sg.StudyGroupCode,
-                                          SchYearID = sy.SchYearID,
-                                          Term = sy.Term,
-                                          Year = sy.Year,
-                                          SubjectCode = sj.SubjectCode,
-                                          SubjectName = sj.SubjectName,
-                                          Course = sj.Course
-                                      }).ToList();
+                                       join sj in db.Tb_Subject on new { sg.SubjectCode, sg.Course } equals new { sj.SubjectCode, sj.Course }
+                                       join sy in db.Tb_SchoolYear on sg.SchYearID equals sy.SchYearID
+                                       where sg.StudyGroupID == id
+                                       select new
+                                       {
+                                           StudyGroupID = sg.StudyGroupID,
+                                           StudyGroupCode = sg.StudyGroupCode,
+                                           SchYearID = sy.SchYearID,
+                                           Term = sy.Term,
+                                           Year = sy.Year,
+                                           SubjectCode = sj.SubjectCode,
+                                           SubjectName = sj.SubjectName,
+                                           Course = sj.Course
+                                       }).ToList();
+                    ViewBag.StudyGroupID = dataHeader.Select(r => r.StudyGroupID).SingleOrDefault();
+                    ViewBag.StudyGroupCode = dataHeader.Select(r => r.StudyGroupCode).SingleOrDefault();
+                    ViewBag.Term = dataHeader.Select(r => r.Term).SingleOrDefault();
+                    ViewBag.Year = dataHeader.Select(r => r.Year).SingleOrDefault();
+                    ViewBag.SubjectCode = dataHeader.Select(r => r.SubjectCode).SingleOrDefault();
+                    ViewBag.SubjectName = dataHeader.Select(r => r.SubjectName).SingleOrDefault();
+                    ViewBag.Course = dataHeader.Select(r => r.Course).SingleOrDefault();
                     ViewBag.StudyGroup = dataHeader;
                 }
                 catch (Exception ex)
                 {
-                    RedirectToAction("Exceptions", "Home", new { message = "query" });
+                    RedirectToAction("Exceptions", "Home", new { message = ex.Message });
                 }
             }
             return View(model);
@@ -2051,7 +2074,7 @@ namespace Students_Attendance_Project.Controllers
             {
                 var dataHeader = (from t1 in db.Tb_SchoolYear
                                   join t2 in db.Tb_StudyGroup on t1.SchYearID equals t2.SchYearID
-                                  join t3 in db.Tb_Subject on t2.SubjectCode equals t3.SubjectCode
+                                  join t3 in db.Tb_Subject on new { t2.SubjectCode, t2.Course } equals new { t3.SubjectCode, t3.Course }
                                   join t4 in db.Tb_Student on t2.StudyGroupID equals t4.StudyGroupID
                                   join t5 in db.Tb_Department on t2.DeptCode equals t5.DeptCode
                                   where t1.SchYearID == model.SchYearID && t2.StudyGroupID == model.StudyGroupID && t3.SubjectCode == model.SubjectCode && t3.Course == model.Course
@@ -2126,7 +2149,7 @@ namespace Students_Attendance_Project.Controllers
             {
                 dataHeader = (from t1 in db.Tb_SchoolYear
                               join t2 in db.Tb_StudyGroup on t1.SchYearID equals t2.SchYearID
-                              join t3 in db.Tb_Subject on t2.SubjectCode equals t3.SubjectCode
+                              join t3 in db.Tb_Subject on new { t2.SubjectCode, t2.Course } equals new { t3.SubjectCode, t3.Course }
                               join t4 in db.Tb_Student on t2.StudyGroupID equals t4.StudyGroupID
                               join t5 in db.Tb_Department on t2.DeptCode equals t5.DeptCode
                               where t1.SchYearID == model.SchYearID && t2.StudyGroupID == model.StudyGroupID && t3.SubjectCode == model.SubjectCode && t3.Course == model.Course && t2.UserID == UserLogon.UserID
@@ -2357,7 +2380,7 @@ namespace Students_Attendance_Project.Controllers
             {
                 dataHeader = (from t1 in db.Tb_SchoolYear
                               join t2 in db.Tb_StudyGroup on t1.SchYearID equals t2.SchYearID
-                              join t3 in db.Tb_Subject on t2.SubjectCode equals t3.SubjectCode
+                              join t3 in db.Tb_Subject on new { t2.SubjectCode, t2.Course } equals new { t3.SubjectCode, t3.Course }
                               join t4 in db.Tb_Student on t2.StudyGroupID equals t4.StudyGroupID
                               join t5 in db.Tb_Department on t2.DeptCode equals t5.DeptCode
                               where t1.SchYearID == model.SchYearID && t2.StudyGroupID == model.StudyGroupID && t3.SubjectCode == model.SubjectCode && t3.Course == model.Course

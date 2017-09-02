@@ -45,7 +45,7 @@
                             <hr />
                         </p>
                         <div class="row col-sm-5 pull-right">
-                            <form id="form-search" action="#" class="form-horizontal" method="post" enctype="multipart/form-data">
+                            <form id="form-search" action="" class="form-horizontal" method="post" enctype="multipart/form-data">
                                 <div class="input-group">
                                     <input type="text" name="Query" class="form-control" placeholder="ค้นหา..">
                                     <span class="input-group-btn">
@@ -89,7 +89,7 @@
                                                     <td>@r.SubjectPractice</td>
                                                     @*<td>@r.TimePractice</td>*@
                                                     <td>
-                                                        <button type="button" class="btn btn-warning btn-xs btn-edit" data-subjectid="@r.SubjectCode" role="button" data-toggle="tooltip" data-placement="top" title="แก้ไขข้อมูล"><i class="fa fa-pencil"></i></button>
+                                                        <button type="button" class="btn btn-warning btn-xs btn-edit" data-subjectid="@r.SubjectCode,@r.Course" role="button" data-toggle="tooltip" data-placement="top" title="แก้ไขข้อมูล"><i class="fa fa-pencil"></i></button>
                                                         @*<button type="button" class="btn btn-danger btn-xs btn-del" data-subjectid="@r.SubjectCode" role="button"><i class="fa fa-remove"></i></button>*@
                                                     </td>
                                                 </tr>
@@ -429,15 +429,15 @@
             //alert(id);
             //$('#SubjectModal').modal('show');
             isSucjCode = true;
-            $("#SubjectCode").val($(this).data("subjectid"));
-            var tempid = $("#SubjectCode").val();
+            var dataKey = $(this).data("subjectid");
+            alert(dataKey);
             $.ajax({
 
                 type: "POST", // method ที่จะส่ง
                 cache: false,
                 url: '@Url.Action("UpdateSubject", "Admin")',  // ส่งไปให้ที่ได้ ระบุ
                 dataType: "json", // ชนิดข้อมูลที่ส่ง
-                data: { id: $('#SubjectCode').val() }, // ข้อมูลที่ส่ง
+                data: { id: dataKey }, // ข้อมูลที่ส่ง
                 traditional: false, // การจดจำข้อมูล
                 beforeSend: function () { // ก่องส่ง data จะให้ทำไร
                     loadSpin();

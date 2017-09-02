@@ -656,11 +656,14 @@ namespace Students_Attendance_Project.Controllers
         public JsonResult UpdateSubject(string id)
         {
             var jsonReturn = new JsonResponse();
+            string[] key = id.Split(',');
+            string key1 = key[0];
+            string key2 = key[1];
             try
             {
                 using (var db = new Student_AttendanceEntities())
                 {
-                    var data = db.Tb_Subject.Where(r => r.SubjectCode == id).Select(r => new
+                    var data = db.Tb_Subject.Where(r => r.SubjectCode == key1 && r.Course == key2).Select(r => new
                     {
                         r.SubjectCode,
                         r.Course,
@@ -717,10 +720,8 @@ namespace Students_Attendance_Project.Controllers
                         var data = db.Tb_Subject.Where(r => r.SubjectCode == model.SubjectCode).FirstOrDefault();
                         if (data != null)
                         {
-                            db.Tb_Subject.Where(r => r.SubjectCode == model.SubjectCode).ForEach(r =>
+                            db.Tb_Subject.Where(r => r.SubjectCode == model.SubjectCode && r.Course == model.Course).ForEach(r =>
                             {
-                                r.SubjectCode = model.SubjectCode;
-                                r.Course = model.Course;
                                 r.SubjectName = model.SubjectName;
                                 r.SubjectNameEN = model.SubjectNameEN;
                                 r.Condition = model.Condition;

@@ -5,7 +5,7 @@
 @using Students_Attendance_Project.Common;
 @{
     ViewBag.Title = "เช็คชื่อ";
-    var dataStudyGroup = (List<StudyGroupModel>)ViewBag.StudyGroup;
+    //var dataStudyGroup = (List<StudyGroupModel>)ViewBag.StudyGroup;
     var dateToday = DateTime.Now.ToString("d/MM/yyyy", Shared.CultureInfoTh);
     var entity = (List<StudentCheckModel>)ViewBag.StdCheck;
 }
@@ -79,10 +79,10 @@
                     <p>
                         <hr />
                         <div class="row col-sm-12">
-                            ปีการศึกษา : @dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.Term).FirstOrDefault()/@dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.Year).FirstOrDefault()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            กลุ่มเรียน : @dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.StudyGroupCode).FirstOrDefault()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            วิชา-หลักสูตร : [@dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.SubjectCode).FirstOrDefault()] @dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.SubjectName).FirstOrDefault()
-                            (@dataStudyGroup.Where(r => r.StudyGroupID == r.StudyGroupID).Select(r => r.Course).FirstOrDefault())&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;วันที่   @dateToday
+                            <span>ปีการศึกษา : @ViewBag.Term/@ViewBag.Year&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span>
+                            <span>กลุ่มเรียน : @ViewBag.StudyGroupCode&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span>
+                            <span>วิชา-หลักสูตร : [@ViewBag.SubjectCode] @ViewBag.SubjectName (@ViewBag.Course)&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span>
+                            <span>วันที่ @dateToday</span>
                         </div>
                     </p>
                 </div>
@@ -201,7 +201,7 @@
                 <div class="modal-body">
 
                     <input type="hidden" name="NoteID" id="NoteID" value="0">
-                    <input type="hidden" name="StudyGroupID" id="StudyGroupID" value="@dataStudyGroup.Select(r => r.StudyGroupID).SingleOrDefault()">
+                    <input type="hidden" name="StudyGroupID" id="StudyGroupID" value="@ViewBag.StudyGroupID">
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label">หัวข้อ :<span class="isRed"> *</span></label>
@@ -229,7 +229,7 @@
 @section scripts{
 
     <script>
-        var groupID = @dataStudyGroup.Select(r => r.StudyGroupID).SingleOrDefault();
+        var groupID = @ViewBag.StudyGroupID;
         var count = $('#StdCount').val();
         var checked = 0;
         var StatusReCheck = 0;
@@ -355,6 +355,7 @@
                         unLoadSpin();
                     },
                     complete: function () {
+                        unLoadSpin();
                         NoteTeach();
                     },
                 });
@@ -529,7 +530,7 @@
                     url: '@Url.Action("SaveStdCheck", "Home")',  // ส่งไปให้ที่ได้ ระบุ
                     dataType: "json", // ชนิดข้อมูลที่ส่ง
                     data: '&' + $.param({ model: result }), // ข้อมูลที่ส่ง
-                    traditional: true, // การจดจำข้อมูล
+                    traditional: true, 
                     beforeSend: function () { // ก่องส่ง data จะให้ทำไร
                         loadSpin();
                     },
@@ -550,13 +551,10 @@
                                 type: "success",
                                 showConfirmButton: false,
                                 timer: 1000,
-                                //confirmButtonColor: "#AEDEF4",
-                                //confirmButtonText: "Ok",
                                 closeOnConfirm: false
                             },
                                 function () {
-                                    location.href = '@Url.Action("ScheduleCheck","Home")', loadSpin();
-                                    //$(location).attr('href', '/../Home/StudentAttendanceCheck');
+                                    location.href = '@Url.Action("ScheduleCheck","Home")';
                                 });
                         }
                     },
@@ -596,7 +594,6 @@
                             StdID: data0,
                             StatusID: data3,
                             Note: data4,
-                            //nickname: data2,
                         });
                         //return false;
                     });
