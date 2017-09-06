@@ -189,9 +189,9 @@
             },
             messages: {
                 FacultyCode: "กรุณาเลือกคณะ",
-                DeptCode: { required: "กรุณาป้อนรหัสสาขา", minlength: "กรุณาป้อนรหัสสาขาเป็นตัวเลข 4 หลัก" },
-                DeptName: "กรุณาป้อนชื่อสาขาวิชา",
-                ShortName: "กรุณาป้อนชื่อย่อสาขาวิชา A-Z(.)"
+                DeptCode: { required: "กรุณากรอกรหัสสาขา", minlength: "กรุณากรอกรหัสสาขาเป็นตัวเลข 4 หลัก" },
+                DeptName: "กรุณากรอกชื่อสาขาวิชา",
+                ShortName: "กรุณากรอกชื่อย่อสาขาวิชา A-Z(.)"
             },
 
         });
@@ -235,7 +235,7 @@
                         }
                         if (status == false) {
                             isDeptcode = false;
-                            $('#isDeptCode').html(deptCode + " ซ้ำ กรุณาป้อนใหม่").addClass("isRed");
+                            $('#isDeptCode').html(deptCode + " ซ้ำ กรุณากรอกใหม่").addClass("isRed");
                             $('#Department-form').find('.form-group').find('#DeptCode').removeClass('valid').addClass('error');
                         }
                         else if (deptCode.length != 4) {

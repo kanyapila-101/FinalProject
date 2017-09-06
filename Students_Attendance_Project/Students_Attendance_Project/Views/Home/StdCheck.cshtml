@@ -36,9 +36,9 @@
             <!-- /.box-header -->
             <div class="box-body">
                 <div class="row pull-right" style="margin-right:2px;">
-                    <button type="button" class="btn btn-sm btn-primary btn-addNote">เพิ่ม</button>
+                    <button type="button" class="btn btn-xs btn-primary btn-addNote">เพิ่ม</button>
                 </div>
-                <br />
+
                 <hr />
                 <div class="table-responsive">
                     <table class="table no-margin table-hover text-center" id="NoteTeach-table">
@@ -79,9 +79,9 @@
                     <p>
                         <hr />
                         <div class="row col-sm-12">
-                            <span>ปีการศึกษา : @ViewBag.Term/@ViewBag.Year&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span>
-                            <span>กลุ่มเรียน : @ViewBag.StudyGroupCode&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span>
-                            <span>วิชา-หลักสูตร : [@ViewBag.SubjectCode] @ViewBag.SubjectName (@ViewBag.Course)&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span>
+                            <span>ปีการศึกษา : @ViewBag.Term/@ViewBag.Year&nbsp; &nbsp; &nbsp; &nbsp; </span>
+                            <span>กลุ่มเรียน : @ViewBag.StudyGroupCode&nbsp; &nbsp; &nbsp; &nbsp; </span>
+                            <span>วิชา-หลักสูตร : [@ViewBag.SubjectCode] @ViewBag.SubjectName (@ViewBag.Course)&nbsp; &nbsp; &nbsp; &nbsp; </span>
                             <span>วันที่ @dateToday</span>
                         </div>
                     </p>
@@ -308,8 +308,8 @@
                 DetailNote: {required: true }
             },
             messages:{
-                NoteName: {required: "กรุณาป้อนหัวข้อบันทึกการสอน"},
-                DetailNote: {required: "กรุณาป้อนรายละเอียดบันทึกการสอน" }
+                NoteName: {required: "กรุณากรอกหัวข้อบันทึกการสอน"},
+                DetailNote: {required: "กรุณากรอกรายละเอียดบันทึกการสอน" }
             }
         });
 
@@ -520,7 +520,22 @@
                     });
                 });
                 //console.log(result);
-                SaveCheckStd();
+                if (StatusReCheck != null) {
+                    SaveCheckStd();
+                }
+                else {
+                    swal({
+                        title: "กรุณาเลือกสถานะ",
+                        type: "error",
+                        showConfirmButton: true,
+                        confirmButtonColor: "#AEDEF4",
+                        confirmButtonText: "Ok",
+                        closeOnConfirm: true
+                    },function () {
+                        $('#StdCheckModal').modal("show");
+                    });
+                }
+
             });
 
             function SaveCheckStd() {
@@ -530,7 +545,7 @@
                     url: '@Url.Action("SaveStdCheck", "Home")',  // ส่งไปให้ที่ได้ ระบุ
                     dataType: "json", // ชนิดข้อมูลที่ส่ง
                     data: '&' + $.param({ model: result }), // ข้อมูลที่ส่ง
-                    traditional: true, 
+                    traditional: true,
                     beforeSend: function () { // ก่องส่ง data จะให้ทำไร
                         loadSpin();
                     },

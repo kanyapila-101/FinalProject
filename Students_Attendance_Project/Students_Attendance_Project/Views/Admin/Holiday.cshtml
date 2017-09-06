@@ -372,7 +372,7 @@
                         }
                         if (status == false) {
                             isHolidayDate = false;
-                            $('#isHoliday').html(sText + " ซ้ำ กรุณาป้อนใหม่").addClass("isRed");
+                            $('#isHoliday').html(sText + " ซ้ำ กรุณาเลือกใหม่").addClass("isRed");
                             $('#Holiday-form').find('.form-group').find('#HolidayDate').removeClass('valid').addClass('error');
                         }
                         else {
@@ -418,7 +418,7 @@
             },
             messages: {
                 HolidayDate: "กรุณาเลือกวันที่",
-                HolidayName: "กรุณาป้อนวันหยุด"
+                HolidayName: "กรุณากรอกวันหยุด"
             }
         })
     </script>

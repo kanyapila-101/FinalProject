@@ -345,7 +345,7 @@
                     }
                     else if (status == false && startdate == "") {
                         isTermYear = false;
-                        $('#overStartDate').html("กรุณาป้อน ว.ด.ป. เริ่ม ก่อน").addClass("isRed");
+                        $('#overStartDate').html("กรุณาเลือก ว.ด.ป. เริ่ม ก่อน").addClass("isRed");
                         $('#SchoolYear-form').find('.form-group').find('#dateEnd').removeClass('valid').addClass('error');
                     }
                     else if (status == true) {
@@ -430,7 +430,7 @@
             }
             else {
                 isTermYear = false;
-                $('#isStartMidterm').html("กรุณาป้อน ว.ด.ป. เริ่ม-สิ้นสุด ก่อน").addClass("isRed");
+                $('#isStartMidterm').html("กรุณาเลือก ว.ด.ป. เริ่ม-สิ้นสุด ก่อน").addClass("isRed");
                 $('#SchoolYear-form').find('.form-group').find('#dateStartMidterm').removeClass('valid').addClass('error');
             }
 
@@ -483,7 +483,7 @@
             }
             else {
                 isTermYear = false;
-                $('#isEndMidterm').html("กรุณาป้อน ว.ด.ป. เริ่มสอบกลางภาคก่อน").addClass("isRed");
+                $('#isEndMidterm').html("กรุณาเลือก ว.ด.ป. เริ่มสอบกลางภาคก่อน").addClass("isRed");
                 $('#SchoolYear-form').find('.form-group').find('#dateEndFinal').removeClass('valid').addClass('error');
             }
         }
@@ -536,7 +536,7 @@
             }
             else {
                 isTermYear = false;
-                $('#isStartFinal').html("กรุณาป้อน ว.ด.ป. สิ้นสุดสอบกลางภาคก่อน").addClass("isRed");
+                $('#isStartFinal').html("กรุณาเลือก ว.ด.ป. สิ้นสุดสอบกลางภาคก่อน").addClass("isRed");
                 $('#SchoolYear-form').find('.form-group').find('#dateStartFinal').removeClass('valid').addClass('error');
             }
 
@@ -589,7 +589,7 @@
             }
             else {
                 isTermYear = true;
-                $('#isEndFinal').html("กรุณาป้อน ว.ด.ป. เริ่มสอบปลายภาคก่อน").addClass("isRed");
+                $('#isEndFinal').html("กรุณาเลือก ว.ด.ป. เริ่มสอบปลายภาคก่อน").addClass("isRed");
                 $('#SchoolYear-form').find('.form-group').find('#dateEndFinal').removeClass('error');
             }
         }
@@ -625,13 +625,13 @@
             },
             messages: {
                 Term: "กรุณาเลือกภาคการศึกาษา",
-                Year: { required: "กรุณาป้อนปีการศึกษา", minlength: "กรุณาป้อนปีการศึกษาเป็นตัวเลข 4 หลัก" },
-                dateStart: "กรุณาป้อน ว.ด.ป. เริ่ม",
-                dateEnd: "กรุณาป้อน ว.ด.ป. สิ้นสุด",
-                dateStartMidterm: "กรุณาป้อน ว.ด.ป. เริ่มสอบกลางภาค",
-                dateEndMidterm: "กรุณาป้อน ว.ด.ป. สิ้นสุดสอบกลางภาค",
-                dateStartFinal: "กรุณาป้อน ว.ด.ป. เริ่มสอบปลายภาค",
-                dateEndFinal: "กรุณาป้อน ว.ด.ป. สิ้นสุดสอบกลางภาค"
+                Year: { required: "กรุณากรอกปีการศึกษา", minlength: "กรุณากรอกปีการศึกษาเป็นตัวเลข 4 หลัก" },
+                dateStart: "กรุณาเลือก ว.ด.ป. เริ่ม",
+                dateEnd: "กรุณาเลือก ว.ด.ป. สิ้นสุด",
+                dateStartMidterm: "กรุณาเลือก ว.ด.ป. เริ่มสอบกลางภาค",
+                dateEndMidterm: "กรุณาเลือก ว.ด.ป. สิ้นสุดสอบกลางภาค",
+                dateStartFinal: "กรุณาเลือก ว.ด.ป. เริ่มสอบปลายภาค",
+                dateEndFinal: "กรุณาเลือก ว.ด.ป. สิ้นสุดสอบกลางภาค"
             }
         });
 

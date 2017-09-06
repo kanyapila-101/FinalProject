@@ -234,7 +234,7 @@
                         }
                         if (status == false) {
                             isUsernamebool = false;
-                            $('#isavailable').html(username + " มีผู้ใช้งานแล้ว กรุณาป้อนใหม่").addClass("isRed");
+                            $('#isavailable').html(username + " มีผู้ใช้งานแล้ว กรุณากรอกใหม่").addClass("isRed");
                             $('#User-form').find('.form-group').find('#Username').removeClass('valid').addClass('error');
                         }
                         else {
@@ -283,7 +283,7 @@
                         }
                         if (status == false) {
                             isEmail = false;
-                            $('#isEmail').html("ที่อยู่อีเมลนี้ ถูกใช้งานแล้ว กรุณาป้อนใหม่").addClass("isRed");
+                            $('#isEmail').html("ที่อยู่อีเมลนี้ ถูกใช้งานแล้ว กรุณากรอกใหม่").addClass("isRed");
                             $('#User-form').find('.form-group').find('#Email').removeClass('valid').addClass('error');
                         }
                         else {
@@ -314,12 +314,12 @@
                 Role: { required: true },
             },
             messages: {
-                Username: { required: "กรุณาป้อน Username" },
-                Password: { required: "กรุณาป้อน Password", minlength: "กรุณาป้อน Password อย่างน้อย 8-16 ตัวอักษร" },
-                Name: "กรุณาป้อนชื่อนามสกุลให้ถูกต้อง",
-                Email: "กรุณาป้อน Email ให้ถูกต้อง",
+                Username: { required: "กรุณากรอก Username" },
+                Password: { required: "กรุณากรอก Password", minlength: "กรุณากรอก Password อย่างน้อย 8-16 ตัวอักษร" },
+                Name: "กรุณากรอกชื่อนามสกุลให้ถูกต้อง",
+                Email: "กรุณากรอก Email ให้ถูกต้อง",
                 DeptCode: "กรุณาเลือกสาขาวิชา",
-                Role: { required: "กรุณาป้อนเลือกสิทธิ์การใช้งาน" },
+                Role: { required: "กรุณาเลือกสิทธิ์การใช้งาน" },
             },
         });
 

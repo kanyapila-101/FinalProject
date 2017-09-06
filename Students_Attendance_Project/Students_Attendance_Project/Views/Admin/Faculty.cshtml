@@ -137,8 +137,8 @@
                 FacultyName: { required: true },
             },
             messages: {
-                FacultyCode: { required: "กรุณาป้อนรหัสคณะ", minlength: "กรุณาป้อนรหัสคณะเป็นตัวเลข 4 หลัก" },
-                FacultyName: "กรุณาป้อนชื่อคณะ"
+                FacultyCode: { required: "กรุณากรอกรหัสคณะ", minlength: "กรุณากรอกรหัสคณะเป็นตัวเลข 4 หลัก" },
+                FacultyName: "กรุณากรอกชื่อคณะ"
             },
         });
 
@@ -182,7 +182,7 @@
                         }
                         if (status == false) {
                             isFac = false;
-                            $('#isFacultyCode').html(facultyCode + " ซ้ำ กรุณาป้อนใหม่").addClass("isRed");
+                            $('#isFacultyCode').html(facultyCode + " ซ้ำ กรุณากรอกใหม่").addClass("isRed");
                             $('#Faculty-form').find('.form-group').find('#FacultyCode').removeClass('valid').addClass('error');
                         }
                         else if (facultyCode.length != 4) {

@@ -141,7 +141,7 @@
                                                                                         <td align="Left">
                                                                                             <span id="" style="font-family:Tahoma;font-size:12px;">
                                                                                                 [@r.SubjectCode]<br>
-                                                                                                วิชา @dataSubj.Where(x => x.SubjectCode == r.SubjectCode).Select(x => x.SubjectName).FirstOrDefault()<br>
+                                                                                                วิชา @dataSubj.Where(x => x.StudyGroupID == r.StudyGroupID).Select(x => x.SubjectName).FirstOrDefault()<br>
                                                                                                 กลุ่มเรียน @dataSubj.Where(x => x.StudyGroupID == r.StudyGroupID).Select(x => x.StudyGroupCode).FirstOrDefault()<br>
                                                                                                 ห้อง @r.RoomNo <br>
                                                                                                 @{

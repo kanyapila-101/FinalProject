@@ -153,8 +153,8 @@
 
             },
             messages: {
-                BuildingCode: "กรุณาป้อนหมายเลขอาคาร",
-                BuildingName: "กรุณาป้อนชื่ออาคาร",
+                BuildingCode: "กรุณากรอกหมายเลขอาคาร",
+                BuildingName: "กรุณากรอกชื่ออาคาร",
             },
         });
 
@@ -212,7 +212,7 @@
                         }
                         if (status == false) {
                             isBuilding = false;
-                            $('#isBuildingCode').html(buildingcode + " มีแล้ว กรุณาป้อนใหม่").addClass("isRed");
+                            $('#isBuildingCode').html(buildingcode + " มีแล้ว กรุณากรอกใหม่").addClass("isRed");
                             $('#Building-form').find('.form-group').find('#BuildingCode').removeClass('valid').addClass('error');
                         }
                         else {

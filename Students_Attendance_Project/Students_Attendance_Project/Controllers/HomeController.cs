@@ -718,7 +718,7 @@ namespace Students_Attendance_Project.Controllers
                                     if (stdDuplicate < stdTotal)
                                     {
                                         var stdcode = Scode.Where(r => !notstd.Contains(r)).ToList();
-                                        dataS = db.Tb_Student.Where(r => stdcode.Contains(r.StdCode)).Select(r => new
+                                        dataS = db.Tb_Student.Where(r => stdcode.Contains(r.StdCode) && r.StudyGroupID == model.StudyGroupID).Select(r => new
                                         {
                                             r.StdID,
                                             r.NameTH,
