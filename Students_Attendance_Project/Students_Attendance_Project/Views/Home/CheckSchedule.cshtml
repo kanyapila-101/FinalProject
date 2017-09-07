@@ -1,0 +1,496 @@
+﻿
+@{
+    ViewBag.Title = "การเช็คชื่อ";
+}
+
+@*<link href="~/AdminLTE-master/plugins/fullcalendar/fullcalendar.min.css" rel="stylesheet" />
+    <link href="~/AdminLTE-master/plugins/fullcalendar/fullcalendar.print.css" rel="stylesheet"  media='print' />*@
+<link href="http://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.0/fullcalendar.min.css" rel="stylesheet" />
+
+<link href="http://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.0/fullcalendar.print.css" rel="stylesheet" media="print" />
+<style>
+    body {
+        padding: 0;
+        font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+        font-size: 14px;
+    }
+
+    #calendar {
+        background-color: white;
+        /*border:1px solid;*/
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    .fc-widget-content{
+        cursor: pointer;
+    }
+    div.fc-list-empty{
+
+    }
+</style>
+@{
+    if (ViewBag.Haveschedule == 0)
+    {
+        <div class="alert alert-warning">
+            <strong>หมายเหตุ!</strong> คุณยังไม่ได้สร้างตารางสอนในภาคการศึกษานี้ กรุณาสร้างตารางสอน เพื่อทำการเช็คชื่อ
+        </div>
+    }
+}
+
+<div id="calendar" class="row"></div>
+
+
+<div id="checknameModel" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">การเช็คชื่อ</h4>
+            </div>
+            <div class="modal-body">
+                <div class="col-sm-4"></div>
+                <div class="col-sm-4">
+                    <button type="button" class="btn btn-success btn-Check pull-left">เช็คชื่อ</button>
+                    <button type="button" class="btn btn-primary btn-Compensate pull-right">ชดเชย</button>
+                </div>
+                <div class="col-sm-4"></div><br /><br />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<form id="Compensate-form" class="form-horizontal">
+    <div class="modal fade" id="CompensateModal" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">สอนชดเชย</h4>
+                </div>
+                <div class="modal-body ">
+                    <input type="hidden" name="dataDateCheck" id="dataDateCheck" value="">
+                    <input type="hidden" name="dataDateDefault" id="dataDateDefault" value="">
+                    <input type="hidden" id="gID" value="" />
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">วันที่เรียนปกติ :</label>
+                        <div class="col-sm-5">
+                            <select class="form-control" id="DateDefault" name="DateDefault" tabindex="1" required>
+                                <option value="">-- กรุณาเลือก --</option>
+                            </select>
+
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">วันที่ชดเชย :</label>
+                        <div class="col-sm-5">
+                            <div class="input-group date">
+                                <input type="text" class="form-control datepicker" id="DateCheck" name="DateCheck" data-date-language="th-th" tabindex="2"
+                                       maxlength="10" required onkeyup="isDate(this.value, this)" @*onchange="CheckDate()"*@>
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            </div>
+                            <div id="isDateCheck" style="padding-top: 3px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-5">
+                            <button type="button" class="btn btn-success btn-save" data-dismiss="modal">บันทึกข้อมูล</button>
+                        </div>
+                    </div>
+                    <p><hr /></p>
+                    <div class="table-scrollable" id="Holiday-table">
+                        <table class="table table-bordered table-hover text-center" id="Compensate-table">
+                            <thead>
+                                <tr class="success">
+                                    <th style="width: 5%;"> ลำดับ </th>
+                                    <th> วันที่ชดเชย </th>
+                                    <th> วันที่เรียนปกติ </th>
+                                    <th style="width: 10%;">  </th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+@section scripts{
+    <script>
+        var d = Date.now.toString('yyyy-mm-dd');
+        var colorCode = ["#0080FF", "#12a112", "#01A9DB", "#9966ff", "#ff9933"];
+        var key = null;
+        $('.datepicker').datepicker({
+            showInputs: true,
+            autoclose: true,
+            disableTouchKeyboard: true,
+            format: 'dd/mm/yyyy'
+        });
+        $('#Compensate-form').validate({
+            rules: {
+                DateDefault: { required: true },
+                DateCheck: { required: true }
+            },
+            messages: {
+                DateDefault: "กรุณาเลือกวันที่เรียนปกติ",
+                DateCheck: "กรุณาเลือกวันที่ชดเชย"
+            }
+        });
+        function isDate(sText, obj) {
+            var ValidChars = "1234567890/";
+            var IsNumber = true;
+            var Char;
+            for (i = 0; i < sText.length && IsNumber == true; i++) {
+                Char = sText.charAt(i);
+                if (ValidChars.indexOf(Char) == -1) {
+                    IsNumber = false;
+                }
+            }
+            if (IsNumber == false) {
+                obj.value = sText.substr(0, sText.length - 1);
+            }
+        }
+
+        $('#CompensateModal').on('hidden.bs.modal', function () {
+            location.reload(true);
+        })
+
+        function getDateCom(groupID) {
+            //alert(groupID);
+            if (groupID != "") {
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("getDatecheck", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: { id: groupID }, // ข้อมูลที่ส่ง
+                    traditional: true, // การจดจำข้อมูล
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+
+                    success: function (res) {
+
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+
+                        } else {
+                            $('#DateDefault').find('option').remove();
+                            $('#DateDefault').append('<option value="">-- กรุณาเลือก --</option>');
+                            // solution one
+                            //$.each(res.data, function (i, e){
+                            //    alert(res.data[i].DeptID);
+                            //});
+
+                            //solutoin two
+                            $.each(res.data.date, function (i, e) {
+                                //alert(e.Dept_PK + "   " + e.DeptName);
+                                $('#DateDefault').append('<option value="' + e + '">' + e + '</option>');
+                            });
+                            $('#Compensate-table').find('tbody').find('tr').remove();
+                            $.each(res.data.compensate, function (i, e) {
+                                var dateCompensate = e.Note.split(' ');
+                                $('#Compensate-table').find('tbody').append('<tr><td>' + (++i) + '</td><td>' + dateCompensate[2] + '</td><<td>' + e.DateOrigin + '</td><td><button type="button" class="btn btn-danger btn-xs btn-del" data-compensate="' + e.ID + "," + dateCompensate[2] + "," + e.DateOrigin + '" role="button" data-toggle="tooltip" data-placement="top" title="ลบ"><i class="fa fa-remove"></i></button></td></tr>');
+                            });
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                        btnDelAppend(groupID);
+                    },
+                });
+
+            }
+        }
+
+        function btnDelAppend(groupID) {
+            $('.btn-del').click(function () {
+                var data = $(this).data("compensate");
+                //alert(data);
+                swal({
+                    title: "ลบข้อมูล?",
+                    text: "คุณต้องการจะลบข้อมูลจริงหรือไม่!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "ใช่ !",
+                    cancelButtonText: "ยกเลิก",
+                    closeOnConfirm: false,
+                    closeOnCancel: true
+                },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            type: "POST", // method ที่จะส่ง
+                            cache: false,
+                            url: '@Url.Action("DeleteCompensate", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                            dataType: "json", // ชนิดข้อมูลที่ส่ง
+                            data: { _data: data }, // ข้อมูลที่ส่ง
+                            traditional: true, // การจดจำข้อมูล
+                            beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                                loadSpin();
+                            },
+                            success: function (res) {
+
+                                var status = false;
+                                var message = 'ดำเนินการไม่สำเร็จ';
+                                if (res != null && res != undefined) {
+                                    status = res.status;
+                                    message = res.message != '' ? res.message : message;
+                                }
+                                if (status == false) {
+                                    swal("ขออภัย!", message, "error");
+
+                                } else {
+                                    var date = data.split(',');
+                                    swal("ลบข้อมูลเรียบร้อยเเล้ว", "คุณสามารถเช็คชื่อในวันที่ " + date[2], "success");
+                                }
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+
+                            },
+                            complete: function () {
+                                unLoadSpin();
+                                getDateCom(groupID);
+                            }
+                        });
+
+                    }
+                });
+            });
+        }
+
+        var gID = null;
+        $('.btn-Compensate').click(function () {
+            //groupID = $(this).val();
+            var str = key.split(',');
+            getDateCom(str[0]);
+            $('#gID').val(str[0]);
+            gID = str[0];
+            //alert($('#gID').val());
+            $('#isDateCheck').html("");
+            $('#Compensate-form').find('.form-group').find('#DateCheck').removeClass('error');
+            $('#Compensate-form').find("input").val("");
+            $('#CompensateModal').modal('show');
+        });
+
+        $('.btn-Check').click(function () {
+            //alert(key);
+            var str = key.split(',');
+            @*$(location).attr("href", "@Url.Action("Checkname", "Home")/" + key + "");*@
+            $(location).attr("href", "@Url.Action("Checkname", "Home")/" + str[0] + "?id2=" + str[1] + "&_date=" + str[2] + "");
+        });
+
+        $('.btn-save').click(function () {
+            var date = $('#DateCheck').val();
+            var datedefault = $('#DateDefault').val();
+            var send = date + "," + gID + "," + datedefault;
+            //alert(datedefault);
+            if ($('#Compensate-form').valid() && isDateCheck == true) {
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("SaveCompensate", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: { _data: send }, // ข้อมูลที่ส่ง
+                    traditional: true, // การจดจำข้อมูล
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+
+                    success: function (res) {
+
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+
+                        } else {
+                            swal({
+                                title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                type: "success",
+                                showConfirmButton: false,
+                                //confirmButtonColor: "#AEDEF4",
+                                //confirmButtonText: "Ok",
+                                timer: 1000,
+                                closeOnConfirm: false
+                            });
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                    },
+                    complete: function () {
+                        $('#DateCheck').val("");
+                        unLoadSpin();
+                        getDateCom(gID);
+                    },
+                });
+            }
+            else {
+                $('#Holiday-form').find('.form-group').find('#HolidayDate').removeClass('valid').addClass('error');
+            }
+            return false;
+        });
+
+        var isDateCheck = false;
+        $('#DateCheck').change(function () {
+            var date = $('#DateCheck').val();
+            $('#dataDateCheck').val(date);
+            //var groupid = $('#gID').val();
+            //alert(groupID);
+            //alert(date);
+            if ($('#dataDateCheck').val() != "") {
+                var send = date + "," + gID;
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("CheckDateTeach", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: { _date: send }, // ข้อมูลที่ส่ง
+                    traditional: true, // การจดจำข้อมูล
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+
+                    success: function (res) {
+
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            isDateCheck = false;
+                            $('#isDateCheck').html(date + " " + message + "กรุณาเลือกใหม่").addClass("isRed");
+                            $('#Compensate-form').find('.form-group').find('#DateCheck').removeClass('valid').addClass('error');
+                        } else {
+                            isDateCheck = true;
+                            $('#isDateCheck').html("");
+                            $('#Compensate-form').find('.form-group').find('#DateCheck').removeClass('error');
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    },
+                });
+            }
+        });
+
+        $(document).ready(function () {
+            $('.sidebar-menu > li').removeClass('active');
+            $('.ScheduleCheck').addClass('active');
+            var events = [];
+            var groupID = null;
+            var yearID = null;
+            $.ajax({
+                type: "GET",
+                dataType: 'json',
+                cache: false,
+                url: '@Url.Action("getScheduleCheck", "Home")',
+                beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                    loadSpin();
+                },
+                success: function (res) {
+                    if (res.status != false) {
+                        $.each(res.data.dataEvent, function (i, e) {
+                            groupID = e.StudyGroupID;
+                            yearID = e.SchYearID;
+                            events.push({
+                                id: e.id,
+                                title: e.title,
+                                description: e.description,
+                                start: e.start,
+                                end: e.end,
+                                @*url: "@Url.Action("StdCheck", "Home")/" + groupID + "?id2=" + yearID + "",*@
+                                color: colorCode[i % colorCode.length]
+                            })
+
+                        });
+
+                        $.each(res.data.dataHoliday, function (i, e) {
+                            events.push({
+                                id: null,
+                                title: e.HolidayName,
+                                description: '',
+                                start: e.HolidayDate,
+                                end: null,
+                                url: null,
+                                color: "#ff0066"
+                            })
+                        });
+                    }
+                    Showdata(events);
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    swal("เกิดข้อผิดพลาด", "", "error");
+                    unLoadSpin();
+                },
+                complete: function () {
+                    unLoadSpin();
+                }
+            });
+
+            function Showdata(events) {
+                //$('.fc-list-empty').val('ไม่มีตารางสอน');
+                $('#calendar').fullCalendar('destroy');
+                $('#calendar').fullCalendar({
+                    locale: 'th',
+                    header: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'month,listWeek,listDay'
+                    },
+                    views: {
+                        listWeek: { buttonText: 'สัปดาห์' },
+                        listDay: { buttonText: 'วัน' }
+                    },
+                    defaultView: 'month',
+                    // defaultDate: '2017-09-12', new Date(),
+                    navLinks: true, // can click day/week names to navigate views
+                    editable: false,
+                    eventLimit: 4, // allow "more" link when too many events
+                    timeFormat: 'HH:mm',
+                    events: events,
+                    eventClick: function (event) {
+                        key = event.id;
+                        $('#checknameModel').modal("show");
+                    }
+
+
+                });
+            }
+
+        });
+    </script>
+
+    <script src="~/Scripts/moment.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.0/fullcalendar.min.js"></script>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.0/locale-all.js'></script>
+}

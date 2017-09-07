@@ -465,8 +465,8 @@
         });
 
         $('.btn-Check').click(function () {
-            var checkID = $(this).val();
-            var idyear = $('#schoolyearID').val();
+            var checkID = $(this).val();// id
+            var idyear = $('#schoolyearID').val(); // id2 
             //alert(idyear);
             //alert(checkID);
             $.ajax({
@@ -500,9 +500,10 @@
                     } else {
                         unLoadSpin();
                         @*location.href = @Url.Action("StdCheck", "Home")?id=""+checkID;*@
-                        window.location.href = "/Home/StdCheck/" + checkID;
+                        //window.location.href = "/Home/StdCheck/" + checkID;
+                        //อิกตัวชื่อตัวแปรอะไร
                         @*location.href(@Url.Action("Student", "Home", new { id = dataSubj.Select(r => r.StudyGroupID) });*@
-                        @*$(location).attr("href", "@Url.Action("StdCheck", "Home")/" + checkID);*@
+                        $(location).attr("href", "@Url.Action("StdCheck", "Home")/'" + checkID + "'?id2=+'"+idyear+"'"); //ลองดู
                     }
                 },
                 error: function (xhr, ajaxOptions, thrownError) {

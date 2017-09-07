@@ -565,6 +565,44 @@ namespace Students_Attendance_Project.Controllers
                                     };
                                     db.Tb_Student.Add(data);
                                     db.SaveChanges();
+                                    var query = db.Tb_Schedule.Where(r => r.StudyGroupID == model.StudyGroupID).ToList();
+                                    if (query.Count > 0 && query != null)
+                                    {
+                                        foreach (var r in query)
+                                        {
+                                            var dataschedule = new GenerateDateModel
+                                            {
+                                                SchYearID = r.SchYearID,
+                                                DayTeach = int.Parse(r.DayTeach),
+                                                StudyGroupID = r.StudyGroupID != 0 ? r.StudyGroupID : model.StudyGroupID
+                                            };
+                                            List<DateTime> date = generateDate(dataschedule);
+                                            if (date != null)
+                                            {
+                                                foreach (var c in date)
+                                                {
+                                                    var HaveDate = db.Tb_StudentCheck.Where(x => x.DateCheck == c && x.StdID == data.StdID).FirstOrDefault();
+                                                    if (HaveDate != null)  // เช็คเพือดูว่า วันที่ query มา มีแล้วรึยัง ถ้ามีแล้ว ให้ออกจากลูป ไม่ต้องเพิ่มซ้ำ
+                                                    {
+                                                        continue;
+                                                    }
+                                                    else
+                                                    {
+                                                        var holiday = db.Tb_Holiday.Where(x => x.HolidayDate == c).FirstOrDefault();
+                                                        db.Tb_StudentCheck.Add(new Tb_StudentCheck
+                                                        {
+                                                            DateCheck = c,
+                                                            StdID = data.StdID,
+                                                            StatusID = (holiday == null ? 9 : 8), // ถ้าไม่ตรงวันหยุด = 9 (รอเช็คชื่อ) มิฉะนั้นแล้ว = 8 (วันหยุด)
+                                                            StudyGroupID = r.StudyGroupID,
+                                                            Note = (holiday == null ? null : "หยุด " + holiday.HolidayName)  // ถ้าไม่ตรงวันหยุด = Null มิฉะนั้นแล้ว = วันหยุด วันนั้น
+                                                        });
+                                                    }
+                                                }
+                                                db.SaveChanges();
+                                            }
+                                        }
+                                    }
                                 }
                                 else
                                 {
@@ -573,11 +611,9 @@ namespace Students_Attendance_Project.Controllers
                                     {
                                         db.Tb_Student.Where(r => r.StdID == model.StdID).ForEach(r =>
                                         {
-                                            r.StdCode = model.StdCode;
                                             r.NameEN = model.NameEN;
                                             r.NameTH = model.NameTH;
                                             r.StatusID = model.StatusID;
-                                            r.StudyGroupID = model.StudyGroupID;
                                         });
                                         db.SaveChanges();
                                     }
@@ -678,6 +714,7 @@ namespace Students_Attendance_Project.Controllers
                                 if (jsonReturn.status == true)
                                 {
                                     var notstd = new List<string>();
+                                    var datastd = new List<StudentModel>();
                                     for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
                                     {
                                         string id = ds.Tables[0].Rows[i][0].ToString();
@@ -699,15 +736,22 @@ namespace Students_Attendance_Project.Controllers
                                             }
                                             else
                                             {
-                                                db.Tb_Student.Add(new Tb_Student
+                                                var dataStd = new Tb_Student()
                                                 {
                                                     StdCode = id,
                                                     NameTH = nameTH,
                                                     NameEN = nameEN,
-                                                    StatusID = 5, // 5 = สถานะลงทะเบียน
+                                                    StatusID = 5,
                                                     StudyGroupID = model.StudyGroupID
-                                                });
+                                                };
+                                                db.Tb_Student.Add(dataStd);
+                                                db.SaveChanges();
                                                 stdNew++;
+                                                datastd.Add(new StudentModel
+                                                {
+                                                    StdID = dataStd.StdID,
+                                                    StudyGroupID = dataStd.StudyGroupID
+                                                });
                                                 isFileCorrect = true;
                                             }
                                         }
@@ -715,7 +759,7 @@ namespace Students_Attendance_Project.Controllers
                                     var Scode = db.Tb_Student.Where(r => r.StudyGroupID == model.StudyGroupID).Select(r => r.StdCode).ToList();
                                     stdTotal = Scode.Count();
                                     var dataS = new object();
-                                    if (stdDuplicate < stdTotal)
+                                    if (stdDuplicate > 0 && stdDuplicate < stdTotal)
                                     {
                                         var stdcode = Scode.Where(r => !notstd.Contains(r)).ToList();
                                         dataS = db.Tb_Student.Where(r => stdcode.Contains(r.StdCode) && r.StudyGroupID == model.StudyGroupID).Select(r => new
@@ -724,6 +768,50 @@ namespace Students_Attendance_Project.Controllers
                                             r.NameTH,
                                             r.StdCode
                                         }).ToList();
+                                    }
+                                    if (stdNew > 0)
+                                    {
+                                        var query = db.Tb_Schedule.Where(r => r.StudyGroupID == model.StudyGroupID).ToList();
+                                        if (query.Count > 0 && query != null)
+                                        {
+                                            foreach (var r in query)
+                                            {
+                                                var dataschedule = new GenerateDateModel
+                                                {
+                                                    SchYearID = r.SchYearID,
+                                                    DayTeach = int.Parse(r.DayTeach),
+                                                    StudyGroupID = r.StudyGroupID != 0 ? r.StudyGroupID : model.StudyGroupID
+                                                };
+                                                List<DateTime> date = generateDate(dataschedule);
+                                                if (date != null)
+                                                {
+                                                    foreach (var c in date)
+                                                    {
+                                                        foreach (var e in datastd)
+                                                        {
+                                                            var HaveDate = db.Tb_StudentCheck.Where(x => x.DateCheck == c && x.StdID == e.StdID).FirstOrDefault();
+                                                            if (HaveDate != null)  // เช็คเพือดูว่า วันที่ query มา มีแล้วรึยัง ถ้ามีแล้ว ให้ออกจากลูป ไม่ต้องเพิ่มซ้ำ
+                                                            {
+                                                                continue;
+                                                            }
+                                                            else
+                                                            {
+                                                                var holiday = db.Tb_Holiday.Where(x => x.HolidayDate == c).FirstOrDefault();
+                                                                db.Tb_StudentCheck.Add(new Tb_StudentCheck
+                                                                {
+                                                                    DateCheck = c,
+                                                                    StdID = e.StdID,
+                                                                    StatusID = (holiday == null ? 9 : 8), // ถ้าไม่ตรงวันหยุด = 9 (รอเช็คชื่อ) มิฉะนั้นแล้ว = 8 (วันหยุด)
+                                                                    StudyGroupID = e.StudyGroupID,
+                                                                    Note = (holiday == null ? null : "หยุด " + holiday.HolidayName)  // ถ้าไม่ตรงวันหยุด = Null มิฉะนั้นแล้ว = วันหยุด วันนั้น
+                                                                });
+                                                            }
+                                                        }
+                                                    }
+                                                    db.SaveChanges();
+                                                }
+                                            }
+                                        }
                                     }
                                     if (isFileCorrect == true)
                                     {
@@ -809,6 +897,52 @@ namespace Students_Attendance_Project.Controllers
             }
             return Json(jsonReturn);
         } // เช็คว่ารหัส นศ. ที่จะเพิ่มซ้ำหรือไม่
+
+        public List<DateTime> generateDate(GenerateDateModel model)
+        {
+            var date = new List<DateTime>();
+            string[] dateofweek = { "", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday" };
+            bool isDay = false;
+            using (var db = new Student_AttendanceEntities())
+            {
+                var dataSchYear = db.Tb_SchoolYear.Where(r => r.SchYearID == model.SchYearID).FirstOrDefault();
+                DateTime sdate = dataSchYear.StartDate;
+                do
+                {
+                    if (dateofweek[model.DayTeach] == sdate.DayOfWeek.ToString().ToLower())
+                    {
+                        for (int i = 1; i <= 17; i++)
+                        {
+                            if (sdate.DayOfYear >= dataSchYear.StartFinal.DayOfYear) // ป้องกัน เมื่อ เทอมซัมเมอร์ ซึ่งการสอนไม่เกิน 7 สัปดาห์
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                if (sdate.DayOfYear <= dataSchYear.StartMidterm.DayOfYear && sdate.DayOfYear <= dataSchYear.EndMidterm.DayOfYear && sdate.DayOfYear < dataSchYear.StartFinal.DayOfYear)
+                                {
+                                    date.Add(sdate);
+                                }
+                                else if (sdate.DayOfYear > dataSchYear.EndMidterm.DayOfYear && sdate.DayOfYear <= dataSchYear.StartFinal.DayOfYear && sdate.DayOfYear <= dataSchYear.EndFinal.DayOfYear)
+                                {
+                                    date.Add(sdate);
+                                }
+                                sdate = sdate.AddDays(7);
+                            }
+
+                        }
+                        isDay = true;
+                    }
+                    else
+                    {
+                        isDay = false;
+                        sdate = sdate.AddDays(+1);
+                    }
+                } while (isDay == false);
+                date.Sort();
+            }
+            return date;
+        }
 
         // Schedule Management CRUD LINQ TO SQL
 
@@ -946,7 +1080,7 @@ namespace Students_Attendance_Project.Controllers
         public JsonResult SaveSchedule(ScheduleModel model)
         {
             var jsonReturn = new JsonResponse();
-            var strTime = new string[] { "08:00", "09:00", "10.00", "11.00", "12.00", "13.00", "14.00", "15.00", "16.00", "17.00", "18.00", "19.00", "20.00", "21.00" };
+            var strTime = new string[] { "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00" };
             var strStart = strTime[model.StartTimeInt - 1];
             var strEnd = strTime[model.EndTimeInt - 1];
             bool isGen = false;
@@ -1431,7 +1565,7 @@ namespace Students_Attendance_Project.Controllers
                         message = "ขออภัย! ไม่สามารถเช็คชื่อได้ เนื่องจากอยู่ในช่วง สอบปลายภาค";
                         return RedirectToAction("Exceptions", "Home", new { message = message });
                     }
-                    else if (holiday != null )
+                    else if (holiday != null)
                     {
                         message = "ขออภัย! ไม่สามารถเช็คชื่อได้ เนื่องจากตรงกับ " + holiday.datename;
                         return RedirectToAction("Exceptions", "Home", new { message = message });
@@ -1507,20 +1641,20 @@ namespace Students_Attendance_Project.Controllers
                     //                      Course = sj.Course
                     //                  }).ToList();
                     var dataHeader = (from sg in db.Tb_StudyGroup        // Query เอาข้อมูลกลุ่มเรียน ไปแสดง ใน Header
-                                       join sj in db.Tb_Subject on new { sg.SubjectCode, sg.Course } equals new { sj.SubjectCode, sj.Course }
-                                       join sy in db.Tb_SchoolYear on sg.SchYearID equals sy.SchYearID
-                                       where sg.StudyGroupID == id
-                                       select new
-                                       {
-                                           StudyGroupID = sg.StudyGroupID,
-                                           StudyGroupCode = sg.StudyGroupCode,
-                                           SchYearID = sy.SchYearID,
-                                           Term = sy.Term,
-                                           Year = sy.Year,
-                                           SubjectCode = sj.SubjectCode,
-                                           SubjectName = sj.SubjectName,
-                                           Course = sj.Course
-                                       }).ToList();
+                                      join sj in db.Tb_Subject on new { sg.SubjectCode, sg.Course } equals new { sj.SubjectCode, sj.Course }
+                                      join sy in db.Tb_SchoolYear on sg.SchYearID equals sy.SchYearID
+                                      where sg.StudyGroupID == id
+                                      select new
+                                      {
+                                          StudyGroupID = sg.StudyGroupID,
+                                          StudyGroupCode = sg.StudyGroupCode,
+                                          SchYearID = sy.SchYearID,
+                                          Term = sy.Term,
+                                          Year = sy.Year,
+                                          SubjectCode = sj.SubjectCode,
+                                          SubjectName = sj.SubjectName,
+                                          Course = sj.Course
+                                      }).ToList();
                     ViewBag.StudyGroupID = dataHeader.Select(r => r.StudyGroupID).SingleOrDefault();
                     ViewBag.StudyGroupCode = dataHeader.Select(r => r.StudyGroupCode).SingleOrDefault();
                     ViewBag.Term = dataHeader.Select(r => r.Term).SingleOrDefault();
@@ -1564,6 +1698,72 @@ namespace Students_Attendance_Project.Controllers
                                         StatusID = int.Parse(r.StatusID),
                                         StudyGroupID = int.Parse(r.StudyGroupID),
                                         Note = r.Note,
+                                        DateCheck = DateTime.Parse(date)
+                                    };
+                                    db.Tb_StudentCheck.Add(data);
+                                }
+                                else
+                                {
+                                    var data = db.Tb_StudentCheck.Where(x => x.StdCheckID == r.StdCheckID).FirstOrDefault();
+                                    if (data != null)
+                                    {
+                                        r.StatusID = r.StatusID == null ? r.StatusRe : r.StatusID;
+                                        db.Tb_StudentCheck.Where(x => x.StdCheckID == r.StdCheckID).ForEach(x =>
+                                        {
+                                            x.StdID = int.Parse(r.StdID);
+                                            x.StatusID = int.Parse(r.StatusID);
+                                            x.Note = r.Note;
+                                        });
+                                    }
+                                }
+                            }
+                            db.SaveChanges();
+                            tran.Commit();
+                            jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อย" };
+                        }
+                        else
+                        {
+                            jsonReturn = new JsonResponse { status = false, message = "เกิดข้อผิดพลาด" };
+                        }
+                        jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อยแล้ว" };
+                    }
+                    catch (Exception ex)
+                    {
+                        tran.Rollback();
+                        jsonReturn = new JsonResponse { status = false, message = "error" + ex.Message };
+                    }
+                }
+            }
+            return Json(jsonReturn);
+        } // บันทึกการเช็คชื่อตามรายวิชา-กลุ่มเรียน
+
+        public JsonResult SaveCheckname(List<DataModel> model)
+        {
+            var jsonReturn = new JsonResponse();
+            using (var db = new Student_AttendanceEntities())
+            {
+                using (var tran = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        if (model != null)
+                        {
+                            foreach (var r in model)
+                            {
+                                if (r.StdCheckID == 0)
+                                {
+                                    var date = DateTime.Now.ToShortDateString();
+                                    if (r.StatusID == null)
+                                    {
+                                        r.StatusID = r.StatusRe;
+                                    }
+                                    var data = new Tb_StudentCheck()
+                                    {
+                                        StdID = int.Parse(r.StdID),
+                                        StatusID = int.Parse(r.StatusID),
+                                        StudyGroupID = int.Parse(r.StudyGroupID),
+                                        Note = r.Note,
+                                       // DateCheck = r.DateCheck.Value
                                         DateCheck = DateTime.Parse(date)
                                     };
                                     db.Tb_StudentCheck.Add(data);
@@ -1782,6 +1982,231 @@ namespace Students_Attendance_Project.Controllers
             }
             return Json(jsonReturn);
         } // รับค่าวันที่จะชดชเย แล้วเช็คว่ามีวันนี้ในตารางการเช็คชื่อหรือยัง ตรงกับวันหยุดหรือไม่
+
+        public ActionResult CheckSchedule()
+        {
+            using (var db = new Student_AttendanceEntities())
+            {
+                var dataSchYear = (from r in db.Tb_SchoolYear
+                                   where DateTime.Now > r.StartDate && DateTime.Now < r.EndDate
+                                   select new
+                                   {
+                                       SchYearID = r.SchYearID,
+                                   }).SingleOrDefault();
+                ViewBag.Haveschedule = db.Tb_Schedule.Where(r => r.UserID == UserLogon.UserID && r.SchYearID == dataSchYear.SchYearID).Count();
+            }
+            return View();
+        }
+
+        public JsonResult getScheduleCheck()
+        {
+            var jsonReturn = new JsonResponse();
+            var dataEvent = new List<CheckScheduleModel>();
+            var dataHoliday = new List<showHolidayModel>();
+            // List<ShowNoteModel> dataH = new List<ShowNoteModel>();
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var dataevent = (from r in db.Tb_StudyGroup
+                                     join x in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { x.SubjectCode, x.Course }
+                                     join s in db.Tb_StudentCheck on r.StudyGroupID equals s.StudyGroupID
+                                     join c in db.Tb_Schedule on r.StudyGroupID equals c.StudyGroupID
+                                     where r.UserID == UserLogon.UserID
+                                     orderby s.DateCheck
+                                     select new
+                                     {
+                                         r.StudyGroupID,
+                                         r.StudyGroupCode,
+                                         r.SchYearID,
+                                         x.SubjectName,
+                                         x.SubjectCode,
+                                         s.DateCheck,
+                                         c.StartTime,
+                                         c.EndTime,
+                                         c.TypeSubject,
+                                         c.TotalHour,
+                                         c.RoomNo
+                                     }).OrderBy(r => r.DateCheck).Distinct().ToList();
+                    if (dataevent.Count > 0 && dataevent != null)
+                    {
+                        foreach (var r in dataevent)
+                        {
+                            dataEvent.Add(new CheckScheduleModel
+                            {
+                                StudyGroupID = r.StudyGroupID.ToString(),
+                                SchYearID = r.SchYearID.ToString(),
+                                id = r.StudyGroupID + "," + r.SchYearID + "," + r.DateCheck.ToShortDateString(),
+                                title = r.SubjectName + " กลุ่มเรียน " + r.StudyGroupCode,
+                                description = r.SubjectCode + " " + r.SubjectName + " กลุ่มเรียน " + r.StudyGroupCode + " ห้อง " + r.RoomNo + " " + (r.TypeSubject == 1 ? "(ท." + r.TotalHour / 1 + ")" : "(ป." + r.TotalHour / 3 + ")"),
+                                start = r.DateCheck.ToString("yyyy-MM-dd") + "T" + r.StartTime,
+                                end = r.DateCheck.ToString("yyyy-MM-dd") + "T" + r.EndTime
+                            });
+                        }
+                    }
+
+                    var dataholiday = db.Tb_Holiday.Select(r => new
+                    {
+                        r.HolidayDate,
+                        r.HolidayName
+                    }).OrderBy(r => r.HolidayDate).ToList();
+
+                    if (dataholiday.Count > 0 && dataholiday != null)
+                    {
+                        foreach (var r in dataholiday)
+                        {
+                            dataHoliday.Add(new showHolidayModel
+                            {
+                                HolidayDate = r.HolidayDate.ToString("yyyy-MM-dd"),
+                                HolidayName = r.HolidayName
+                            });
+                        }
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            if (dataEvent != null)
+            {
+                jsonReturn = new JsonResponse { status = true, data = new { dataEvent, dataHoliday } };
+            }
+            else
+            {
+                jsonReturn = new JsonResponse { status = false };
+            }
+            return Json(jsonReturn, JsonRequestBehavior.AllowGet);
+            //return new JsonResult { Data = new { dataEvent, dataHoliday }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        }
+
+        public ActionResult Checkname(int id, int id2, string _date)
+        {   // id = studygroupID id2 = schoolyearID
+            using (var db = new Student_AttendanceEntities())
+            {
+                try
+                {
+                    var data = (from r in db.Tb_SchoolYear
+                                where DateTime.Now > r.StartDate && DateTime.Now < r.EndDate && r.SchYearID == id2
+                                select new
+                                {
+                                    r
+                                }).FirstOrDefault();
+                    var today = DateTime.Now.ToShortDateString();
+                    DateTime Today = DateTime.Parse(_date);
+                    var dataholiday = db.Tb_Holiday.Select(r => new { date = r.HolidayDate, datename = r.HolidayName }).ToList();
+                    var groupstudy = db.Tb_StudyGroup.Where(r => r.StudyGroupID == id && r.SchYearID == id2).FirstOrDefault();
+                    var holiday = dataholiday.Where(r => r.date.ToShortDateString() == _date).FirstOrDefault();
+                    var message = new object();
+                    if (groupstudy == null)
+                    {
+                        message = "ขออภัย! ไม่สามารถเช็คชื่อได้ เนื่องจากไม่อยู่ในช่วงภาคการศึกษาปัจจุบัน";
+                        return RedirectToAction("Exceptions", "Home", new { message = message });
+                    }
+                    if (Today >= data.r.StartMidterm && Today <= data.r.EndMidterm)
+                    {
+                        message = "ขออภัย! ไม่สามารถเช็คชื่อได้ เนื่องจากอยู่ในช่วง สอบกลางภาค";
+                        return RedirectToAction("Exceptions", "Home", new { message = message });
+                    }
+                    else if (Today >= data.r.StartFinal && Today <= data.r.EndFinal)
+                    {
+                        message = "ขออภัย! ไม่สามารถเช็คชื่อได้ เนื่องจากอยู่ในช่วง สอบปลายภาค";
+                        return RedirectToAction("Exceptions", "Home", new { message = message });
+                    }
+                    else if (holiday != null)
+                    {
+                        message = "ขออภัย! ไม่สามารถเช็คชื่อได้ เนื่องจากตรงกับ " + holiday.datename;
+                        return RedirectToAction("Exceptions", "Home", new { message = message });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return RedirectToAction("Exceptions", "Home", new { message = ex.Message });
+                }
+            }
+
+            using (var db = new Student_AttendanceEntities())
+            {
+                try
+                {
+                    // Query เอาข้อมูลนักศึกษาทุกคนที่ยังไม่ได้เช็คชื่อวันนี้ เพิ่อเอาไปเช็คชื่อครั้งใหม่ ในวันที่นอกเหนือจาก วันที่สอนปกติ
+                    var dataNoCheck = (from sg in db.Tb_StudyGroup
+                                       join st in db.Tb_Student on sg.StudyGroupID equals st.StudyGroupID
+                                       where sg.StudyGroupID == id && st.StatusID == 5  // 5 = สถานะลงทะเบียน เท่านั้นที่มีสิทธิ์เช็คชื่อ
+                                       orderby st.StdCode
+                                       select new StudentCheckModel
+                                       {
+                                           StudyGroupID = sg.StudyGroupID,
+                                           StdID = st.StdID,
+                                           StdCode = st.StdCode,
+                                           NameTH = st.NameTH,
+                                       }).ToList();
+                    //var today = "06/29/2017";
+                    //var today = DateTime.Now.ToString("MM/dd/yyyy");
+                    var today = DateTime.Now.ToShortDateString();
+                    DateTime date = DateTime.Parse(_date);
+                    // Query เอาข้อมูลการเช็คชื่อนักศึกษาทุกคนที่ได้เช็คชื่อวันนี้ เพิ่อเอาไปแก้การเช็คชื่อ ถ้ามีคนลงทะเบียนเพิ่มในวันนี้หลังจากเช็คชื่อไปแล้ว ไม่สามารถเช็คชื่อได้ ต้องรอให้พ้นวันนี้ไปก่อน
+                    var dataIscheck = (from t1 in db.Tb_Student
+                                       join t3 in db.Tb_StudentCheck on t1.StdID equals t3.StdID
+                                       orderby t1.StdCode
+                                       where t3.DateCheck == date && t3.StudyGroupID == id && t1.StatusID == 5
+                                       select new StudentCheckModel()
+                                       {
+                                           StdCheckID = t3.StdCheckID,
+                                           StudyGroupID = t3.StudyGroupID,
+                                           StdID = t3.StdID,
+                                           StdCode = t1.StdCode,
+                                           NameTH = t1.NameTH,
+                                           StatusID = t3.StatusID,
+                                           Note = t3.Note
+                                       }).ToList();
+
+                    var datastatus = (from t1 in db.Tb_StudentCheck      // Query เอาสถานะการเช็คชื่อของวันนี้ ว่าเป็น มา สาย ลา ขาด ไหม เพิ่อเอาไปแก้การเช็คชื่อ
+                                      join t2 in db.Tb_Student on t1.StdID equals t2.StdID
+                                      where t1.StudyGroupID == id && t1.DateCheck == date
+                                      select t1.StatusID).ToList();
+                    if (datastatus.Count > 0) // ถ้าวันนี้มีการเช็คชื่อแล้วไปแล้วอย่างน้อย 1 ครั้ง
+                    {
+                        ViewBag.StdCheck = dataIscheck;             // ส่งข้อมูล Query dataIscheck ไปแก้ไขการเช็คชื่อ
+                    }
+                    else
+                    {
+                        ViewBag.StdCheck = dataNoCheck;             // มิฉะนั้นแล้ว ส่งข้อมูล Query dataNoCheck ไปการเช็คชื่อครั้งใหม่
+                    }
+                    var dataHeader = (from sg in db.Tb_StudyGroup        // Query เอาข้อมูลกลุ่มเรียน ไปแสดง ใน Header
+                                      join sj in db.Tb_Subject on new { sg.SubjectCode, sg.Course } equals new { sj.SubjectCode, sj.Course }
+                                      join sy in db.Tb_SchoolYear on sg.SchYearID equals sy.SchYearID
+                                      where sg.StudyGroupID == id
+                                      select new
+                                      {
+                                          StudyGroupID = sg.StudyGroupID,
+                                          StudyGroupCode = sg.StudyGroupCode,
+                                          SchYearID = sy.SchYearID,
+                                          Term = sy.Term,
+                                          Year = sy.Year,
+                                          SubjectCode = sj.SubjectCode,
+                                          SubjectName = sj.SubjectName,
+                                          Course = sj.Course
+                                      }).ToList();
+                    ViewBag.StudyGroupID = dataHeader.Select(r => r.StudyGroupID).SingleOrDefault();
+                    ViewBag.StudyGroupCode = dataHeader.Select(r => r.StudyGroupCode).SingleOrDefault();
+                    ViewBag.Term = dataHeader.Select(r => r.Term).SingleOrDefault();
+                    ViewBag.Year = dataHeader.Select(r => r.Year).SingleOrDefault();
+                    ViewBag.SubjectCode = dataHeader.Select(r => r.SubjectCode).SingleOrDefault();
+                    ViewBag.SubjectName = dataHeader.Select(r => r.SubjectName).SingleOrDefault();
+                    ViewBag.Course = dataHeader.Select(r => r.Course).SingleOrDefault();
+                    ViewBag.StudyGroup = dataHeader;
+                    ViewBag.date = _date;
+                    ViewBag.datetime = date.ToString("dd/MM/yyyy", Shared.CultureInfoTh);
+                }
+                catch (Exception ex)
+                {
+                    RedirectToAction("Exceptions", "Home", new { message = ex.Message });
+                }
+            }
+            return View();
+        } // นำข้อมูลที่มีการเช็คชื่อแล้วในวันนี้ หรือ ยังไม่ได้เช็คชื่อในวันนี้ไปแสดง เพื่อทำการเช็คชื่อ ใหม่ หรือ แก้ไขการเช็คชื่อ
 
         // NoteTeach Management CRUD LINQ TO SQL
 

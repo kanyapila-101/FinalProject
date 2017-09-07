@@ -166,6 +166,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\BuildingModel.cs" />
+    <Compile Include="Models\CheckScheduleModel.cs" />
     <Compile Include="Models\HolidayModel.cs" />
     <Compile Include="Models\LoginModel.cs" />
     <Compile Include="Models\NoteTeachModel.cs" />
@@ -1650,6 +1651,8 @@
     <Content Include="Views\Login\acs.cshtml" />
     <Content Include="Usermanual\AdminManual.pdf" />
     <Content Include="Usermanual\Usermanual-StudentsAttandance.pdf" />
+    <Content Include="Views\Home\CheckSchedule.cshtml" />
+    <Content Include="Views\Home\Checkname.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

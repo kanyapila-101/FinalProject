@@ -482,7 +482,7 @@
                                 swal("เกิดข้อผิดพลาด", "เนื่องจาก" + message, "error");
                             }
                             else if (status == true && res.data != null) {
-                                if (res.data.stdDuplicate < res.data.stdTotal) {
+                                if (res.data.stdDuplicate > 0 && res.data.stdDuplicate < res.data.stdTotal) {
                                     stdcodeNomat = [];
                                     var stdDif = res.data.stdTotal - res.data.stdDuplicate;
                                     $('#present').html(stdDif);
@@ -505,7 +505,7 @@
                                 else {
                                     swal({
                                         title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
-                                        text: "นักศึกษาเดิม " + res.data.stdDuplicate + " คน \n " + "มีนักศึกษาเพิ่มใหม่ " + res.data.stdNew + " คน",
+                                        text: "รายชื่อนักศึกษาเดิมซ้ำ " + res.data.stdDuplicate + " คน \n " + "มีนักศึกษาเพิ่มใหม่ " + res.data.stdNew + " คน",
                                         type: "success"
                                     }, function () {
                                         location.reload(true);

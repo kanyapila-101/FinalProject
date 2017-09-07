@@ -33,6 +33,7 @@ namespace Students_Attendance_Project.Models
         public string Note { get; set; }
         public DateTime? DateCheck { get; set; }
        
+
     }
 
     public class DateModel
