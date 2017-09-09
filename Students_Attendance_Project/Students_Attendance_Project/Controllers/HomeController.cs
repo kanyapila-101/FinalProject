@@ -1383,7 +1383,7 @@ namespace Students_Attendance_Project.Controllers
                                        SchYearID = r.SchYearID,
                                        Term = r.Term,
                                        Year = r.Year
-                                   }).FirstOrDefault();
+                                   }).ToList();
                 ViewBag.SchYear = dataSchYear;
 
                 var dataSubject = (from s in db.Tb_Subject
@@ -1418,8 +1418,8 @@ namespace Students_Attendance_Project.Controllers
                            orderby t.StartTimeInt
                            select t).ToList();
                 ViewBag.Day = Day;
-
-                ViewBag.Haveschedule = db.Tb_Schedule.Where(r => r.UserID == UserLogon.UserID && r.ScheduleID == dataSchYear.SchYearID).Count();
+                var schID = dataSchYear.Select(x => x.SchYearID).SingleOrDefault();
+                ViewBag.Haveschedule = db.Tb_Schedule.Where(r => r.UserID == UserLogon.UserID && r.SchYearID == schID).Count();
             }
             return View(model);
         }  // แสดงตารางการเช็คชื่อ ตามภาคการศึกษาปัจจุบันเท่านั้น
@@ -1433,7 +1433,8 @@ namespace Students_Attendance_Project.Controllers
                 {
                     // Query เอาข้อมูลวันที่เช็คเชื่อปกติ แต่ละวันจากเริ้ม-สุดสิ้นภาคเรียน ไปแสดงใน dropdownlist เพื่อจะทำการเลือกวันชดเชย
                     var dateCheck = (from r in db.Tb_StudentCheck
-                                     where r.StudyGroupID == id && (r.StatusID == null || r.StatusID == 9) && (r.Note == null || r.Note == "")
+                                     join s in db.Tb_Student on r.StdID equals s.StdID
+                                     where r.StudyGroupID == id && s.StatusID == 5 && r.StatusID == 9 && (r.Note == null || r.Note == "")
                                      orderby r.DateCheck
                                      select new DateModel { DateCheck = r.DateCheck }).Distinct().ToList();
                     // Query เอาข้อมูลวันที่ชดเชย แต่ละวันจากเริ้ม-สุดสิ้นภาคเรียน ไปแสดงใน ตารางเพื่อดู หรือลบวันชดเชย
@@ -1484,29 +1485,28 @@ namespace Students_Attendance_Project.Controllers
                 string[] str = _data.Split(',');
                 string dateCom = str[1];
                 string dateorigin = str[2];
-                var dateCom1 = DateTime.ParseExact(dateCom, "dd/MM/yyyy", Shared.CultureInfoTh).ToShortDateString();
-                var dateOri = DateTime.ParseExact(dateorigin, "dd/MM/yyyy", Shared.CultureInfoTh).ToShortDateString();
-                DateTime dateCompensate = DateTime.Parse(dateCom1);
-                DateTime dateOrigin = DateTime.Parse(dateOri);
+                var dateCompensate = DateTime.ParseExact(dateCom, "dd/MM/yyyy", Shared.CultureInfoTh);
+                var dateOrigin = DateTime.ParseExact(dateorigin, "dd/MM/yyyy", Shared.CultureInfoTh);
+                //DateTime dateCompensate = DateTime.Parse(dateCom1);
+                //DateTime dateOrigin = DateTime.Parse(dateOri);
                 int groupID = int.Parse(str[0]);
-                //string today = DateTime.Now.ToString("MM/dd/yyyy", Shared.CultureInfoTh);
-                //DateTime Today = DateTime.Parse(today);
                 using (var db = new Student_AttendanceEntities())
                 {
                     var dataCompens = (from r in db.Tb_StudentCheck
-                                       where r.StudyGroupID == groupID && r.DateCheck == dateCompensate && r.StatusID == 9
+                                       join s in db.Tb_Student on r.StdID equals s.StdID
+                                       where r.StudyGroupID == groupID && r.DateCheck == dateCompensate && r.StatusID == 9 && s.StatusID == 5
                                        select r).ToList();
-
                     var DateOriginal = (from r in db.Tb_StudentCheck
                                         where r.StudyGroupID == groupID && r.DateCheck == dateOrigin
                                         select r).ToList();
                     if (dataCompens.Count > 0 && dataCompens != null)
                     {
-                        foreach (var r in dataCompens)
+                        var delete = db.Tb_StudentCheck.Where(c => c.DateCheck == dateCompensate && c.StudyGroupID == groupID).ToList();
+                        foreach (var r in delete)
                         {
                             db.Tb_StudentCheck.Remove(r);
                         }
-
+                        db.SaveChanges();
                         if (DateOriginal.Count > 0 && DateOriginal != null)
                         {
                             var holiday = db.Tb_Holiday.Where(r => r.HolidayDate == dateOrigin).FirstOrDefault();
@@ -1530,7 +1530,10 @@ namespace Students_Attendance_Project.Controllers
             }
             catch (Exception ex)
             {
+                string err = ex.Message?.ToString() ?? ex.InnerException.Message;
+                Log.Error(err);
                 jsonReturn = new JsonResponse { status = false, message = ex.Message };
+
             }
             return Json(jsonReturn);
         } // delete วันสอนชดเชย ลบออกจากตารางการเช็คชื่อ ตามกลุ่มเรียนนั้น และให้วันที่เรียนปกติ มีสถานะ รอการเช็คชื่อ(9) , Note = ""
@@ -2091,7 +2094,7 @@ namespace Students_Attendance_Project.Controllers
                             dataMidterm.Add(new showSchoolYearModel
                             {
                                 title = "สอบกลางภาค " + r.Term + "/" + r.Year + "",
-                                description = "<b>วันที่ "+ r.StartMidterm.ToString("dd-MM-yyyy", Shared.CultureInfoTh) +" - " + r.EndMidterm.ToString("dd/MM/yyyy", Shared.CultureInfoTh) + "</br>สอบกลางภาค " + r.Term + "/" + r.Year + "</b>",
+                                description = "<b>วันที่ " + r.StartMidterm.ToString("dd-MM-yyyy", Shared.CultureInfoTh) + " - " + r.EndMidterm.ToString("dd/MM/yyyy", Shared.CultureInfoTh) + "</br>สอบกลางภาค " + r.Term + "/" + r.Year + "</b>",
                                 start = r.StartMidterm.ToString("yyyy-MM-dd", Shared.CultureInfo),
                                 end = r.EndMidterm.AddDays(1).ToString("yyyy-MM-dd", Shared.CultureInfo),
                             });
