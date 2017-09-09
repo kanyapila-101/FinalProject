@@ -2,11 +2,7 @@
 @{
     ViewBag.Title = "การเช็คชื่อ";
 }
-
-@*<link href="~/AdminLTE-master/plugins/fullcalendar/fullcalendar.min.css" rel="stylesheet" />
-    <link href="~/AdminLTE-master/plugins/fullcalendar/fullcalendar.print.css" rel="stylesheet"  media='print' />*@
 <link href="http://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.0/fullcalendar.min.css" rel="stylesheet" />
-
 <link href="http://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.0/fullcalendar.print.css" rel="stylesheet" media="print" />
 <style>
     body {
@@ -17,15 +13,19 @@
 
     #calendar {
         background-color: white;
-        /*border:1px solid;*/
-        max-width: 1000px;
+        max-width: 900px;
         margin: 0 auto;
     }
-    .fc-widget-content{
+
+    .fc-widget-content {
         cursor: pointer;
     }
-    div.fc-list-empty{
 
+    .fc-unthemed td.fc-today {
+        background: #ffffcc;
+    }
+
+    div.fc-list-empty {
     }
 </style>
 @{
@@ -36,31 +36,32 @@
         </div>
     }
 }
-
 <div id="calendar" class="row"></div>
 
-
-<div id="checknameModel" class="modal fade" role="dialog">
+<div id="checknameModal" class="modal fade" role="dialog">
     <div class="modal-dialog">
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">การเช็คชื่อ</h4>
+                <h4 class="modal-title"><span id="checknameModalTitle">การเช็คชื่อ</span></h4>
             </div>
             <div class="modal-body">
-                <div class="col-sm-4"></div>
-                <div class="col-sm-4">
+                <div id="description">
+                    <center></center><br />
+                </div>
+
+                <div class="col-sm-4 col-md-4 col-xs-2"></div>
+                <div class="col-sm-4 col-md-4 col-xs-8">
                     <button type="button" class="btn btn-success btn-Check pull-left">เช็คชื่อ</button>
                     <button type="button" class="btn btn-primary btn-Compensate pull-right">ชดเชย</button>
+                    <button type="button" class="btn btn-default center-block hidden btn-close" data-dismiss="modal">Close</button>
                 </div>
-                <div class="col-sm-4"></div><br /><br />
+                <div class="col-sm-4 col-md-4 col-xs-2"></div><br /><br />
             </div>
         </div>
     </div>
 </div>
-
-
 
 <form id="Compensate-form" class="form-horizontal">
     <div class="modal fade" id="CompensateModal" role="dialog">
@@ -90,7 +91,7 @@
                         <div class="col-sm-5">
                             <div class="input-group date">
                                 <input type="text" class="form-control datepicker" id="DateCheck" name="DateCheck" data-date-language="th-th" tabindex="2"
-                                       maxlength="10" required onkeyup="isDate(this.value, this)" @*onchange="CheckDate()"*@>
+                                       maxlength="10" required onkeyup="isDate(this.value, this)">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                             </div>
                             <div id="isDateCheck" style="padding-top: 3px;"></div>
@@ -122,7 +123,6 @@
         </div>
     </div>
 </form>
-
 
 @section scripts{
     <script>
@@ -419,6 +419,7 @@
                 },
                 success: function (res) {
                     if (res.status != false) {
+                        @*url: "@Url.Action("StdCheck", "Home")/" + groupID + "?id2=" + yearID + "",*@
                         $.each(res.data.dataEvent, function (i, e) {
                             groupID = e.StudyGroupID;
                             yearID = e.SchYearID;
@@ -428,21 +429,63 @@
                                 description: e.description,
                                 start: e.start,
                                 end: e.end,
-                                @*url: "@Url.Action("StdCheck", "Home")/" + groupID + "?id2=" + yearID + "",*@
                                 color: colorCode[i % colorCode.length]
                             })
-
                         });
+
 
                         $.each(res.data.dataHoliday, function (i, e) {
                             events.push({
                                 id: null,
                                 title: e.HolidayName,
-                                description: '',
+                                description: e.description,
                                 start: e.HolidayDate,
                                 end: null,
-                                url: null,
-                                color: "#ff0066"
+                                color: "#ff3333"
+                            })
+                        });
+
+                        $.each(res.data.dataStartYear, function (i, e) {
+                            events.push({
+                                id: null,
+                                title: e.title,
+                                description: e.description,
+                                start: e.start,
+                                end: null,
+                                color: "#00cc99"
+                            })
+                        });
+
+                        $.each(res.data.dataEndYear, function (i, e) {
+                            events.push({
+                                id: null,
+                                title: e.title,
+                                description: e.description,
+                                start: e.start,
+                                end: null,
+                                color: "#00cc99"
+                            })
+                        });
+
+                        $.each(res.data.dataMidterm, function (i, e) {
+                            events.push({
+                                id: null,
+                                title: e.title,
+                                description: e.description,
+                                start: e.start,
+                                end: e.end,
+                                color: "#00cc99"
+                            })
+                        });
+
+                        $.each(res.data.dataFinal, function (i, e) {
+                            events.push({
+                                id: null,
+                                title: e.title,
+                                description: e.description,
+                                start: e.start,
+                                end: e.end,
+                                color: "#00cc99"
                             })
                         });
                     }
@@ -461,7 +504,7 @@
                 //$('.fc-list-empty').val('ไม่มีตารางสอน');
                 $('#calendar').fullCalendar('destroy');
                 $('#calendar').fullCalendar({
-                    locale: 'th',
+                    locale: "th",
                     header: {
                         left: 'prev,next today',
                         center: 'title',
@@ -480,17 +523,30 @@
                     events: events,
                     eventClick: function (event) {
                         key = event.id;
-                        $('#checknameModel').modal("show");
+                        if (key == null) {
+                            $('#checknameModal #checknameModalTitle').text(event.title);
+                            $('.btn-close').removeClass('hidden');
+                            $('.btn-Compensate').addClass('hidden');
+                            $('.btn-Check').addClass('hidden');
+                            $('#description center').html("<b>" + event.description + "</b>");
+                        }
+                        else {
+                            $('#checknameModal #checknameModalTitle').text("การเช็คชื่อ");
+                            $('.btn-close').addClass('hidden');
+                            $('.btn-Check').removeClass('hidden');
+                            $('.btn-Compensate').removeClass('hidden');
+                            $('#description center').html(event.description);
+                        }
+                        $('#checknameModal').modal("show");
+
                     }
-
-
                 });
             }
-
         });
     </script>
 
-    <script src="~/Scripts/moment.min.js"></script>
+    @*<script src="~/Scripts/moment.min.js"></script>*@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.0/fullcalendar.min.js"></script>
-    <script src='http://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.0/locale-all.js'></script>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.0/locale/th.js'></script>
 }

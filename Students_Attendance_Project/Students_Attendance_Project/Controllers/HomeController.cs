@@ -1383,7 +1383,7 @@ namespace Students_Attendance_Project.Controllers
                                        SchYearID = r.SchYearID,
                                        Term = r.Term,
                                        Year = r.Year
-                                   }).ToList();
+                                   }).FirstOrDefault();
                 ViewBag.SchYear = dataSchYear;
 
                 var dataSubject = (from s in db.Tb_Subject
@@ -1419,7 +1419,7 @@ namespace Students_Attendance_Project.Controllers
                            select t).ToList();
                 ViewBag.Day = Day;
 
-                ViewBag.Haveschedule = db.Tb_Schedule.Where(r => r.UserID == UserLogon.UserID).Count();
+                ViewBag.Haveschedule = db.Tb_Schedule.Where(r => r.UserID == UserLogon.UserID && r.ScheduleID == dataSchYear.SchYearID).Count();
             }
             return View(model);
         }  // แสดงตารางการเช็คชื่อ ตามภาคการศึกษาปัจจุบันเท่านั้น
@@ -1484,11 +1484,13 @@ namespace Students_Attendance_Project.Controllers
                 string[] str = _data.Split(',');
                 string dateCom = str[1];
                 string dateorigin = str[2];
-                DateTime dateCompensate = DateTime.ParseExact(dateCom, "dd/MM/yyyy", Shared.CultureInfoTh);
-                DateTime dateOrigin = DateTime.ParseExact(dateorigin, "dd/MM/yyyy", Shared.CultureInfoTh);
+                var dateCom1 = DateTime.ParseExact(dateCom, "dd/MM/yyyy", Shared.CultureInfoTh).ToShortDateString();
+                var dateOri = DateTime.ParseExact(dateorigin, "dd/MM/yyyy", Shared.CultureInfoTh).ToShortDateString();
+                DateTime dateCompensate = DateTime.Parse(dateCom1);
+                DateTime dateOrigin = DateTime.Parse(dateOri);
                 int groupID = int.Parse(str[0]);
-                string today = DateTime.Now.ToString("MM/dd/yyyy", Shared.CultureInfoTh);
-                DateTime Today = DateTime.Parse(today);
+                //string today = DateTime.Now.ToString("MM/dd/yyyy", Shared.CultureInfoTh);
+                //DateTime Today = DateTime.Parse(today);
                 using (var db = new Student_AttendanceEntities())
                 {
                     var dataCompens = (from r in db.Tb_StudentCheck
@@ -1763,7 +1765,7 @@ namespace Students_Attendance_Project.Controllers
                                         StatusID = int.Parse(r.StatusID),
                                         StudyGroupID = int.Parse(r.StudyGroupID),
                                         Note = r.Note,
-                                       // DateCheck = r.DateCheck.Value
+                                        // DateCheck = r.DateCheck.Value
                                         DateCheck = DateTime.Parse(date)
                                     };
                                     db.Tb_StudentCheck.Add(data);
@@ -1864,7 +1866,6 @@ namespace Students_Attendance_Project.Controllers
                         {
                             db.Tb_StudentCheck.Where(x => x.StdCheckID == r.StdCheckID).ForEach(x =>
                             {
-                                x.StdCheckID = r.StdCheckID;
                                 x.StatusID = 7;
                                 x.Note = "ชดเชย วันที่ " + date;
                             });
@@ -2003,6 +2004,10 @@ namespace Students_Attendance_Project.Controllers
             var jsonReturn = new JsonResponse();
             var dataEvent = new List<CheckScheduleModel>();
             var dataHoliday = new List<showHolidayModel>();
+            var dataStartYear = new List<showSchoolYearModel>();
+            var dataEndYear = new List<showSchoolYearModel>();
+            var dataMidterm = new List<showSchoolYearModel>();
+            var dataFinal = new List<showSchoolYearModel>();
             // List<ShowNoteModel> dataH = new List<ShowNoteModel>();
             try
             {
@@ -2038,9 +2043,11 @@ namespace Students_Attendance_Project.Controllers
                                 SchYearID = r.SchYearID.ToString(),
                                 id = r.StudyGroupID + "," + r.SchYearID + "," + r.DateCheck.ToShortDateString(),
                                 title = r.SubjectName + " กลุ่มเรียน " + r.StudyGroupCode,
-                                description = r.SubjectCode + " " + r.SubjectName + " กลุ่มเรียน " + r.StudyGroupCode + " ห้อง " + r.RoomNo + " " + (r.TypeSubject == 1 ? "(ท." + r.TotalHour / 1 + ")" : "(ป." + r.TotalHour / 3 + ")"),
-                                start = r.DateCheck.ToString("yyyy-MM-dd") + "T" + r.StartTime,
-                                end = r.DateCheck.ToString("yyyy-MM-dd") + "T" + r.EndTime
+                                start = r.DateCheck.ToString("yyyy-MM-dd", Shared.CultureInfo) + "T" + r.StartTime,
+                                end = r.DateCheck.ToString("yyyy-MM-dd", Shared.CultureInfo) + "T" + r.EndTime,
+                                description = "<strong>วันที่ " + r.DateCheck.ToString("dd/MM/yyyy", Shared.CultureInfoTh) + " เวลา " + r.StartTime + " น. - " + r.EndTime + " น.</strong></br>" +
+                                "[" + r.SubjectCode + "] " + r.SubjectName + "</br> กลุ่มเรียน " + r.StudyGroupCode +
+                                "</br> ห้อง " + r.RoomNo + "</br> " + (r.TypeSubject == 1 ? "(ท." + r.TotalHour / 1 + ")" : "(ป." + r.TotalHour / 3 + ")"),
                             });
                         }
                     }
@@ -2057,8 +2064,43 @@ namespace Students_Attendance_Project.Controllers
                         {
                             dataHoliday.Add(new showHolidayModel
                             {
-                                HolidayDate = r.HolidayDate.ToString("yyyy-MM-dd"),
+                                HolidayDate = r.HolidayDate.ToString("yyyy-MM-dd", Shared.CultureInfo),
+                                description = r.HolidayDate.ToString("dd-MM-yyyy") + " " + r.HolidayName,
                                 HolidayName = r.HolidayName
+                            });
+                        }
+                    }
+
+                    var dataschoolyear = db.Tb_SchoolYear.OrderBy(r => r.SchYearID).ToList();
+                    if (dataschoolyear.Count > 0 && dataschoolyear != null)
+                    {
+                        foreach (var r in dataschoolyear)
+                        {
+                            dataStartYear.Add(new showSchoolYearModel
+                            {
+                                title = "เปิดภาคการศึกษา " + r.Term + "/" + r.Year + "",
+                                description = "<b>เปืดภาคการศึกษา " + r.Term + "/" + r.Year + "</b>",
+                                start = r.StartDate.ToString("yyyy-MM-dd", Shared.CultureInfo),
+                            });
+                            dataEndYear.Add(new showSchoolYearModel
+                            {
+                                title = "สิ้นสุดภาคการศึกษา " + r.Term + "/" + r.Year + "",
+                                description = "<b>สิ้นสุดภาคการศึกษา " + r.Term + "/" + r.Year + "</b>",
+                                start = r.EndDate.ToString("yyyy-MM-dd", Shared.CultureInfo),
+                            });
+                            dataMidterm.Add(new showSchoolYearModel
+                            {
+                                title = "สอบกลางภาค " + r.Term + "/" + r.Year + "",
+                                description = "<b>วันที่ "+ r.StartMidterm.ToString("dd-MM-yyyy", Shared.CultureInfoTh) +" - " + r.EndMidterm.ToString("dd/MM/yyyy", Shared.CultureInfoTh) + "</br>สอบกลางภาค " + r.Term + "/" + r.Year + "</b>",
+                                start = r.StartMidterm.ToString("yyyy-MM-dd", Shared.CultureInfo),
+                                end = r.EndMidterm.AddDays(1).ToString("yyyy-MM-dd", Shared.CultureInfo),
+                            });
+                            dataFinal.Add(new showSchoolYearModel
+                            {
+                                title = "สอบปลายภาค " + r.Term + "/" + r.Year + "",
+                                description = "<b>วันที่ " + r.StartFinal.ToString("dd-MM-yyyy", Shared.CultureInfoTh) + " - " + r.EndFinal.ToString("dd/MM/yyyy", Shared.CultureInfoTh) + "</br>สอบปลายภาค " + r.Term + "/" + r.Year + "</b>",
+                                start = r.StartFinal.ToString("yyyy-MM-dd", Shared.CultureInfo),
+                                end = r.EndFinal.AddDays(1).ToString("yyyy-MM-dd", Shared.CultureInfo),
                             });
                         }
                     }
@@ -2069,9 +2111,9 @@ namespace Students_Attendance_Project.Controllers
             {
 
             }
-            if (dataEvent != null)
+            if (dataEvent != null || dataHoliday != null || dataStartYear != null || dataEndYear != null || dataMidterm != null || dataEvent != null)
             {
-                jsonReturn = new JsonResponse { status = true, data = new { dataEvent, dataHoliday } };
+                jsonReturn = new JsonResponse { status = true, data = new { dataEvent, dataHoliday, dataStartYear, dataEndYear, dataMidterm, dataFinal } };
             }
             else
             {
