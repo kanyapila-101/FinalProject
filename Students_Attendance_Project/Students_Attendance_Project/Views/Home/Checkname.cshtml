@@ -8,6 +8,7 @@
     //var dataStudyGroup = (List<StudyGroupModel>)ViewBag.StudyGroup;
     var dateToday = DateTime.Now.ToString("d/MM/yyyy", Shared.CultureInfoTh);
     var entity = (List<StudentCheckModel>)ViewBag.StdCheck;
+    string state = null;
 }
 <style type="text/css">
     .detail {
@@ -17,7 +18,12 @@
     }
 </style>
 <!-- /.box table -->
-<div class="row">
+<div class="alert alert-warning alert-dismissible hidden" id="cannotCheck">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+    <h4><i class="icon fa fa-warning"></i> Alert!</h4>
+    <center> <h4><span id="textnocheck"></span></h4></center>
+</div>
+<div class="row" id="noteteach">
     <div class="col-md-1"></div>
     <div class="col-md-10">
         <!-- BEGIN SAMPLE TABLE PORTLET-->
@@ -93,10 +99,10 @@
                             <table class="table table-bordered table-hover text-center" id="StdCheck-table">
                                 <thead>
                                     <tr class="success">
-                                        <th style="width: 20%">รหัสนักศึกษา</th>
-                                        <th style="width: 25%">ชื่อ-นามสกุล</th>
+                                        <th style="width: 20%" class="hidden-xs hidden-sm">รหัสนักศึกษา</th>
+                                        <th style="width: 30%">ชื่อ-นามสกุล</th>
                                         <th style="width: 30%">สถานะ</th>
-                                        <th style="width: 25%">หมายเหตุ</th>
+                                        <th style="width: 20%" class="hidden-xs hidden-sm">หมายเหตุ</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -111,6 +117,7 @@
                                             foreach (var r in entity)
                                             {
                                                 var status = r.StatusID;
+                                                state = r.StatusID.ToString();
                                                 <tr class="@(line % 2 != 0 ? "info" : "")">
                                                     <td class="hidden">
                                                         <input type="hidden" value="@r.StudyGroupID" id="StudyGroupID" />
@@ -119,15 +126,15 @@
                                                         <input type="hidden" value="@r.StdCheckID" id="StdCheckID" />
                                                         <input type="hidden" value="@count" id="isbtndisabled" /> <!-- จำนวนสถานะที่ = ชดเชย เพื่อส่งค่าไปเช็ค btn-save-->
                                                     </td>
-                                                    <td style="text-align: left">@r.StdCode</td>
+                                                    <td style="text-align: left" class="hidden-xs hidden-sm">@r.StdCode</td>
                                                     <td style="text-align: left">@r.NameTH</td>
                                                     <td>
-                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="1" @(status == 1 ? "checked" : status == 7 ? "disabled" : "")>มา</label>
+                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="1" @(status == 1 ? "checked" : status == 7 ? "disabled" : status == 9 ? "checked" : "")>มา</label>
                                                         <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="2" @(status == 2 ? "checked" : status == 7 ? "disabled" : "")>สาย</label>
                                                         <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="3" @(status == 3 ? "checked" : status == 7 ? "disabled" : "")>ลา</label>
                                                         <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="4" @(status == 4 ? "checked" : status == 7 ? "disabled" : "")>ขาด</label>
                                                     </td>
-                                                    <td>
+                                                    <td class="hidden-xs hidden-sm">
                                                         <input type="text" class="col-sm-12 Note" name="Note" value="@r.Note" @((r.StatusID == 7) ? "readonly" : "") />
                                                     </td>
                                                 </tr>
@@ -172,7 +179,7 @@
                         </div>
                         <span class="isRed">กรุณาเลือกสถานะ :</span>
                         <div class="form-group">
-                            <label class="radio-inline pull-left">&nbsp;<input type="radio" name="StatusID[]" id="StatusID" value="1">มา</label>
+                            <label class="radio-inline pull-left"><input type="radio" name="StatusID[]" id="StatusID" value="1">มา</label>
                             <label class="radio-inline pull-left"><input type="radio" name="StatusID[]" id="StatusID" value="2">สาย</label>
                             <label class="radio-inline pull-left"><input type="radio" name="StatusID[]" id="StatusID" value="3">ลา</label>
                             <label class="radio-inline pull-left"><input type="radio" name="StatusID[]" id="StatusID" value="4">ขาด</label>
@@ -230,6 +237,12 @@
 @section scripts{
 
     <script>
+        var _statusid = @state;
+        if (_statusid == "7") {
+            $('#cannotCheck').removeClass('hidden');
+            $('#textnocheck').html("ไม่สามารถเช็คชื่อในวันนี้ได้ เนื่องจากได้ทำการ" +$('.Note').val());
+            $('#noteteach').addClass('hidden');
+        }
         var groupID = @ViewBag.StudyGroupID;
         var dateCheck = "";
         var count = $('#StdCount').val();

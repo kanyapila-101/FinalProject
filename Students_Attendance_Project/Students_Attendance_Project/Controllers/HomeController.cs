@@ -859,7 +859,7 @@ namespace Students_Attendance_Project.Controllers
                     {
                         foreach (var r in model)
                         {
-                            db.Tb_Student.Where(x => x.StdID == r.StdID).ForEach(x =>
+                            db.Tb_Student.Where(x => x.StudyGroupID == r.StudyGroupID && x.StdCode == r.StdCode).ForEach(x =>
                             {
                                 x.StatusID = r.StatusID;
                             });
@@ -911,7 +911,7 @@ namespace Students_Attendance_Project.Controllers
                 {
                     if (dateofweek[model.DayTeach] == sdate.DayOfWeek.ToString().ToLower())
                     {
-                        for (int i = 1; i <= 17; i++)
+                        for (int i = 1; i <= 18; i++)
                         {
                             if (sdate.DayOfYear >= dataSchYear.StartFinal.DayOfYear) // ป้องกัน เมื่อ เทอมซัมเมอร์ ซึ่งการสอนไม่เกิน 7 สัปดาห์
                             {
@@ -1206,7 +1206,7 @@ namespace Students_Attendance_Project.Controllers
                 {
                     if (dateofweek[listGen.DayTeach] == sdate.DayOfWeek.ToString().ToLower())
                     {
-                        for (int i = 1; i <= 17; i++)
+                        for (int i = 1; i <= 18; i++)
                         {
                             if (sdate.DayOfYear >= dataSchYear.StartFinal.DayOfYear) // ป้องกัน เมื่อ เทอมซัมเมอร์ ซึ่งการสอนไม่เกิน 7 สัปดาห์
                             {
@@ -2124,6 +2124,26 @@ namespace Students_Attendance_Project.Controllers
             }
             return Json(jsonReturn, JsonRequestBehavior.AllowGet);
             //return new JsonResult { Data = new { dataEvent, dataHoliday }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        }
+
+        public JsonResult CheckDateDefault(string date, string studygID)
+        {
+            var jsonReturn = new JsonResponse();
+            DateTime dateTeach = DateTime.ParseExact(date, "dd/MM/yyyy", Shared.CultureInfoTh);
+            int groupID = int.Parse(studygID);
+            using (var db = new Student_AttendanceEntities())
+            {
+                var data = db.Tb_StudentCheck.Where(r => r.StudyGroupID == groupID && r.DateCheck == dateTeach && (r.StatusID == 1 || r.StatusID == 2 || r.StatusID == 3 || r.StatusID == 4)).ToList();
+                if (data.Count > 0 && data != null)
+                {
+                    jsonReturn = new JsonResponse { status = false };
+                }
+                else
+                {
+                    jsonReturn = new JsonResponse { status = true };
+                }
+            }
+            return Json(jsonReturn);
         }
 
         public ActionResult Checkname(int id, int id2, string _date)

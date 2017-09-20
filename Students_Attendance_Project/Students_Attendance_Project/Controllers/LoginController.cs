@@ -94,7 +94,7 @@ namespace Students_Attendance_Project.Controllers
                             case "personalId":
                                 personalId = ssoValue;
                                 break;
-                            case "program":
+                            case "department":
                                 deptName = ssoValue;
                                 break;
                             case "gecos":
@@ -122,11 +122,6 @@ namespace Students_Attendance_Project.Controllers
             ViewBag.identityId = identityId;
             ViewBag.url = url;
             ViewBag.ssoValid = valid;
-            //gidNumber = "2500";
-            //username = "somsin";//
-            //firstname = "สมสิน";
-            //lastname = "วางขุนทด";
-            //deptName = "";
             if (gidNumber == "2500")
             {
                 // insert to user table & login table
@@ -450,21 +445,21 @@ namespace Students_Attendance_Project.Controllers
             }
             else if (UserLogon != null && (UserLogon.Role.ToLower() == "admin"))
             {
-                if (UserLogon.Name != "ผดุงศักดิ์ กัญญพิลา")
-                {
-                    if (CheckInternetConnectByPingGoogle() == true)
-                    {
-                        LineNotify(UserLogon.Name);
-                    }
-                }
+                //if (UserLogon.Name != "ผดุงศักดิ์ กัญญพิลา")
+                //{
+                //    if (CheckInternetConnectByPingGoogle() == true)
+                //    {
+                //        LineNotify(UserLogon.Name);
+                //    }
+                //}
                 return RedirectToAction("Index", "Admin");
             }
             else
             {
-                if (CheckInternetConnectByPingGoogle() == true)
-                {
-                    LineNotify(UserLogon.Name);
-                }
+                //if (CheckInternetConnectByPingGoogle() == true)
+                //{
+                //    LineNotify(UserLogon.Name);
+                //}
                 return RedirectToAction("Index", "Home");
             }
         }

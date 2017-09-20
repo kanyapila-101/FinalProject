@@ -67,22 +67,25 @@
                                             int line = 0;
                                             foreach (var r in entity)
                                             {
-                                    <tr class="@(line % 2 != 0 ? "info" : "")">
-                                        <td>@r.StdCode</td>
-                                        <td style="text-align:left;">@r.NameTH</td>
-                                        <td style="text-align:left;">@r.NameEN</td>
-                                        <td style="color:@(r.StatusID == 6 ? "red":"none" )">@r.StatusName</td>
+                                                <tr class="@(line % 2 != 0 ? "info" : "")">
+                                                    <td class="hidden">
+                                                        <input type="text" id="studygid" value="@r.StudyGroupID" />
+                                                    </td>
+                                                    <td>@r.StdCode</td>
+                                                    <td style="text-align:left;">@r.NameTH</td>
+                                                    <td style="text-align:left;">@r.NameEN</td>
+                                                    <td style="color:@(r.StatusID == 6 ? "red":"none" )">@r.StatusName</td>
 
-                                        <td>
-                                            <button type="button" class="btn btn-warning btn-xs btn-edit" data-studentid="@r.StdID,@r.StudyGroupID" role="button"
-                                                    data-toggle="tooltip" data-placement="top" title="แก้ไขข้อมูล">
-                                                <i class="fa fa-pencil"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                                                line++;
-                                                            }
-                                                        }
+                                                    <td>
+                                                        <button type="button" class="btn btn-warning btn-xs btn-edit" data-studentid="@r.StdID,@r.StudyGroupID" role="button"
+                                                                data-toggle="tooltip" data-placement="top" title="แก้ไขข้อมูล">
+                                                            <i class="fa fa-pencil"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                line++;
+                                            }
+                                        }
                                     }
                                 </tbody>
                             </table>
@@ -228,17 +231,14 @@
                             <div class="form-group">
                                 <strong>มีรายชื่อนักศึกษาที่เพิ่มใหม่ลดลง หรือไม่ตรงกับรายชื่อนักศึกษาเดิมในกลุ่มเรียน : <span id="present">...</span>   รายชื่อ</strong>
                             </div>
-                            <span>ถ้าต้องการเปลี่ยนสถานะ ลงทะเบียนเรียน เป็น <span class="isRed">ถอนรายวิชา</span> กรุณาเลือกสถานะ </span><br /><br />
-                            <div class="form-group">
-                                <label class="radio-inline pull-left"><input type="radio" name="StatusID[]" id="StatusID" value="6">เปลี่ยนตอนนี้</label>
-                                <label class="radio-inline pull-left"><input type="radio" name="StatusID[]" id="StatusID" value="1">ภายหลัง</label>
-                            </div><br />
+                            <span>ถ้าต้องการเปลี่ยนสถานะ ลงทะเบียนเรียน เป็น <span class="isRed">ถอนรายวิชา</span> กรุณาเลือก </span><br /><br />
                             <div class="table-scrolllabel">
                                 <table id="NotStd-table" class="table table-bordered table-hover">
                                     <thead>
                                         <tr class="info" style="text-align:center;">
                                             <td width="20%">รหัสนักศึกษา</td>
                                             <td width="35%">ชื่อ-สกุล</td>
+                                            <td width="15%"><label><input type="checkbox" id="checkall" checked /> ทั้งหมด</label></td>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -260,7 +260,8 @@
     </div>
 </section>
 @section scripts{
-
+    <script src="~/AdminLTE-master/plugins/iCheck/icheck.js"></script>
+    <script src="~/AdminLTE-master/plugins/iCheck/icheck.min.js"></script>
     <script>
         $('.btn-fileExam').click(function () {
             $('#fileExampleModal').modal("show");
@@ -428,7 +429,6 @@
             }
         }
 
-
         $(document).ready(function () {
             $('.sidebar-menu > li').removeClass('active');
             $('.studyGroup').addClass('active');
@@ -446,7 +446,38 @@
                 $('.fileHidden').show();
                 $('#StudentModal').modal("show");
             });
-            var stdcodeNomat = new Array();
+
+            $('#checkall').change(function () {
+                if (this.checked) {
+                    $('#NotStd-table tbody tr').each(function () {
+                        $($(this).find('#StatusID')).prop('checked', true);
+                    });
+                }
+                else {
+                    $('#NotStd-table tbody tr').each(function () {
+                        $($(this).find('#StatusID')).attr('checked', false);
+                    });
+                }
+            });
+            //function nocheck() {
+            //    $(".checkbx").change(function () {
+            //        var ischeck = false;
+            //        var i = 0;
+            //        $('#NotStd-table tbody tr').each(function () {
+            //            ischeck = $(".checkbx").prop('checked') ? true : false;
+            //            if (!ischeck) {
+            //                i++;
+            //            }
+            //        });
+            //        if (i > 0) {
+            //            $('#checkall').prop('checked', false);
+            //        }
+            //        else {
+            //            $('#checkall').prop('checked', true);
+            //        }
+            //    });
+            //}
+
             $('.btn-save').click(function () {
                 //var id = $('#StudyGroupID').val();
                 //alert(id);
@@ -458,7 +489,7 @@
                         url: '@Url.Action("SaveStudent", "Home")',  // ส่งไปให้ที่ได้ ระบุ
                         dataType: "json", // ชนิดข้อมูลที่ส่ง
                         //data: $('#Student-form').serialize(), // ข้อมูลที่ส่ง
-                        traditional: true, // การจดจำข้อมูล
+                        traditional: true,
                         contentType: false,
                         processData: false,
                         data: form_data, // ข้อมูลที่ส่ง
@@ -483,20 +514,18 @@
                             }
                             else if (status == true && res.data != null) {
                                 if (res.data.stdDuplicate > 0 && res.data.stdDuplicate < res.data.stdTotal) {
-                                    stdcodeNomat = [];
+                                   
                                     var stdDif = res.data.stdTotal - res.data.stdDuplicate;
                                     $('#present').html(stdDif);
                                     $('#NotStd-table').find('tbody').find('tr').remove();
                                     if (res.data.dataS != null) {
                                         $.each(res.data.dataS, function (i, e) {
-                                            stdcodeNomat.push({
-                                                StdID: e.StdID,
-                                                StatusID: 6
-                                            });
                                             $('#NotStd-table').find('tbody').append(
                                                 '<tr>' +
+                                                '<td class="hidden"><input type="hidden" value="' + e.StdCode + '" id="StdCode" /></td>' +
                                                 '<td style="text-align:left">' + e.StdCode + '</td>' +
                                                 '<td style="text-align:left">' + e.NameTH + '</td>' +
+                                                '<td style="text-align:left"><center><input class="checkbox checkbx" type="checkbox" name="StatusID[]" id="StatusID" value="6" checked></center></td>' +
                                                 '</tr>');
                                         });
                                     }
@@ -530,6 +559,7 @@
                             unLoadSpin();
                         },
                         complete: function () {
+                           // nocheck();
                             unLoadSpin();
                         },
                     });
@@ -537,7 +567,7 @@
 
                 return false;
             });
-            
+
             $('#addStdModal').on('hidden.bs.modal', function () {
                 if (hide != 1) {
                     $('#addStdModal').find("input[type=radio]").attr('checked', false);
@@ -555,11 +585,25 @@
                 }
             })
             //$('#addStdModal').modal("show");
+            var stdchangeStatus = new Array();
             var hide = 0;
             $('.btn-save2').click(function () {
+                stdchangeStatus = [];
                 hide = 1;
-                var StatusR = $('#addStdModal').find("input[type=radio]:checked").val();
-                if (StatusR != '6') {
+                var groupid = $('#studygid').val();
+                $('#NotStd-table tbody tr').each(function () {
+                    var datastdcode = $($(this).find('td #StdCode')).val();
+                    var datastatus = $($(this).find('#StatusID:checked')).val();
+                    if (datastdcode != null && datastatus != null) {
+                        stdchangeStatus.push({
+                            StudyGroupID: groupid,
+                            StdCode: datastdcode,
+                            StatusID: datastatus
+                        });
+                    }
+                    //console.log(stdchangeStatus);
+                });
+                if (stdchangeStatus.length == 0) {
                     swal({
                         title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
                         type: "success",
@@ -571,14 +615,14 @@
                         location.reload(true);
                     });
                 }
-                else if (StatusR == '6') {
+                else if (stdchangeStatus.length > 0) {
                     $.ajax({
                         type: "POST", // method ที่จะส่ง
                         cache: false,
                         url: '@Url.Action("SaveStdChangeStatus", "Home")',  // ส่งไปให้ที่ได้ ระบุ
                         dataType: "json", // ชนิดข้อมูลที่ส่ง
-                        data: '&' + $.param({ model: stdcodeNomat }), // ข้อมูลที่ส่ง
-                        traditional: true, 
+                        data: '&' + $.param({ model: stdchangeStatus }), // ข้อมูลที่ส่ง
+                        traditional: true,
                         beforeSend: function () { // ก่องส่ง data จะให้ทำไร
                             loadSpin();
                         },
@@ -600,7 +644,7 @@
                                     type: "success",
                                     showConfirmButton: false,
                                     timer: 1000,
-                                   
+
                                     closeOnConfirm: false
                                 },
                                     function () {
@@ -624,8 +668,6 @@
                 $('.fileHidden').hide();
                 isStdCode = true;
                 $("#StdID").val($(this).data("studentid"));
-                //var id = $("#StdID").val();
-                //alert(id);
                 $.ajax({
 
                     type: "POST", // method ที่จะส่ง
@@ -673,5 +715,4 @@
             });
         });
     </script>
-
 }

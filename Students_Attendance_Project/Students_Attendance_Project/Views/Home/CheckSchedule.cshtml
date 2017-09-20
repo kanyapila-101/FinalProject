@@ -22,7 +22,7 @@
     }
 
     .fc-unthemed td.fc-today {
-        background: #ffffcc;
+        background: #ccffd9;
     }
 
     div.fc-list-empty {
@@ -79,10 +79,7 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label">วันที่เรียนปกติ :</label>
                         <div class="col-sm-5">
-                            <select class="form-control" id="DateDefault" name="DateDefault" tabindex="1" required>
-                                <option value="">-- กรุณาเลือก --</option>
-                            </select>
-
+                            <input type="text" class="form-control" id="DateDefault" name="DateDefault" readonly/>
                         </div>
                     </div>
 
@@ -129,6 +126,7 @@
         var d = Date.now.toString('yyyy-mm-dd');
         var colorCode = ["#0080FF", "#12a112", "#01A9DB", "#9966ff", "#ff9933"];
         var key = null;
+        var realDate = new Array();
         $('.datepicker').datepicker({
             showInputs: true,
             autoclose: true,
@@ -190,18 +188,7 @@
                             swal("เกิดข้อผิดพลาด", message, "error");
 
                         } else {
-                            $('#DateDefault').find('option').remove();
-                            $('#DateDefault').append('<option value="">-- กรุณาเลือก --</option>');
-                            // solution one
-                            //$.each(res.data, function (i, e){
-                            //    alert(res.data[i].DeptID);
-                            //});
-
-                            //solutoin two
-                            $.each(res.data.date, function (i, e) {
-                                //alert(e.Dept_PK + "   " + e.DeptName);
-                                $('#DateDefault').append('<option value="' + e + '">' + e + '</option>');
-                            });
+                            $('#DateDefault').val(realDate[1]);
                             $('#Compensate-table').find('tbody').find('tr').remove();
                             $.each(res.data.compensate, function (i, e) {
                                 var dateCompensate = e.Note.split(' ');
@@ -217,7 +204,6 @@
                         btnDelAppend(groupID);
                     },
                 });
-
             }
         }
 
@@ -282,18 +268,55 @@
             });
         }
 
+        function checkDateDufault(stygID) {
+            var state = false;
+            if (realDate[1] != "") {
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("CheckDateDefault", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: { date: realDate[1], studygID: stygID }, // ข้อมูลที่ส่ง
+                    traditional: true, // การจดจำข้อมูล
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("ขออภัย !", "ไม่สามารถทำการชดเชยในวันนี้ได้ เนื่องจากมีการเช็คชื่อไปแล้ว", "error");
+                        } else {
+                            var str = key.split(',');
+                            getDateCom(str[0]);
+                            $('#gID').val(str[0]);
+                            gID = str[0];
+                            $('#isDateCheck').html("");
+                            $('#Compensate-form').find('.form-group').find('#DateCheck').removeClass('error');
+                            $('#Compensate-form').find("input").val("");
+                            $('#CompensateModal').modal('show');
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    },
+                    
+                });
+            }
+            return state;
+        }
+
         var gID = null;
         $('.btn-Compensate').click(function () {
-            //groupID = $(this).val();
             var str = key.split(',');
-            getDateCom(str[0]);
-            $('#gID').val(str[0]);
-            gID = str[0];
-            //alert($('#gID').val());
-            $('#isDateCheck').html("");
-            $('#Compensate-form').find('.form-group').find('#DateCheck').removeClass('error');
-            $('#Compensate-form').find("input").val("");
-            $('#CompensateModal').modal('show');
+            checkDateDufault(str[0]);
         });
 
         $('.btn-Check').click(function () {
@@ -535,6 +558,10 @@
                             $('#description center').html("<b>" + event.description + "</b>");
                         }
                         else {
+                            realDate = event.description.split(" ");
+                            //alert(realDate[1]);
+                            //$('#DateDefault').val(realDate[1]);
+
                             $('#checknameModal #checknameModalTitle').text("การเช็คชื่อ");
                             $('.btn-close').addClass('hidden');
                             $('.btn-Check').removeClass('hidden');

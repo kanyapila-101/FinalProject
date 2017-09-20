@@ -238,16 +238,16 @@
                             <span class="pull-right-container">@*<small class="label pull-right bg-green">New</small>*@</span>
                         </a>
                     </li>
-                    <li class="treeview ScheduleCheck">
+                    @*<li class="treeview ScheduleCheck">
                         <a href="@Url.Action("ScheduleCheck", "Home")">
                             <i class="fa  fa-check-square-o"></i>
                             <span>เช็คชื่อ</span>
                         </a>
-                    </li>
+                    </li>*@
                     <li class="treeview ScheduleCheck">
                         <a href="@Url.Action("CheckSchedule", "Home")">
                             <i class="fa  fa-check-square-o"></i>
-                            <span>เช็คชื่อ</span><small class="label pull-right bg-green">new</small>
+                            <span>เช็คชื่อ</span>@*<small class="label pull-right bg-green">new</small>*@
                         </a>
                     </li>
                     <li class="treeview summary">
@@ -265,11 +265,6 @@
                     @*<li>
                         <a href="@Url.Action("HolidayCalendar","Home")">
                             <i class="fa fa-calendar"></i> <span>ปฏิทินวันหยุดไทย</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="@Url.Action("Logout","Login")">
-                            <i class="fa fa-sign-out"></i> <span>ออกจากระบบ</span>
                         </a>
                     </li>*@
                 </ul>
