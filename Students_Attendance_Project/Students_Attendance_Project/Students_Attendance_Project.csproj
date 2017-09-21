@@ -1248,6 +1248,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Content Include="icon\404.png" />
     <Content Include="icon\admin-dept.png" />
     <Content Include="icon\admin-faculty.png" />
     <Content Include="icon\admin-help.png" />
@@ -1653,6 +1654,7 @@
     <Content Include="Usermanual\Usermanual-StudentsAttandance.pdf" />
     <Content Include="Views\Home\CheckSchedule.cshtml" />
     <Content Include="Views\Home\Checkname.cshtml" />
+    <Content Include="Views\Login\error404.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

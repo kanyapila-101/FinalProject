@@ -27,7 +27,7 @@ namespace Students_Attendance_Project.Controllers
             int userid = userReq != null ? userReq.UserID : 0;
             string controller = System.Web.HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString().ToLower();
             string action = System.Web.HttpContext.Current.Request.RequestContext.RouteData.Values["action"].ToString().ToLower();
-            var actionlist = new string[] { "login", "loginload", "registersave", "acs", "sls", "redirectsso" };
+            var actionlist = new string[] { "login", "loginload", "registersave", "acs", "sls", "redirectsso","error404" };
             if (!actionlist.Contains(action))
             {
                 using (var db = new Student_AttendanceEntities())

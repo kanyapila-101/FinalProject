@@ -210,7 +210,7 @@ namespace Students_Attendance_Project.Controllers
             else
             {
                 ViewBag.notUse = "ขออภัยบัญชีผู้ใช้ " + username + " นี้ไม่สามารถใช้งานระบบนี้ได้";
-                return View();
+                return RedirectToAction("error404", "Login");
             }
             //return View();
         }
@@ -462,6 +462,11 @@ namespace Students_Attendance_Project.Controllers
                 //}
                 return RedirectToAction("Index", "Home");
             }
+        }
+
+        public ActionResult error404()
+        {
+            return View();
         }
 
         public JsonResult LoginLoad(string username, string password) // เช็ค email password ในการ Login

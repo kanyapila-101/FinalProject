@@ -433,12 +433,12 @@ namespace OneLogin
             if (returnTo == "")
             {
                 Url = this.Settings.idp_sso_url + "?SAMLRequest=" + this.Context.Server.UrlEncode(this.Request.GetAuthRequest());
-                Log.Error("Url Null "+Url);
+                //Log.Error("Url Null "+Url);
             }
             else
             {
                 Url = this.Settings.idp_sso_url + "?SAMLRequest=" + this.Context.Server.UrlEncode(this.Request.GetAuthRequest()) + "&RelayState=" + returnTo;
-                Log.Error("Url Not null " + Url);
+               // Log.Error("Url Not null " + Url);
             }
             this.Context.Response.Redirect(Url);
             //return Url;

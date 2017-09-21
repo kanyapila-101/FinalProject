@@ -146,11 +146,17 @@
                             </table>
                         </form>
                         <div class="box-footer">
+                            <div class="radio-inline col-sm-offset-3" id="checkall">
+                                <label class="radio-inline"><input type="radio" class="center-block" id="All" name="all" value="1"/>มาทั้งหมด</label>
+                                <label class="radio-inline"><input type="radio" class="center-block" id="All" name="all" value="2"/>สายทั้งหมด</label>
+                                <label class="radio-inline"><input type="radio" class="center-block" id="All" name="all" value="3"/>ลาทั้งหมด</label>
+                                <label class="radio-inline"><input type="radio" class="center-block" id="All" name="all" value="4"/>ขาดทั้งหมด</label>
+                            </div>
                             <button class="btn btn-success pull-right btn-save"
                                     disabled>
                                 บันทึกข้อมูล
                             </button>
-                            <button class="btn btn-default pull-left" onclick="location.href='@Url.Action("ScheduleCheck", "Home")'">ยกเลิก</button>
+                            <button class="btn btn-default pull-left" onclick="location.href='@Url.Action("CheckSchedule", "Home")'">ยกเลิก</button>
                         </div>
                     </div>
                 </div>
@@ -237,6 +243,14 @@
 @section scripts{
 
     <script>
+        $('#checkall input').change(function(){
+            var a = $('#checkall').find("input[type=radio]:checked").val();
+            console.log(a);
+            $("table tbody tr td input[type=radio]").each(function () {
+                $('table tbody tr td input[type=radio][value='+ a +']').prop('checked', true); 
+                return false;
+            });
+        })
         var _statusid = @state;
         if (_statusid == "7") {
             $('#cannotCheck').removeClass('hidden');
