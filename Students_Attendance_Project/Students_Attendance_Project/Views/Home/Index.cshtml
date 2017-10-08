@@ -30,10 +30,10 @@
     <br /><br />
 </div>
 @*<section class="content-header">
-    <h4><span class="glyphicon glyphicon-hand-right"></span> ข้อมูลพื้นฐาน</h4>
-</section>*@
+        <h4><span class="glyphicon glyphicon-hand-right"></span> ข้อมูลพื้นฐาน</h4>
+    </section>*@
 <div class="row">
-    <div class="col-md-12 col-lg-12 col-sm-12 col-xs-12" >
+    <div class="col-md-12 col-lg-12 col-sm-12 col-xs-12">
         <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
             <!-- small box -->
             <div>
@@ -65,8 +65,26 @@
             <!-- small box -->
             <div>
                 <figure class="item">
-                    <a href="@Url.Action("ScheduleCheck","Home")"><img class="size" src="~/icon/icon_check1.png"></a>
+                    <a href="@Url.Action("CheckSchedule","Home")"><img class="size" src="~/icon/icon_check1.png"></a>
                     <figcaption class="caption"><a href="@Url.Action("CheckSchedule","Home")">เช็คชื่อ</a></figcaption>
+                </figure>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+            <!-- small box -->
+            <div>
+                <figure class="item">
+                    <a href="@Url.Action("STask","Home")"><img class="size" src="~/icon/icon_task1.png"></a>
+                    <figcaption class="caption"><a href="@Url.Action("STask","Home")">งานเดี่ยว</a></figcaption>
+                </figure>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+            <!-- small box -->
+            <div>
+                <figure class="item">
+                    <a href="@Url.Action("GTask","Home")"><img class="size" src="~/icon/icon_task2.png"></a>
+                    <figcaption class="caption"><a href="@Url.Action("GTask","Home")">งานกลุ่ม</a></figcaption>
                 </figure>
             </div>
         </div>
@@ -92,6 +110,15 @@
             <!-- small box -->
             <div>
                 <figure class="item">
+                    <a href="@Url.Action("SummaryTask","Home")"><><img class="size" src="~/icon/icon_file3.png"></a>
+                    <figcaption class="caption"><a href="@Url.Action("SummaryTask","Home")">ส>สรุปคะแนนงานที่มอบหมาย</a></figcaption>
+                </figure>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+            <!-- small box -->
+            <div>
+                <figure class="item">
                     <a href="@Url.Action("Contact","Home")"><img class="size" src="~/icon/admin-help.png"></a>
                     <figcaption class="caption"><a href="@Url.Action("Contact","Home")">คู่มือการใช้งานระบบ</a></figcaption>
                 </figure>
@@ -101,13 +128,10 @@
     <!-- Main row -->
 </div>
 @*<section class="content-header">
-    <h4><span class="glyphicon glyphicon-hand-right"></span> การเช็คชื่อ รายงานสรุปผล</h4>
-</section>*@
+        <h4><span class="glyphicon glyphicon-hand-right"></span> การเช็คชื่อ รายงานสรุปผล</h4>
+    </section>*@
 <div class="row">
     <div class="col-md-12">
-        
-        
-        
     </div>
 </div>
 @section scripts{
@@ -117,4 +141,4 @@
             $('.index').addClass('active');
         });
     </script>
-     }
+}

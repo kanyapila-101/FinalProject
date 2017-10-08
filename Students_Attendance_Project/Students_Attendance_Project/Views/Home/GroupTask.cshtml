@@ -1,0 +1,323 @@
+﻿@using Students_Attendance_Project.Models;
+@model Students_Attendance_Project.Models.FilterModel
+@using PagedList.Mvc;
+@using PagedList;
+@{
+    ViewBag.Title = "งานกลุ่ม";
+}
+
+<style>
+    .table-scrollable {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border: 1px solid #e7ecf1;
+        margin: 10px 0 !important;
+    }
+
+        .table-scrollable .text-left {
+            text-align: left;
+        }
+</style>
+<section>
+    <div class="row">
+        <div class="col-sm-12">
+            <!-- BEGIN SAMPLE TABLE PORTLET-->
+            <div class="panel panel-danger">
+                <div class="box-header">
+                    <div class="box-header">
+                        <div class="caption">
+                            <i class="fa fa-cogs"></i> &nbsp;<strong style="font-size: 16px; ">@ViewBag.Header</strong>
+                            <button type="button" class="btn btn-primary btn-sm pull-right btn-addgrouptask"><i class="fa fa-plus"></i>&nbsp;เพิ่ม</button>
+                        </div>
+                        <hr />
+                    </div>
+                    <div class="portlet-body">
+                        <div class="table-scrollable">
+                            <table class="table table-bordered table-hover text-center" id="GroupTask-table">
+                                <thead>
+                                    <tr class="success">
+                                        <th style="width: 7%;">งานที่</th>
+                                        <th>ชื่องาน</th>
+                                        <th style="width: 8%;">คะแนนเต็ม</th>
+                                        <th style="width: 25%;">หมายเหตุ</th>
+                                        <th style="width: 10%;">รายละเอีบด</th>
+                                        <th style="width: 15%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var query = (List<TaskModel>)ViewBag.GroupTask;
+                                        if (query.Count > 0 && query != null)
+                                        {
+                                            int line = 1;
+                                            foreach (var r in query)
+                                            {
+                                                <tr class="@(line % 2 == 0 ? "info" : "")">
+                                                    <td>@line</td>
+                                                    <td class="text-left">@r.TaskName</td>
+                                                    <td>@r.FullScore</td>
+                                                    <td class="text-left hidden-xs hidden-sm">@r.Note</td>
+                                                    <td>
+                                                        <a href="@Url.Action("GTaskScore","Home", new { Gid = r.StudyGroupID, taskID = r.TaskID})" class="btn btn-success btn-xs">รายละเอีบด</a>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-warning btn-xs btn-editTask" data-taskid="@r.TaskID" role="button" data-toggle="tooltip" data-placement="top" title="แก้ไข"><i class="fa fa-pencil"></i></button>
+                                                        <button type="button" class="btn btn-danger btn-xs btn-delTask" data-taskid="@r.TaskID" role="button" data-toggle="tooltip" data-placement="right" title="ลบ"><i class="fa fa-remove"></i></button>
+                                                    </td>
+                                                </tr>
+                                                line++;
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END SAMPLE TABLE PORTLET-->
+        </div>
+    </div>
+</section>
+<form id="GroupTask-form" class="form-horizontal">
+    <div class="modal fade" id="GroupTaskModal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">งานกลุ่ม</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="TaskID" id="TaskID" value="0">
+                    <input type="hidden" name="StudyGroupID" id="StudyGroupID" value="@ViewBag.StudyGroupID">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">ชื่องาน :<span class="isRed"> *</span></label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" id="TaskName" name="TaskName" tabindex="1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">คะแนนเต็ม :<span class="isRed"> *</span></label>
+                        <div class="col-sm-3">
+                            <input type="number" class="form-control" id="FullScore" name="FullScore" tabindex="2" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">จำนวนกลุ่ม :<span class="isRed"> *</span></label>
+                        <div class="col-sm-3">
+                            <input type="number" class="form-control" id="quantityGroup" name="quantityGroup" tabindex="3" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">หมายเหตุ :&nbsp;&nbsp;</label>
+                        <div class="col-sm-7">
+                            <textarea class="form-control" rows="3" id="Note" name="Note" tabindex="4"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-success pull-right btn-saveTask" tabindex="5" data-dismiss="modal">บันทึกข้อมูล</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        $('#GroupTask-form').validate({
+            rules: {
+                TaskName: { required: true },
+                FullScore: { required: true, min: 1 },
+                quantityGroup: { required: true, min: 1 },
+            },
+            messages: {
+                TaskName: { required: "กรุณากรอกชื่องาน" },
+                FullScore: { required: "กรุณากรอกคะแนนเต็ม", min: "กรุณากรอกคะแนนเต็มอย่างน้อย 1 คะแนน" },
+                quantityGroup: { required: "กรุณากรอกจำนวนกลุ่ม", min: "กรุณากรอกจำนวนกลุ่มอย่างน้อย 1 กลุ่ม" },
+            }
+        });
+        $(document).ready(function () {
+            $('.sidebar-menu > li').removeClass('active');
+            $('.task').addClass('active');
+            $('.task > ul > .task2').addClass('active');
+
+            $('.btn-addgrouptask').click(function () {
+                $('#TaskID').val("0");
+                $('#TaskName').val("");
+                $('#FullScore').val("");
+                $('#quantityGroup').val("");
+                $('#Note').val("");
+                ResetModal();
+                $('#GroupTaskModal').modal("show");
+            });
+        });
+        function ResetModal() {
+            $('#GroupTask-form').find('.form-group').find('label.error').remove();
+            $('#GroupTask-form').find('.form-group').find('.error').removeClass('error');
+            $('#GroupTask-form').find('.form-group').find('.valid').removeClass('valid');
+        }
+        $('.btn-saveTask').click(function () {
+            //$('#StudyGroupID').val(groupID);
+            //alert($('#StudyGroupID').val());
+            if ($('#GroupTask-form').valid()) {
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("SaveGroupTask", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: $('#GroupTask-form').serialize(), // ข้อมูลที่ส่ง
+                    traditional: true,
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+
+                        } else {
+                            swal({
+                                title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                type: "success",
+                                showConfirmButton: false,
+                                timer: 1000,
+                                closeOnConfirm: false
+                            },
+                                function () {
+                                    location.reload(true);
+                                });
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    },
+                });
+            }
+            return false;
+        });
+        $('.btn-editTask').click(function () {
+            var taskid = $(this).data("taskid");
+            //alert(taskid);
+            $.ajax({
+                type: "POST", // method ที่จะส่ง
+                cache: false,
+                url: '@Url.Action("UpdateGroupTask", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                dataType: "json", // ชนิดข้อมูลที่ส่ง
+                data: { taskid: taskid }, // ข้อมูลที่ส่ง
+                traditional: false,
+                beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                    loadSpin();
+                },
+                success: function (res) {
+
+                    var status = false;
+                    var message = 'ดำเนินการไม่สำเร็จ';
+                    if (res != null && res != undefined) {
+                        status = res.status;
+                        message = res.message != '' ? res.message : message;
+                    }
+                    if (status == false) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+
+                    } else {
+                        $('#TaskID').val(res.data.TaskID);
+                        $('#StudyGroupID').val(res.data.StudyGroupID);
+                        $('#TaskName').val(res.data.TaskName);
+                        $('#FullScore').val(res.data.FullScore);
+                        $('#quantityGroup').val(res.data.quantityGroup);
+                        $('#Note').val(res.data.Note);
+                        ResetModal();
+                        $('#GroupTaskModal').modal('show');
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    swal("เกิดข้อผิดพลาด", message, "error");
+                    unLoadSpin();
+                },
+                complete: function () {
+                    unLoadSpin();
+                }
+            });
+        });
+
+        $('.btn-delTask').click(function () {
+            var taskid = $(this).data("taskid");
+            //alert(taskid);
+            swal({
+                title: "ลบข้อมูล?",
+                text: "คุณต้องการจะลบข้อมูลจริงหรือไม่!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "ใช่ !",
+                cancelButtonText: "ยกเลิก",
+                closeOnConfirm: false,
+                closeOnCancel: true
+            },
+            function (isConfirm) {
+                if (isConfirm) {
+                    $.ajax({
+                        type: "POST", // method ที่จะส่ง
+                        cache: false,
+                        url: '@Url.Action("DeleteGroupTask", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                        dataType: "json", // ชนิดข้อมูลที่ส่ง
+                        data: { taskid: taskid }, // ข้อมูลที่ส่ง
+                        traditional: true,
+                        beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                            loadSpin();
+                        },
+                        success: function (res) {
+
+                            var status = false;
+                            var message = 'ดำเนินการไม่สำเร็จ';
+                            if (res != null && res != undefined) {
+                                status = res.status;
+                                message = res.message != '' ? res.message : message;
+                            }
+                            if (status == false) {
+                                swal("เกิดข้อผิดพลาด", message, "error");
+
+                            } else {
+
+                                swal({
+                                    title: "ลบข้อมูลเรียบร้อยเเล้ว",
+                                    type: "success",
+                                    showConfirmButton: false,
+                                    timer: 1000,
+                                    //confirmButtonColor: "#AEDEF4",
+                                    //confirmButtonText: "Ok",
+                                    closeOnConfirm: false
+                                },
+                                function () {
+                                    location.reload(true);
+                                });
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+                            unLoadSpin();
+                        },
+                        complete: function () {
+                            unLoadSpin();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}
+
+

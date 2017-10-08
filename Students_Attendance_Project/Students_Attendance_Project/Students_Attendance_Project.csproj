@@ -196,6 +196,7 @@
     <Compile Include="Models\StudentCheckModel.cs" />
     <Compile Include="Models\SubjectModel.cs" />
     <Compile Include="Models\SummaryModel.cs" />
+    <Compile Include="Models\TaskModel.cs" />
     <Compile Include="Models\Tb_Building.cs">
       <DependentUpon>StudentAttendanceModel.tt</DependentUpon>
     </Compile>
@@ -203,6 +204,12 @@
       <DependentUpon>StudentAttendanceModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Tb_Faculty.cs">
+      <DependentUpon>StudentAttendanceModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Tb_Group.cs">
+      <DependentUpon>StudentAttendanceModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Tb_GroupTask.cs">
       <DependentUpon>StudentAttendanceModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Tb_Holiday.cs">
@@ -223,6 +230,9 @@
     <Compile Include="Models\Tb_SchoolYear.cs">
       <DependentUpon>StudentAttendanceModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\Tb_SingleTask.cs">
+      <DependentUpon>StudentAttendanceModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\Tb_Status.cs">
       <DependentUpon>StudentAttendanceModel.tt</DependentUpon>
     </Compile>
@@ -236,6 +246,9 @@
       <DependentUpon>StudentAttendanceModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Tb_Subject.cs">
+      <DependentUpon>StudentAttendanceModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Tb_Task.cs">
       <DependentUpon>StudentAttendanceModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Tb_User.cs">
@@ -1265,12 +1278,15 @@
     <Content Include="icon\icon_department.png" />
     <Content Include="icon\icon_file1.png" />
     <Content Include="icon\icon_file2.png" />
+    <Content Include="icon\icon_file3.png" />
     <Content Include="icon\icon_group_study.png" />
     <Content Include="icon\icon_group_study1.png" />
     <Content Include="icon\icon_help.png.png" />
     <Content Include="icon\icon_rmuti 512.png" />
     <Content Include="icon\icon_room.png" />
     <Content Include="icon\icon_schedule.png" />
+    <Content Include="icon\icon_task1.png" />
+    <Content Include="icon\icon_task2.png" />
     <Content Include="icon\Logo_RMUTI.ico" />
     <Content Include="icon\Logo_RMUTI_128X235.png" />
     <Content Include="icon\qrcode.jpg" />
@@ -1655,6 +1671,13 @@
     <Content Include="Views\Home\CheckSchedule.cshtml" />
     <Content Include="Views\Home\Checkname.cshtml" />
     <Content Include="Views\Login\error404.cshtml" />
+    <Content Include="Views\Home\STask.cshtml" />
+    <Content Include="Views\Home\SingleTask.cshtml" />
+    <Content Include="Views\Home\STaskScore.cshtml" />
+    <Content Include="Views\Home\GTask.cshtml" />
+    <Content Include="Views\Home\GroupTask.cshtml" />
+    <Content Include="Views\Home\GTaskScore.cshtml" />
+    <Content Include="Views\Home\SummaryTask.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

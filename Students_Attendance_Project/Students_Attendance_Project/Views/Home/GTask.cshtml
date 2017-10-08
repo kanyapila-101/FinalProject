@@ -1,0 +1,129 @@
+﻿@using Students_Attendance_Project.Models;
+@model Students_Attendance_Project.Models.FilterModel
+@using PagedList.Mvc;
+@using PagedList;
+@{
+    ViewBag.Title = "งานกลุ่ม";
+    var entity = (List<StudyGroupModel>)ViewBag.studyGroup1;
+}
+<style>
+    .table-scrollable {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border: 1px solid #e7ecf1;
+        margin: 10px 0 !important;
+    }
+
+        .table-scrollable .text-left {
+            text-align: left;
+        }
+</style>
+<section>
+    <div class="row">
+        <div class="col-sm-10 col-sm-offset-1">
+            <!-- BEGIN SAMPLE TABLE PORTLET-->
+            <div class="panel panel-danger">
+                <div class="box-header">
+                    <div class="box-header">
+                        <div class="caption">
+                            <i class="fa fa-cogs"></i> &nbsp;<strong style="font-size: 16px; ">งานกลุ่ม</strong>
+                            @*<button type="button" class="btn btn-primary btn-sm pull-right btn-addsingletask"><i class="fa fa-plus"></i>&nbsp;เพิ่ม</button>*@
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col-sm-5 pull-right">
+                                <form id="form-search" action="" class="form-horizontal" method="post" enctype="multipart/form-data">
+                                    <div class="form-group">
+                                        <div class="col-sm-6 pull-right">
+                                            <select class="form-control" id="Query" name="Query" tabindex="1" onchange="Submit()">
+                                                @{
+                                                    var TermEntity = (List<SchoolYearModel>)ViewBag.SchYear;
+                                                    if (TermEntity.Count > 0 && TermEntity != null)
+                                                    {
+                                                        foreach (var r in TermEntity)
+                                                        {
+                                                            if (r.Term.Equals("3"))
+                                                            {
+                                                                <option value="@r.SchYearID">@r.Year/@r.Term ฤดูร้อน</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@r.SchYearID">@r.Year/@r.Term</option>
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div class="table-scrollable">
+                            <table class="table table-bordered table-hover text-center" id="studyGroup-table">
+                                <thead>
+                                    <tr class="success">
+                                        <th style="width: 15%;">กลุ่มเรียน</th>
+                                        <th>วิชา (หลักสูตร)</th>
+                                        <th style="width: 10%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var query = (PagedList.IPagedList<StudyGroupModel>)ViewBag.studyGroup;
+                                        if (query.Count > 0 && query != null)
+                                        {
+                                            int line = 1;
+                                            foreach (var r in query)
+                                            {
+                                                <tr class="@(line % 2 == 0 ? "info" : "")">
+                                                    <td>@r.StudyGroupCode</td>
+                                                    <td class="text-left">[@r.SubjectCode] @r.SubjectName (@r.Course)</td>
+                                                    <td>
+                                                        <a href="@Url.Action("GroupTask","Home", new { id = r.StudyGroupID})" data-studygroupid="@r.StudyGroupID" class="btn btn-success btn-xs">จัดการงานกลุ่ม</a>
+                                                    </td>
+                                                </tr>
+                                                line++;
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row pull-right" style="margin-right:2px;">
+                            @Html.PagedListPager((IPagedList)ViewBag.studyGroup, page => Url.Action("GTask", new { page, Model.Query }))
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END SAMPLE TABLE PORTLET-->
+        </div>
+    </div>
+</section>
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $('.sidebar-menu > li').removeClass('active');
+            $('.task').addClass('active');
+            $('.task > ul > .task2').addClass('active');
+
+        });
+        function Submit() {
+            loadSpin();
+            $('#form-search').submit();
+        }
+        //var id = $('#schYearID').val();
+        //alert(id);
+        $('#Query').val(@entity.Select(r => r.SchYearID).FirstOrDefault());
+
+        if (@Model.Query+"" != "") {
+            $('#Query').val(@Model.Query);
+        }
+        else {
+            $('#Query').val(@entity.Select(r => r.SchYearID).FirstOrDefault());
+        }
+    </script>
+}

@@ -15,51 +15,43 @@ namespace Students_Attendance_Project.Models
 using System;
     using System.Collections.Generic;
     
-public partial class Tb_Student
+public partial class Tb_Task
 {
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-    public Tb_Student()
+    public Tb_Task()
     {
 
-        this.Tb_GroupTask = new HashSet<Tb_GroupTask>();
+        this.Tb_Group = new HashSet<Tb_Group>();
 
         this.Tb_SingleTask = new HashSet<Tb_SingleTask>();
-
-        this.Tb_StudentCheck = new HashSet<Tb_StudentCheck>();
 
     }
 
 
-    public int StdID { get; set; }
+    public int TaskID { get; set; }
 
-    public string StdCode { get; set; }
+    public Nullable<int> Type { get; set; }
 
-    public string NameTH { get; set; }
+    public string TaskName { get; set; }
 
-    public string NameEN { get; set; }
+    public Nullable<int> FullScore { get; set; }
 
-    public int StudyGroupID { get; set; }
+    public string Note { get; set; }
 
-    public Nullable<int> StatusID { get; set; }
+    public Nullable<int> StudyGroupID { get; set; }
 
 
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
 
-    public virtual ICollection<Tb_GroupTask> Tb_GroupTask { get; set; }
+    public virtual ICollection<Tb_Group> Tb_Group { get; set; }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
 
     public virtual ICollection<Tb_SingleTask> Tb_SingleTask { get; set; }
 
-    public virtual Tb_Status Tb_Status { get; set; }
-
     public virtual Tb_StudyGroup Tb_StudyGroup { get; set; }
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-
-    public virtual ICollection<Tb_StudentCheck> Tb_StudentCheck { get; set; }
 
 }
 

@@ -34,13 +34,27 @@ public partial class Student_AttendanceEntities : DbContext
 
     public virtual DbSet<Tb_Building> Tb_Building { get; set; }
 
+    public virtual DbSet<Tb_Department> Tb_Department { get; set; }
+
     public virtual DbSet<Tb_Faculty> Tb_Faculty { get; set; }
+
+    public virtual DbSet<Tb_Group> Tb_Group { get; set; }
+
+    public virtual DbSet<Tb_GroupTask> Tb_GroupTask { get; set; }
 
     public virtual DbSet<Tb_Holiday> Tb_Holiday { get; set; }
 
+    public virtual DbSet<Tb_Login> Tb_Login { get; set; }
+
+    public virtual DbSet<Tb_NoteTeach> Tb_NoteTeach { get; set; }
+
     public virtual DbSet<Tb_Room> Tb_Room { get; set; }
 
+    public virtual DbSet<Tb_Schedule> Tb_Schedule { get; set; }
+
     public virtual DbSet<Tb_SchoolYear> Tb_SchoolYear { get; set; }
+
+    public virtual DbSet<Tb_SingleTask> Tb_SingleTask { get; set; }
 
     public virtual DbSet<Tb_Status> Tb_Status { get; set; }
 
@@ -48,17 +62,11 @@ public partial class Student_AttendanceEntities : DbContext
 
     public virtual DbSet<Tb_StudentCheck> Tb_StudentCheck { get; set; }
 
+    public virtual DbSet<Tb_StudyGroup> Tb_StudyGroup { get; set; }
+
     public virtual DbSet<Tb_Subject> Tb_Subject { get; set; }
 
-    public virtual DbSet<Tb_Login> Tb_Login { get; set; }
-
-    public virtual DbSet<Tb_Schedule> Tb_Schedule { get; set; }
-
-    public virtual DbSet<Tb_NoteTeach> Tb_NoteTeach { get; set; }
-
-    public virtual DbSet<Tb_Department> Tb_Department { get; set; }
-
-    public virtual DbSet<Tb_StudyGroup> Tb_StudyGroup { get; set; }
+    public virtual DbSet<Tb_Task> Tb_Task { get; set; }
 
     public virtual DbSet<Tb_User> Tb_User { get; set; }
 

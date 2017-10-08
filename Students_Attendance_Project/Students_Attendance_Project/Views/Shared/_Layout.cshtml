@@ -250,6 +250,18 @@
                             <span>เช็คชื่อ</span>@*<small class="label pull-right bg-green">new</small>*@
                         </a>
                     </li>
+                    <li class="treeview task">
+                        <a href="@Url.Action("","Home")">
+                            <i class="fa fa-files-o"></i> <span>การมอบหมายงาน</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-chevron-down pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li class="task1"><a href="@Url.Action("STask","Home")"><i class="fa fa-circle-o"></i> งานเดี่ยว</a></li>
+                            <li class="task2"><a href="@Url.Action("GTask","Home")"><i class="fa fa-circle-o"></i> งานกลุ่ม</a></li>
+                        </ul>
+                    </li>
                     <li class="treeview summary">
                         <a href="@Url.Action("","Home")">
                             <i class="fa fa-files-o"></i> <span>รายงานสรุปผล</span>
@@ -260,6 +272,7 @@
                         <ul class="treeview-menu">
                             <li class="summary1"><a href="@Url.Action("SummaryListCheck","Home")"><i class="fa fa-circle-o"></i> สรุปผลการเช็คชื่อ</a></li>
                             <li class="summary2"><a href="@Url.Action("SummaryNoExam","Home")"><i class="fa fa-circle-o"></i> สรุปรายชื่อ นศ. ไม่มีสิทธิ์สอบ</a></li>
+                            <li class="summary3"><a href="@Url.Action("SummaryTask","Home")"><i class="fa fa-circle-o"></i> สรุปคะแนนงานที่มอบหมาย</a></li>
                         </ul>
                     </li>
                     @*<li>

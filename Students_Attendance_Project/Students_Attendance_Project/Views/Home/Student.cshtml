@@ -635,9 +635,7 @@
                                 message = res.message != '' ? res.message : message;
                             }
                             if (status == false) {
-                                alert(1111);
                                 swal("เกิดข้อผิดพลาด", message, "error");
-
                             } else {
                                 swal({
                                     title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
@@ -653,7 +651,6 @@
                             }
                         },
                         error: function (xhr, ajaxOptions, thrownError) {
-                            alert(1);
                             swal("เกิดข้อผิดพลาด", message, "error");
                             unLoadSpin();
                         },

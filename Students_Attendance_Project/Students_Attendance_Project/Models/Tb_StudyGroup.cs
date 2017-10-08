@@ -22,6 +22,8 @@ public partial class Tb_StudyGroup
     public Tb_StudyGroup()
     {
 
+        this.Tb_Group = new HashSet<Tb_Group>();
+
         this.Tb_NoteTeach = new HashSet<Tb_NoteTeach>();
 
         this.Tb_Schedule = new HashSet<Tb_Schedule>();
@@ -29,6 +31,8 @@ public partial class Tb_StudyGroup
         this.Tb_Student = new HashSet<Tb_Student>();
 
         this.Tb_StudentCheck = new HashSet<Tb_StudentCheck>();
+
+        this.Tb_Task = new HashSet<Tb_Task>();
 
     }
 
@@ -53,6 +57,10 @@ public partial class Tb_StudyGroup
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
 
+    public virtual ICollection<Tb_Group> Tb_Group { get; set; }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+
     public virtual ICollection<Tb_NoteTeach> Tb_NoteTeach { get; set; }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
@@ -72,6 +80,10 @@ public partial class Tb_StudyGroup
     public virtual Tb_Subject Tb_Subject { get; set; }
 
     public virtual Tb_User Tb_User { get; set; }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+
+    public virtual ICollection<Tb_Task> Tb_Task { get; set; }
 
 }
 

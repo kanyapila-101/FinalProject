@@ -1,0 +1,681 @@
+﻿@using Students_Attendance_Project.Models;
+@model Students_Attendance_Project.Models.FilterModel
+@using PagedList.Mvc;
+@using PagedList;
+@{
+    ViewBag.Title = "รายละเอียดงานกลุ่ม";
+}
+<style>
+
+
+</style>
+<section>
+    <div class="row">
+
+        <div class="col-sm-offset-3 col-sm-6">
+            <div class="panel panel-danger">
+                <div class="box-header">
+                    <div class="caption">
+                        <i class="fa fa-cogs"></i> &nbsp;<span style="font-size: 16px; ">@ViewBag.TaskName</span>
+                        <button type="button" class="btn btn-primary btn-sm pull-right btn-addgrouptask" data-addgrouptask="@ViewBag.key"><i class="fa fa-plus"></i>&nbsp;เพิ่มกลุ่ม</button>
+                    </div>
+                </div>
+                <div>
+                    <span style="padding-left:30px">@ViewBag.TaskNote</span>
+                </div>
+            </div>
+            <div class="panel-group">
+
+                @{
+                    var group = (List<GroupTaskModel>)ViewBag.Group;
+                    if (group.Count > 0 && group != null)
+                    {
+                        foreach (var r in group)
+                        {
+                            <div class="panel panel-success">
+                                <div class="panel-heading">@r.GroupName
+                                    <button type="button" class="btn btn-warning btn-xs btn-GroupName" data-groupid="@r.GroupID"><i class="fa fa-pencil"></i>&nbsp;ชื่อกลุ่ม</button>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="table-scrolllabel ">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>ชื่อ-สกุล</th>
+                                                    <th width="20%">คะแนน</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @{
+                                                    var groupTask = (List<GroupTaskModel>)ViewBag.GroupTask;
+                                                    if (groupTask.Count > 0)
+                                                    {
+                                                        foreach (var e in groupTask)
+                                                        {
+                                                            if (e.GroupID == r.GroupID)
+                                                            {
+                                                                <tr>
+                                                                    <td>@e.NameTH</td>
+                                                                    <td>@e.Score/@e.FullScore</td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="panel-footer">
+                                    <div class="btn-group-sm">
+                                        <button type="button" class="btn btn-danger btn-deleteGroup" data-deletegroup="@r.GroupID">ลบ</button>
+                                        <button type="button" class="btn btn-success btn-addStd" data-addstd="@r.GroupID,@r.StudyGroupID,@r.TaskID">เพิ่มนักศึกษา</button>
+                                        <button type="button" class="btn btn-warning btn-addScore" data-addscore="@r.GroupID,@r.TaskID">คะแนน</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</section>
+<form id="addGroup-form" class="form-horizontal">
+    <div class="modal fade" id="addGroupModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">เพิ่มกลุ่ม</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="valueKey" name="valueKey" value="">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">ชื่อกลุ่ม :<span class="isRed"> *</span></label>
+                        <div class="col-sm-5">
+                            <input type="text" class="form-control" id="GroupName" name="GroupName" tabindex="1" value="กลุ่มที่ " required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-success pull-right btn-addGroup" tabindex="2" data-dismiss="modal">บันทึก</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<form id="editGroupName-form" class="form-horizontal">
+    <div class="modal fade" id="editGroupNameModal" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">แก้ไขชื่อกลุ่ม</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="GroupID" id="GroupID">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">ชื่อกลุ่ม :<span class="isRed"> *</span></label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" id="GroupName" name="GroupName" tabindex="1" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-success pull-right btn-saveGroupname" tabindex="2" data-dismiss="modal">บันทึก</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<section>
+    <div class="modal fade" id="addStdToGroupModal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header success">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">เพิ่มนักศึกษา</h4>
+                </div>
+                <div class="modal-body info" style="max-height: calc(100% - 120px); overflow-y: auto;">
+                    <div class="row">
+                        <div class="col-sm-8 col-sm-offset-2">
+                            <div class="table-responsive no-padding">
+                                <table id="addStdtoGroup-table" class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>เลือก</th>
+                                            <th>นักศึกษา</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-success pull-right btn-save2" data-dismiss="modal">ตกลง</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section>
+    <div class="modal fade" id="addScoreModal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header success">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">คะแนน</h4>
+                </div>
+                <div class="modal-body info" style="max-height: calc(100% - 120px); overflow-y: auto;">
+                    <div class="row">
+                        <div class="col-sm-8 col-sm-offset-2">
+                            <div class="table-responsive no-padding">
+                                <table id="addScore-table" class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>นักศึกษา</th>
+                                            <th width="20%">คะแนน</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>aaaa</td>
+                                            <td>
+                                                <input type="number" class="form-control" id="Score" name="Score" tabindex="1"  onkeyup="checkScore(this.value)" onblur="checkScore(this.value)" value="1">
+                                                <span id="scoreInvalid" class="hidden" style="padding-top: 3px; color:red;">คะแนนไม่ถูกต้อง</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-success pull-right btn-saveScore" data-dismiss="modal">บันทึก</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts{
+    <script>
+        $('#addGroup-form').validate({
+            rules: {
+                TaskName: { required: true },
+            },
+            messages: {
+                TaskName: { required: "กรุณากรอกชื่องาน" },
+            }
+        });
+        $(document).ready(function () {
+            $('.sidebar-menu > li').removeClass('active');
+            $('.task').addClass('active');
+            $('.task > ul > .task2').addClass('active');
+
+            $('.btn-addgrouptask').click(function () {
+                ResetModal();
+                $('#addGroupModal').modal("show");
+            });
+        });
+        function ResetModal() {
+            $('#addGroup-form').find('.form-group').find('label.error').remove();
+            $('#addGroup-form').find('.form-group').find('.error').removeClass('error');
+            $('#addGroup-form').find('.form-group').find('.valid').removeClass('valid');
+            $('#editGroupName-form').find('.form-group').find('label.error').remove();
+            $('#editGroupName-form').find('.form-group').find('.error').removeClass('error');
+            $('#editGroupName-form').find('.form-group').find('.valid').removeClass('valid');
+        }
+        $('.btn-addgrouptask').click(function () {
+            var taskid = $(this).data("addgrouptask");
+            $('#valueKey').val(taskid); // studygroupID,TaskID
+        });
+        function checkScore() {
+            var fullscore = $(this).val();
+            console.log(fullscore);
+            //if (parseInt(value) > fullscore) {
+            //    $('#scoreInvalid').addClass('isRed');
+            //    $('#scoreInvalid').removeClass('hidden');
+            //    isInvalid = false;
+            //}
+            //else {
+            //    $('#scoreInvalid').addClass('hidden');
+            //    isInvalid = true;
+            //}
+        }
+        $('.btn-addScore').click(function () {
+            var groupid = $(this).data("addscore");
+            $.ajax({
+                type: "POST", // method ที่จะส่ง
+                cache: false,
+                url: '@Url.Action("getGroupTask", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                dataType: "json", // ชนิดข้อมูลที่ส่ง
+                data: { key: groupid }, // ข้อมูลที่ส่ง
+                traditional: true,
+                beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                    loadSpin();
+                },
+                success: function (res) {
+                    var status = false;
+                    var message = 'ดำเนินการไม่สำเร็จ';
+                    if (res != null && res != undefined) {
+                        status = res.status;
+                        message = res.message != '' ? res.message : message;
+                    }
+                    if (status == false) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+
+                    } else {
+                        $('#addScore-table').find('tbody').find('tr').remove();
+                        if (res.data != null) {
+                            $.each(res.data, function (i, e) {
+                                $('#addScore-table').find('tbody').append(
+                                    '<tr>' +
+                                    '<td class="hidden"><input type="hidden" value="' + e.StdID + '" id="StdID" /></td>' +
+                                    '<td class="hidden"><input type="hidden" value="' + e.GroupID + '" id="GroupID" /></td>' +
+                                    '<td class="hidden"><input type="hidden" value="' + e.FullScore + '" id="fullscore1" /></td>' +
+                                    '<td>' + e.NameTH + '</td>' +
+                                    '<td><input type="number" class="form-control" id="Score" name="Score" min="0" max="' + e.FullScore + '" value="' + e.Score + '"/></td>' +
+                                    '</tr>');
+                            });
+                        }
+                        $('#addScoreModal').modal("show");
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    swal("เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
+                    unLoadSpin();
+                },
+                complete: function () {
+                    unLoadSpin();
+                },
+            });
+            return false;
+
+        });
+        var dataScore = new Array();
+        $('.btn-saveScore').click(function () {
+            dataScore = [];
+            $('#addScore-table tbody tr').each(function () {
+                var datastdID = $($(this).find('td #StdID')).val();
+                var datagroupID = $($(this).find('td #GroupID')).val();
+                var score = $($(this).find('td #Score')).val();
+                var fullscore = $($(this).find('td #fullscore1')).val();
+                dataScore.push({
+                    StdID: datastdID,
+                    GroupID: datagroupID,
+                    Score: score,
+                    FullScore: fullscore
+                });
+            });
+            //console.log(dataScore);
+            if (dataScore.length > 0) {
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("SaveGroupTaskScore", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: '&' + $.param({ model: dataScore }), // ข้อมูลที่ส่ง
+                    traditional: true,
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+                        } else {
+                            swal({
+                                title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                type: "success",
+                                showConfirmButton: false,
+                                timer: 1000,
+                                closeOnConfirm: false
+                            },
+                                function () {
+                                    location.reload(true), loadSpin();
+                                });
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    },
+                });
+            }
+            else {
+                location.reload(true);
+            }
+            return false;
+        });
+        $('.btn-GroupName').click(function () {
+            var groupid = $(this).data("groupid");
+            $('#editGroupName-form').find('#GroupID').val(groupid);
+            $.ajax({
+                type: "POST", // method ที่จะส่ง
+                cache: false,
+                url: '@Url.Action("getGroupName", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: { groupID: groupid }, // ข้อมูลที่ส่ง
+                    traditional: true,
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+
+                        } else {
+                            ResetModal();
+                            $('#editGroupName-form').find('#GroupID').val(groupid);
+                            $('#editGroupName-form').find('#GroupName').val(res.data);
+                            $('#editGroupNameModal').modal("show");
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    },
+                });
+                return false;
+            });
+            $('.btn-saveGroupname').click(function () {
+                if ($('#editGroupName-form').valid()) {
+                    $.ajax({
+                        type: "POST", // method ที่จะส่ง
+                        cache: false,
+                        url: '@Url.Action("SaveGroupName", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                        dataType: "json", // ชนิดข้อมูลที่ส่ง
+                        data: $('#editGroupName-form').serialize(), // ข้อมูลที่ส่ง
+                        traditional: true,
+                        beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                            loadSpin();
+                        },
+                        success: function (res) {
+                            var status = false;
+                            var message = 'ดำเนินการไม่สำเร็จ';
+                            if (res != null && res != undefined) {
+                                status = res.status;
+                                message = res.message != '' ? res.message : message;
+                            }
+                            if (status == false) {
+                                swal("เกิดข้อผิดพลาด", message, "error");
+
+                            } else {
+                                swal({
+                                    title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                    type: "success",
+                                    showConfirmButton: false,
+                                    timer: 1000,
+                                    closeOnConfirm: false
+                                },
+                                    function () {
+                                        location.reload(true);
+                                    });
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            swal("เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
+                            unLoadSpin();
+                        },
+                        complete: function () {
+                            unLoadSpin();
+                        },
+                    });
+                }
+                return false;
+            });
+            $('.btn-addGroup').click(function () {
+                var a = $('#valueKey').val();
+                var b = $('#GroupName').val();
+                //alert(a+","+b);
+                if ($('#addGroup-form').valid()) {
+                    $.ajax({
+                        type: "POST", // method ที่จะส่ง
+                        cache: false,
+                        url: '@Url.Action("SaveAddGroup", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                        dataType: "json", // ชนิดข้อมูลที่ส่ง
+                        data: { valueKey: a, groupName: b }, // ข้อมูลที่ส่ง
+                        traditional: true,
+                        beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                            loadSpin();
+                        },
+                        success: function (res) {
+                            var status = false;
+                            var message = 'ดำเนินการไม่สำเร็จ';
+                            if (res != null && res != undefined) {
+                                status = res.status;
+                                message = res.message != '' ? res.message : message;
+                            }
+                            if (status == false) {
+                                swal("เกิดข้อผิดพลาด", message, "error");
+
+                            } else {
+                                swal({
+                                    title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                    type: "success",
+                                    showConfirmButton: false,
+                                    timer: 1000,
+                                    closeOnConfirm: false
+                                },
+                                    function () {
+                                        location.reload(true);
+                                    });
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            swal("เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
+                            unLoadSpin();
+                        },
+                        complete: function () {
+                            unLoadSpin();
+                        },
+                    });
+                }
+                return false;
+            });
+            $('.btn-deleteGroup').click(function () {
+                var groupid = $(this).data("deletegroup");
+                //alert(groupid);
+                swal({
+                    title: "ลบข้อมูล?",
+                    text: "คุณต้องการจะลบข้อมูลจริงหรือไม่!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "ใช่ !",
+                    cancelButtonText: "ยกเลิก",
+                    closeOnConfirm: false,
+                    closeOnCancel: true
+                },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            type: "POST", // method ที่จะส่ง
+                            cache: false,
+                            url: '@Url.Action("deleteGroup", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                            dataType: "json", // ชนิดข้อมูลที่ส่ง
+                            data: { groupID: groupid }, // ข้อมูลที่ส่ง
+                            traditional: true,
+                            beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                                loadSpin();
+                            },
+                            success: function (res) {
+
+                                var status = false;
+                                var message = 'ดำเนินการไม่สำเร็จ';
+                                if (res != null && res != undefined) {
+                                    status = res.status;
+                                    message = res.message != '' ? res.message : message;
+                                }
+                                if (status == false) {
+                                    swal("เกิดข้อผิดพลาด", message, "error");
+
+                                } else {
+
+                                    swal({
+                                        title: "ลบข้อมูลเรียบร้อยเเล้ว",
+                                        type: "success",
+                                        showConfirmButton: false,
+                                        timer: 1000,
+                                        closeOnConfirm: false
+                                    },
+                                    function () {
+                                        location.reload(true);
+                                    });
+                                }
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+                                swal("เกิดข้อผิดพลาด", message, "error");
+                                unLoadSpin();
+                            },
+                            complete: function () {
+                                unLoadSpin();
+                            }
+                        });
+                    }
+                });
+            });
+            $('.btn-addStd').click(function () {
+                var key = $(this).data("addstd"); //GroupID,StudyGroupID,TaskID
+                //alert(taskid);
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("getStudentToGroupTask", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: { valueKey: key }, // ข้อมูลที่ส่ง
+                    traditional: true,
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                        loadSpin();
+                    },
+                    success: function (res) {
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+
+                        } else {
+                            $('#addStdtoGroup-table').find('tbody').find('tr').remove();
+                            if (res.data != null) {
+                                $.each(res.data, function (i, e) {
+                                    $('#addStdtoGroup-table').find('tbody').append(
+                                        '<tr>' +
+                                        '<td class="hidden"><input type="hidden" value="' + e.StdID + '" id="StdID" /></td>' +
+                                        '<td class="hidden"><input type="hidden" value="' + e.GroupID + '" id="GroupID" /></td>' +
+                                        '<td style="text-align:left"><input class="checkbox checkbx" type="checkbox" name="isSelect[]" id="isSelect" value="1"></td>' +
+                                        '<td style="text-align:left">' + e.StdCode + " " + e.NameTH + '</td>' +
+                                        '</tr>');
+                                });
+                            }
+                            $('#addStdToGroupModal').modal("show");
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    },
+                });
+                return false;
+            });
+            var dataAddStd = new Array();
+            $('.btn-save2').click(function () {
+                dataAddStd = [];
+                $('#addStdtoGroup-table tbody tr').each(function () {
+                    var datastdID = $($(this).find('td #StdID')).val();
+                    var datagroupID = $($(this).find('td #GroupID')).val();
+                    var dataSelect = $($(this).find('#isSelect:checked')).val();
+                    if (dataSelect != null) {
+                        dataAddStd.push({
+                            StdID: datastdID,
+                            GroupID: datagroupID,
+                            isSelect: dataSelect
+                        });
+                    }
+                });
+                if (dataAddStd.length > 0) {
+                    $.ajax({
+                        type: "POST", // method ที่จะส่ง
+                        cache: false,
+                        url: '@Url.Action("SaveAddStdToGroupTask", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                        dataType: "json", // ชนิดข้อมูลที่ส่ง
+                        data: '&' + $.param({ model: dataAddStd }), // ข้อมูลที่ส่ง
+                        traditional: true,
+                        beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                            loadSpin();
+                        },
+                        success: function (res) {
+
+                            var status = false;
+                            var message = 'ดำเนินการไม่สำเร็จ';
+                            if (res != null && res != undefined) {
+                                status = res.status;
+                                message = res.message != '' ? res.message : message;
+                            }
+                            if (status == false) {
+                                swal("เกิดข้อผิดพลาด", message, "error");
+                            } else {
+                                swal({
+                                    title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                    type: "success",
+                                    showConfirmButton: false,
+                                    timer: 1000,
+                                    closeOnConfirm: false
+                                },
+                                    function () {
+                                        location.reload(true), loadSpin();
+                                    });
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+                            unLoadSpin();
+                        },
+                        complete: function () {
+                            unLoadSpin();
+                        },
+                    });
+                }
+                else {
+                    location.reload(true);
+                }
+            });
+    </script>
+}

@@ -1,0 +1,312 @@
+﻿@using Students_Attendance_Project.Models;
+@model Students_Attendance_Project.Models.FilterModel
+@using PagedList.Mvc;
+@using PagedList;
+@{
+    ViewBag.Title = "คะแนนงานเดี่ยว";
+}
+<style>
+    .table-scrollable {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border: 1px solid #e7ecf1;
+        margin: 10px 0 !important;
+    }
+
+        .table-scrollable .text-left {
+            text-align: left;
+        }
+</style>
+<section>
+    <!-- /.box table -->
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8">
+            <!-- BEGIN SAMPLE TABLE PORTLET-->
+            <div class="box">
+                <div class="box-header">
+                    <div class="box-header">
+                        <div class="caption">
+                            <i class="fa fa-cogs"></i> &nbsp;<strong style="font-size: 16px; ">คะแนนงานเดี่ยว &emsp;@ViewBag.Header&emsp;@ViewBag.Header1</strong>
+                            @*<button type="button" class="btn btn-primary btn-sm pull-right btn-addstudent"><i class="fa fa-plus"></i>&nbsp;เพิ่มนักศึกษา</button>*@
+                        </div>
+                        <p>
+                            <hr />
+                            <div class="row col-sm-12">
+
+                            </div>
+                        </p>
+                    </div>
+                    <div class="portlet-body">
+                        <div class="table-scrolllabel">
+                            <table class="table table-bordered table-hover text-center" id="singleTaskScore-table">
+                                <thead>
+                                    <tr class="success">
+                                        <th style="width: 15%" class="hidden-xs hidden-sm"> รหัสนักศึกษา </th>
+                                        <th style="width: 30%"> ชื่อ-นามสกุล </th>
+                                        <th style="width: 15%"> คะแนน </th>
+                                        <th style="width: 13%"> </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var entity = (List<SingleTaskModel>)ViewBag.singleTaskScore;
+                                        if (entity.Count > 0 && entity != null)
+                                        {
+                                            int line = 0;
+                                            foreach (var r in entity)
+                                            {
+                                                <tr class="@(line % 2 != 0 ? "info" : "")">
+                                                    <td class="hidden">
+                                                        <input type="text" id="StudyGroupID" value="@ViewBag.studyGroupid" />
+                                                        <input type="text" id="taskID1" value="@r.TaskID" />
+                                                    </td>
+                                                    <td class="hidden-xs hidden-sm">@r.StdCode</td>
+                                                    <td style="text-align:left;">@r.NameTH</td>
+                                                    <td>@(r.Score == null ? 0 : r.Score)/@r.FullScore</td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-warning btn-xs btn-score" data-singletaskscore="@r.StdID,@r.TaskID,@r.FullScore" role="button">แก้ไขคะแนน</button>
+                                                    </td>
+                                                </tr>
+                                                line++;
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END SAMPLE TABLE PORTLET-->
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+    <!-- /.box table -->
+</section>
+<form id="ScoreTask-form" class="form-horizontal">
+    <div class="modal fade" id="ScoreTaskModal" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">ให้คะแนน</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="TaskID" id="TaskID">
+                    <input type="hidden" name="StdID" id="StdID">
+                    <input type="hidden" name="FullScore" id="FullScore">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">คะแนน :<span class="isRed"> *</span></label>
+                        <div class="col-sm-3">
+                            <input type="number" class="form-control" id="Score" min="0" name="Score" tabindex="1" required onkeyup="checkScore(this.value)" onblur="checkScore(this.value)">
+                            <div id="scoreInvalid" class="hidden" style="padding-top: 3px;">กรอกคะแนนไม่ถูกต้อง</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-success pull-right btn-saveScore" tabindex="2" data-dismiss="modal">บันทึก</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script>
+        $('#ScoreTask-form').validate({
+            rules: {
+                Score: { required: true, min: 0 },
+            },
+            messages: {
+                Score: { required: "กรุณากรอกคะแนน", min: "กรุณากรอกคะแนนให้ถูกต้อง" },
+            }
+        });
+        var isInvalid = true;
+        function checkScore(value) {
+            var fullscore = parseInt($('#FullScore').val());
+            if (parseInt(value) > fullscore) {
+                $('#scoreInvalid').addClass('isRed');
+                $('#scoreInvalid').removeClass('hidden');
+                isInvalid = false;
+            }
+            else {
+                $('#scoreInvalid').addClass('hidden');
+                isInvalid = true;
+            }
+        }
+
+        $(document).ready(function () {
+            $('.sidebar-menu > li').removeClass('active');
+            $('.task').addClass('active');
+            $('.task > ul > .task1').addClass('active');
+            appendButton();
+        });
+        function ResetModal() {
+            $('#ScoreTask-form').find('.form-group').find('label.error').remove();
+            $('#ScoreTask-form').find('.form-group').find('.error').removeClass('error');
+            $('#ScoreTask-form').find('.form-group').find('.valid').removeClass('valid');
+        }
+
+        function getScore() {
+            var taskid = $('#taskID1').val();
+            var stdgroupid = $('#StudyGroupID').val();
+            var data = taskid + "," + stdgroupid;
+            $.ajax({
+                type: "POST", // method ที่จะส่ง
+                cache: false,
+                url: '@Url.Action("getSingleTaskScore", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                dataType: "json", // ชนิดข้อมูลที่ส่ง
+                data: { _data: data }, // ข้อมูลที่ส่ง
+                traditional: true,
+                beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                    loadSpin();
+                },
+                success: function (res) {
+                    var status = false;
+                    var message = 'ดำเนินการไม่สำเร็จ';
+                    if (res != null && res != undefined) {
+                        status = res.status;
+                        message = res.message != '' ? res.message : message;
+                    }
+                    if (status == false) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+
+                    } else {
+                        $('#singleTaskScore-table').find('tbody').find('tr').remove();
+                        if (res.data != null) {
+                            $.each(res.data, function (i, e) {
+                                if (i % 2 != 0) {
+                                    $('#singleTaskScore-table').find('tbody').append(
+                                        '<tr class="info">' +
+                                            '<td class="hidden"><input type="text" id="StudyGroupID" value="@ViewBag.studyGroupid" /><input type="text" id="taskID1" value="' + e.TaskID + '" /></td>' +
+                                            '<td class="hidden-xs hidden-sm">' + e.StdCode + '</td>' +
+                                            '<td style="text-align:left">' + e.NameTH + '</td>' +
+                                            '<td >' + e.Score + "/" + e.FullScore + '</td>' +
+                                            '<td><button type="button" class="btn btn-warning btn-xs btn-score" data-singletaskscore="' + e.StdID + "," + e.TaskID + "," + e.FullScore + '" role="button">แก้ไขคะแนน</button></td>' +
+                                        '</tr>');
+                                } else {
+                                    $('#singleTaskScore-table').find('tbody').append(
+                                        '<tr class="">' +
+                                            '<td class="hidden"><input type="text" id="StudyGroupID" value="@ViewBag.studyGroupid" /><input type="text" id="taskID1" value="' + e.TaskID + '" /></td>' +
+                                            '<td class="hidden-xs hidden-sm">' + e.StdCode + '</td>' +
+                                            '<td style="text-align:left">' + e.NameTH + '</td>' +
+                                            '<td >' + e.Score + "/" + e.FullScore + '</td>' +
+                                            '<td><button type="button" class="btn btn-warning btn-xs btn-score" data-singletaskscore="' + e.StdID + "," + e.TaskID + "," + e.FullScore + '" role="button">แก้ไขคะแนน</button></td>' +
+                                        '</tr>');
+                                }
+
+                            });
+                            appendButton()
+                        }
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    swal("เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
+                    unLoadSpin();
+                },
+                complete: function () {
+                    unLoadSpin();
+                },
+            });
+        }
+        function appendButton() {
+            $('.btn-saveScore').click(function () {
+                if ($('#ScoreTask-form').valid() && isInvalid == true) {
+                    $.ajax({
+                        type: "POST", // method ที่จะส่ง
+                        cache: false,
+                        url: '@Url.Action("SaveSingleTaskScore", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                        dataType: "json", // ชนิดข้อมูลที่ส่ง
+                        data: $('#ScoreTask-form').serialize(), // ข้อมูลที่ส่ง
+                        traditional: true,
+                        beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                            loadSpin();
+                        },
+                        success: function (res) {
+                            var status = false;
+                            var message = 'ดำเนินการไม่สำเร็จ';
+                            if (res != null && res != undefined) {
+                                status = res.status;
+                                message = res.message != '' ? res.message : message;
+                            }
+                            if (status == false) {
+                                swal("เกิดข้อผิดพลาด", message, "error");
+
+                            } else {
+                                //swal({
+                                //    title: "บันทึกข้อมูลเรียบร้อยเเล้ว",
+                                //    type: "success",
+                                //    showConfirmButton: false,
+                                //    //confirmButtonColor: "#AEDEF4",
+                                //    //confirmButtonText: "Ok",
+                                //    timer: 1000,
+                                //    closeOnConfirm: false
+                                //});
+                                $('#ScoreTaskModal').modal('hide');
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            swal("เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
+                            unLoadSpin();
+                        },
+                        complete: function () {
+                            unLoadSpin();
+                            getScore();
+                        },
+                    });
+                }
+                return false;
+            });
+            $('.btn-score').click(function () {
+                var data = $(this).data("singletaskscore");
+                //alert(data);
+                $.ajax({
+                    type: "POST", // method ที่จะส่ง
+                    cache: false,
+                    url: '@Url.Action("UpdateSingleTaskScore", "Home")',  // ส่งไปให้ที่ได้ ระบุ
+                    dataType: "json", // ชนิดข้อมูลที่ส่ง
+                    data: { _data: data }, // ข้อมูลที่ส่ง
+                    traditional: false,
+                    beforeSend: function () { // ก่องส่ง data จะให้ทำไร
+                    },
+                    success: function (res) {
+
+                        var status = false;
+                        var message = 'ดำเนินการไม่สำเร็จ';
+                        if (res != null && res != undefined) {
+                            status = res.status;
+                            message = res.message != '' ? res.message : message;
+                        }
+                        if (status == false) {
+                            swal("เกิดข้อผิดพลาด", message, "error");
+
+                        } else {
+                            if (res.data.Score == null) {
+                                $('#Score').val("");
+                            } else {
+                                $('#Score').val(res.data.Score);
+                            }
+                            $('#TaskID').val(res.data.TaskID);
+                            $('#StdID').val(res.data.StdID);
+                            $('#FullScore').val(res.data.FullScore);
+
+                            ResetModal();
+                            $('#ScoreTaskModal').modal('show');
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("เกิดข้อผิดพลาด", message, "error");
+                        unLoadSpin();
+                    },
+                    complete: function () {
+                        unLoadSpin();
+                    }
+                });
+            });
+        }
+
+    </script>
+}

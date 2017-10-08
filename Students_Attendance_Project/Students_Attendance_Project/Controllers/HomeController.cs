@@ -75,7 +75,8 @@ namespace Students_Attendance_Project.Controllers
             using (var db = new Student_AttendanceEntities())
             {
                 var data = (from t in db.Tb_Subject
-                            where (string.IsNullOrEmpty(model.Query) || t.SubjectCode.Contains(model.Query) || t.SubjectName.Contains(model.Query) || t.SubjectNameEN.Contains(model.Query))
+                            where (string.IsNullOrEmpty(model.Query) || t.SubjectCode.Contains(model.Query)
+                            || t.SubjectName.Contains(model.Query) || t.SubjectNameEN.Contains(model.Query))
                             orderby t.SubjectCode, t.Course
                             select new SubjectModel
                             {
@@ -2420,6 +2421,985 @@ namespace Students_Attendance_Project.Controllers
             return Json(jsonReturn);
         } // ลบข้อมูลบันทึกการสอนใน record นั้น จากตาราง NoteTeach 
 
+        public ActionResult STask(FilterModel model)
+        {
+            using (var db = new Student_AttendanceEntities())
+            {
+                var schYeardata = (from s in db.Tb_SchoolYear
+                                   orderby s.Year descending
+                                   select new SchoolYearModel()
+                                   {
+                                       SchYearID = s.SchYearID,
+                                       Term = s.Term,
+                                       Year = s.Year
+                                   }).ToList();
+                ViewBag.SchYear = schYeardata;
+
+                if (model.Query == null)
+                {
+                    var dataStdgroup = (from r in db.Tb_StudyGroup
+                                        join s in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { s.SubjectCode, s.Course }
+                                        join y in db.Tb_SchoolYear on r.SchYearID equals y.SchYearID
+                                        where (string.IsNullOrEmpty(model.Query) || y.SchYearID.ToString().Contains(model.Query))
+                                        where (DateTime.Now >= y.StartDate && DateTime.Now <= y.EndDate) && r.UserID == UserLogon.UserID
+                                        orderby r.StudyGroupCode ascending
+                                        select new StudyGroupModel()
+                                        {
+                                            SchYearID = y.SchYearID,
+                                            StudyGroupID = r.StudyGroupID,
+                                            StudyGroupCode = r.StudyGroupCode,
+                                            SubjectCode = s.SubjectCode,
+                                            Course = s.Course,
+                                            SubjectName = s.SubjectName,
+                                        }).ToPagedList(model.page, 10);
+                    ViewBag.studyGroup = dataStdgroup;
+                    ViewBag.studyGroup1 = dataStdgroup.ToList();
+                }
+                else
+                {
+                    int schYear = int.Parse(model.Query);
+                    var dataStdgroup = (from r in db.Tb_StudyGroup
+                                        join s in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { s.SubjectCode, s.Course }
+                                        join y in db.Tb_SchoolYear on r.SchYearID equals y.SchYearID
+                                        orderby r.StudyGroupCode ascending
+                                        where r.SchYearID == schYear && r.UserID == UserLogon.UserID
+                                        select new StudyGroupModel()
+                                        {
+                                            SchYearID = y.SchYearID,
+                                            StudyGroupID = r.StudyGroupID,
+                                            StudyGroupCode = r.StudyGroupCode,
+                                            SubjectCode = s.SubjectCode,
+                                            Course = s.Course,
+                                            SubjectName = s.SubjectName,
+                                        }).ToPagedList(model.page, 10);
+                    ViewBag.studyGroup = dataStdgroup;
+                    ViewBag.studyGroup1 = dataStdgroup.ToList();
+                }
+
+            }
+            return View(model);
+        }
+
+        public ActionResult SingleTask(int id)
+        {
+            using (var db = new Student_AttendanceEntities())
+            {
+                var dataHeader = (from r in db.Tb_StudyGroup
+                                  join s in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { s.SubjectCode, s.Course }
+                                  where r.StudyGroupID == id
+                                  select new StudyGroupModel
+                                  {
+                                      StudyGroupID = r.StudyGroupID,
+                                      StudyGroupCode = r.StudyGroupCode,
+                                      SubjectCode = s.SubjectCode,
+                                      SubjectName = s.SubjectName,
+                                      Course = s.Course
+                                  }).FirstOrDefault();
+
+                var dataSTask = (from t in db.Tb_Task
+                                 join r in db.Tb_StudyGroup on t.StudyGroupID equals r.StudyGroupID
+                                 join s in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { s.SubjectCode, s.Course }
+                                 where t.StudyGroupID == id && t.Type == 1
+                                 orderby t.TaskID
+                                 select new TaskModel()
+                                 {
+                                     TaskID = t.TaskID,
+                                     TaskName = t.TaskName,
+                                     FullScore = t.FullScore.Value,
+                                     Note = t.Note,
+                                     StudyGroupID = t.StudyGroupID.Value,
+                                 }).ToList();
+                ViewBag.SingleTask = dataSTask;
+                string stdGrupCode = dataHeader.StudyGroupCode;
+                string SubjCode = dataHeader.SubjectCode;
+                string SubjName = dataHeader.SubjectName;
+                string Course = dataHeader.Course;
+                ViewBag.Header = "กลุ่มเรียน " + stdGrupCode + "  " + SubjCode + " " + SubjName + " (" + Course + ")";
+                ViewBag.StudyGroupID = dataHeader.StudyGroupID;
+            }
+            return View();
+        }
+
+        public JsonResult SaveSingleTask(TaskModel model)
+        {
+            var jsonReturn = new JsonResponse();
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    if (model.TaskID == 0)
+                    {
+                        var data = new Tb_Task()
+                        {
+                            Type = 1,
+                            TaskName = model.TaskName,
+                            FullScore = model.FullScore,
+                            Note = model.Note,
+                            StudyGroupID = model.StudyGroupID
+                        };
+                        db.Tb_Task.Add(data);
+                        db.SaveChanges();
+                        var dataStd = db.Tb_Student.Where(r => r.StudyGroupID == model.StudyGroupID).Select(r => r.StdID).ToList();
+                        if (dataStd.Count > 0 && dataStd != null)
+                        {
+                            foreach (var r in dataStd)
+                            {
+                                var dataST = new Tb_SingleTask()
+                                {
+                                    TaskID = data.TaskID,
+                                    StdID = r,
+                                    Score = 0
+                                };
+                                db.Tb_SingleTask.Add(dataST);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var data = db.Tb_Task.Where(r => r.TaskID == model.TaskID).FirstOrDefault();
+                        if (data != null)
+                        {
+                            db.Tb_Task.Where(r => r.TaskID == model.TaskID).ForEach(r =>
+                            {
+                                r.TaskName = model.TaskName;
+                                r.FullScore = model.FullScore;
+                                r.Note = model.Note;
+                            });
+                        }
+                    }
+                    db.SaveChanges();
+                    jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อย" };
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = "error" + ex.Message };
+            }
+            return Json(jsonReturn);
+        }
+
+        public JsonResult UpdateSingleTask(int taskid)
+        {
+            var jsonReturn = new JsonResponse();
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var data = db.Tb_Task.Where(r => r.TaskID == taskid).Select(r => new TaskModel()
+                    {
+                        TaskID = r.TaskID,
+                        TaskName = r.TaskName,
+                        FullScore = r.FullScore.Value,
+                        StudyGroupID = r.StudyGroupID.Value,
+                        Note = r.Note
+                    }).FirstOrDefault();
+                    if (data != null)
+                    {
+                        jsonReturn = new JsonResponse { status = true, data = data };
+                    }
+                    else
+                    {
+                        jsonReturn = new JsonResponse { status = false, message = "ไม่พบข้อมูล" };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = ex.Message };
+
+            }
+            return Json(jsonReturn);
+        }
+
+        public JsonResult DeleteSingleTask(int taskid)
+        {
+            var jsonReturn = new JsonResponse();
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var data1 = db.Tb_SingleTask.Where(r => r.TaskID == taskid).ToList();
+                    if (data1.Count > 0)
+                    {
+                        foreach (var r in data1)
+                        {
+                            db.Tb_SingleTask.Remove(r);
+                        }
+                    }
+                    db.SaveChanges();
+                    var data = db.Tb_Task.Where(r => r.TaskID == taskid).FirstOrDefault();
+                    if (data != null)
+                    {
+                        db.Tb_Task.Remove(data);
+                        db.SaveChanges();
+                        jsonReturn = new JsonResponse { status = true, message = "ลบข้อมูลเรียบร้อยเเล้ว" };
+                    }
+                    else
+                    {
+                        jsonReturn = new JsonResponse { status = false, message = "ไม่พบข้อมูลที่ต้องการลบ" };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = "error" + ex.Message };
+            }
+            return Json(jsonReturn);
+        }
+
+        public ActionResult STaskScore(int Gid, int taskID)
+        {
+            using (var db = new Student_AttendanceEntities())
+            {
+                var dataTask = (from r in db.Tb_Task
+                                join s in db.Tb_StudyGroup on r.StudyGroupID equals s.StudyGroupID
+                                where r.TaskID == taskID && s.StudyGroupID == Gid
+                                select new TaskModel
+                                {
+                                    TaskName = r.TaskName,
+                                    StudyGroupCode = s.StudyGroupCode
+                                }).FirstOrDefault();
+                ViewBag.Header = "ชื่องาน : " + dataTask.TaskName;
+                ViewBag.Header1 = "กลุ่มเรียน : " + dataTask.StudyGroupCode;
+                var data = (from r in db.Tb_Student
+                            join s in db.Tb_StudyGroup on r.StudyGroupID equals s.StudyGroupID
+                            join st in db.Tb_SingleTask on r.StdID equals st.StdID
+                            join t in db.Tb_Task on st.TaskID equals t.TaskID
+                            where s.StudyGroupID == Gid && st.TaskID == taskID && r.StatusID == 5
+                            select new SingleTaskModel
+                            {
+                                TaskID = st.TaskID,
+                                StdID = r.StdID,
+                                StdCode = r.StdCode,
+                                NameTH = r.NameTH,
+                                Score = st.Score,
+                                FullScore = (int)t.FullScore
+                            }).ToList();
+                ViewBag.singleTaskScore = data;
+                ViewBag.studyGroupid = Gid;
+            }
+            return View();
+        }
+
+        public JsonResult getSingleTaskScore(string _data)
+        {
+            var jsonReturn = new JsonResponse();
+            string[] str = _data.Split(',');
+            int taskID = int.Parse(str[0]);
+            int Gid = int.Parse(str[1]);
+            using (var db = new Student_AttendanceEntities())
+            {
+                var data = (from r in db.Tb_Student
+                            join s in db.Tb_StudyGroup on r.StudyGroupID equals s.StudyGroupID
+                            join st in db.Tb_SingleTask on r.StdID equals st.StdID
+                            join t in db.Tb_Task on st.TaskID equals t.TaskID
+                            where s.StudyGroupID == Gid && st.TaskID == taskID && r.StatusID == 5
+                            select new SingleTaskModel
+                            {
+                                TaskID = st.TaskID,
+                                StdID = r.StdID,
+                                StdCode = r.StdCode,
+                                NameTH = r.NameTH,
+                                Score = st.Score,
+                                FullScore = (int)t.FullScore
+                            }).ToList();
+                if (data != null)
+                {
+                    jsonReturn = new JsonResponse { status = true, data = data };
+                }
+                else
+                {
+                    jsonReturn = new JsonResponse { status = true, message = "ไม่พบข้อมูล" };
+                }
+            }
+            return Json(jsonReturn);
+        }
+
+        public JsonResult UpdateSingleTaskScore(string _data)
+        {
+            var jsonReturn = new JsonResponse();
+            string[] str = _data.Split(',');
+            int stdID = int.Parse(str[0]);
+            int taskID = int.Parse(str[1]);
+            int fullScore = int.Parse(str[2]);
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var data = (from st in db.Tb_SingleTask
+                                join t in db.Tb_Task on st.TaskID equals t.TaskID
+                                where st.StdID == stdID && st.TaskID == taskID
+                                select new SingleTaskModel
+                                {
+                                    TaskID = st.TaskID,
+                                    StdID = st.StdID,
+                                    Score = st.Score,
+                                    FullScore = (int)t.FullScore
+                                }).FirstOrDefault();
+                    if (data != null)
+                    {
+                        jsonReturn = new JsonResponse { status = true, data = data };
+                    }
+                    else
+                    {
+                        jsonReturn = new JsonResponse { status = false, message = "ไม่พบข้อมูล" };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = ex.Message };
+
+            }
+            return Json(jsonReturn);
+        }
+
+        public JsonResult SaveSingleTaskScore(SingleTaskModel model)
+        {
+            var jsonReturn = new JsonResponse();
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    if (model != null)
+                    {
+                        var data = db.Tb_SingleTask.Where(r => r.TaskID == model.TaskID && r.StdID == model.StdID).FirstOrDefault();
+                        if (data != null)
+                        {
+                            db.Tb_SingleTask.Where(r => r.TaskID == model.TaskID && r.StdID == model.StdID).ForEach(r =>
+                            {
+                                r.Score = model.Score;
+                            });
+                            db.SaveChanges();
+                            jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อย" };
+                        }
+                        else
+                        {
+                            jsonReturn = new JsonResponse { status = false, message = "ไม่พบข้อมูล" };
+                        }
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = ex.Message };
+            }
+            return Json(jsonReturn);
+        }
+
+        public ActionResult GTask(FilterModel model)
+        {
+            using (var db = new Student_AttendanceEntities())
+            {
+                var schYeardata = (from s in db.Tb_SchoolYear
+                                   orderby s.Year descending
+                                   select new SchoolYearModel()
+                                   {
+                                       SchYearID = s.SchYearID,
+                                       Term = s.Term,
+                                       Year = s.Year
+                                   }).ToList();
+                ViewBag.SchYear = schYeardata;
+
+                if (model.Query == null)
+                {
+                    var dataStdgroup = (from r in db.Tb_StudyGroup
+                                        join s in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { s.SubjectCode, s.Course }
+                                        join y in db.Tb_SchoolYear on r.SchYearID equals y.SchYearID
+                                        where (string.IsNullOrEmpty(model.Query) || y.SchYearID.ToString().Contains(model.Query))
+                                        where (DateTime.Now >= y.StartDate && DateTime.Now <= y.EndDate) && r.UserID == UserLogon.UserID
+                                        orderby r.StudyGroupCode ascending
+                                        select new StudyGroupModel()
+                                        {
+                                            SchYearID = y.SchYearID,
+                                            StudyGroupID = r.StudyGroupID,
+                                            StudyGroupCode = r.StudyGroupCode,
+                                            SubjectCode = s.SubjectCode,
+                                            Course = s.Course,
+                                            SubjectName = s.SubjectName,
+                                        }).ToPagedList(model.page, 10);
+                    ViewBag.studyGroup = dataStdgroup;
+                    ViewBag.studyGroup1 = dataStdgroup.ToList();
+                }
+                else
+                {
+                    int schYear = int.Parse(model.Query);
+                    var dataStdgroup = (from r in db.Tb_StudyGroup
+                                        join s in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { s.SubjectCode, s.Course }
+                                        join y in db.Tb_SchoolYear on r.SchYearID equals y.SchYearID
+                                        orderby r.StudyGroupCode ascending
+                                        where r.SchYearID == schYear && r.UserID == UserLogon.UserID
+                                        select new StudyGroupModel()
+                                        {
+                                            SchYearID = y.SchYearID,
+                                            StudyGroupID = r.StudyGroupID,
+                                            StudyGroupCode = r.StudyGroupCode,
+                                            SubjectCode = s.SubjectCode,
+                                            Course = s.Course,
+                                            SubjectName = s.SubjectName,
+                                        }).ToPagedList(model.page, 10);
+                    ViewBag.studyGroup = dataStdgroup;
+                    ViewBag.studyGroup1 = dataStdgroup.ToList();
+                }
+
+            }
+            return View(model);
+        }
+
+        public ActionResult GroupTask(int id)
+        {
+            using (var db = new Student_AttendanceEntities())
+            {
+                var dataHeader = (from r in db.Tb_StudyGroup
+                                  join s in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { s.SubjectCode, s.Course }
+                                  where r.StudyGroupID == id
+                                  select new StudyGroupModel
+                                  {
+                                      StudyGroupID = r.StudyGroupID,
+                                      StudyGroupCode = r.StudyGroupCode,
+                                      SubjectCode = s.SubjectCode,
+                                      SubjectName = s.SubjectName,
+                                      Course = s.Course
+                                  }).FirstOrDefault();
+
+                var dataGTask = (from t in db.Tb_Task
+                                 join r in db.Tb_StudyGroup on t.StudyGroupID equals r.StudyGroupID
+                                 join s in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { s.SubjectCode, s.Course }
+                                 where t.StudyGroupID == id && t.Type == 2
+                                 orderby t.TaskID
+                                 select new TaskModel()
+                                 {
+                                     TaskID = t.TaskID,
+                                     TaskName = t.TaskName,
+                                     FullScore = t.FullScore.Value,
+                                     Note = t.Note,
+                                     StudyGroupID = t.StudyGroupID.Value,
+                                 }).ToList();
+                ViewBag.GroupTask = dataGTask;
+                string stdGrupCode = dataHeader.StudyGroupCode;
+                string SubjCode = dataHeader.SubjectCode;
+                string SubjName = dataHeader.SubjectName;
+                string Course = dataHeader.Course;
+                ViewBag.Header = "กลุ่มเรียน " + stdGrupCode + "  " + SubjCode + " " + SubjName + " (" + Course + ")";
+                ViewBag.StudyGroupID = dataHeader.StudyGroupID;
+            }
+            return View();
+        }
+
+        public JsonResult SaveGroupTask(TaskModel model)
+        {
+            var jsonReturn = new JsonResponse();
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    if (model.TaskID == 0)
+                    {
+                        var data = new Tb_Task()
+                        {
+                            Type = 2,
+                            TaskName = model.TaskName,
+                            FullScore = model.FullScore,
+                            Note = model.Note,
+                            StudyGroupID = model.StudyGroupID
+                        };
+                        db.Tb_Task.Add(data);
+                        db.SaveChanges();
+                        for (int i = 1; i <= model.quantityGroup; i++)
+                        {
+                            var dataGroup = new Tb_Group()
+                            {
+                                GroupName = "กลุ่มที่ " + i,
+                                TaskID = data.TaskID,
+                                StudyGroupID = model.StudyGroupID
+                            };
+                            db.Tb_Group.Add(dataGroup);
+                        }
+                        db.SaveChanges();
+                        jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อย" };
+                    }
+                    else
+                    {
+                        var data = db.Tb_Task.Where(r => r.TaskID == model.TaskID).FirstOrDefault();
+                        if (data != null)
+                        {
+                            db.Tb_Task.Where(r => r.TaskID == model.TaskID).ForEach(r =>
+                            {
+                                r.TaskName = model.TaskName;
+                                r.FullScore = model.FullScore;
+                                r.Note = model.Note;
+                            });
+                            db.SaveChanges();
+                            jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อย" };
+                            var dataGroup = db.Tb_Group.Where(r => r.TaskID == model.TaskID).ToArray();
+                            if (model.quantityGroup > dataGroup.Length)
+                            {
+                                for (int i = dataGroup.Length + 1; i <= model.quantityGroup; i++)
+                                {
+                                    var datanew = new Tb_Group()
+                                    {
+                                        GroupName = "กลุ่มที่ " + i,
+                                        TaskID = data.TaskID,
+                                        StudyGroupID = model.StudyGroupID
+                                    };
+                                    db.Tb_Group.Add(datanew);
+                                }
+                                db.SaveChanges();
+                                jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อย" };
+                            }
+                            else if (model.quantityGroup < dataGroup.Length)
+                            {
+                                for (int i = dataGroup.Length; i > model.quantityGroup; i--)
+                                {
+                                    int groupID = dataGroup[i - 1].GroupID;
+                                    var dataGT = db.Tb_GroupTask.Where(r => r.GroupID == groupID).ToList();
+                                    if (dataGT.Count > 0 && dataGT != null)
+                                    {
+                                        foreach (var r in dataGT)
+                                        {
+                                            db.Tb_GroupTask.Remove(r);
+                                        }
+                                    }
+                                }
+                                db.SaveChanges();
+                                for (int i = dataGroup.Length; i > model.quantityGroup; i--)
+                                {
+                                    int groupID = dataGroup[i - 1].GroupID;
+                                    var dataG = db.Tb_Group.Where(r => r.GroupID == groupID).FirstOrDefault();
+                                    if (dataG != null)
+                                    {
+                                        db.Tb_Group.Remove(dataG);
+                                    }
+                                }
+                                db.SaveChanges();
+                                jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อย" };
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = ex.Message };
+            }
+            return Json(jsonReturn);
+        }
+
+        public JsonResult UpdateGroupTask(int taskid)
+        {
+            var jsonReturn = new JsonResponse();
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var countGroup = db.Tb_Group.Where(r => r.TaskID == taskid).Count();
+                    var data = db.Tb_Task.Where(r => r.TaskID == taskid).Select(r => new TaskModel()
+                    {
+                        TaskID = r.TaskID,
+                        TaskName = r.TaskName,
+                        FullScore = r.FullScore.Value,
+                        StudyGroupID = r.StudyGroupID.Value,
+                        quantityGroup = countGroup,
+                        Note = r.Note
+                    }).FirstOrDefault();
+                    if (data != null)
+                    {
+                        jsonReturn = new JsonResponse { status = true, data = data };
+                    }
+                    else
+                    {
+                        jsonReturn = new JsonResponse { status = false, message = "ไม่พบข้อมูล" };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = ex.Message };
+
+            }
+            return Json(jsonReturn);
+        }
+
+        public JsonResult DeleteGroupTask(int taskid)
+        {
+            var jsonReturn = new JsonResponse();
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var dataGID = db.Tb_Group.Where(r => r.TaskID == taskid).Select(r => r.GroupID).ToList();
+                    if (dataGID.Count > 0)
+                    {
+                        foreach (var r in dataGID)
+                        {
+                            var gtask = db.Tb_GroupTask.Where(x => x.GroupID == r).FirstOrDefault();
+                            if (gtask != null)
+                            {
+                                db.Tb_GroupTask.Remove(gtask);
+                            }
+                        }
+                        db.SaveChanges();
+                    }
+                    var dataG = db.Tb_Group.Where(r => r.TaskID == taskid).ToList();
+                    if (dataG.Count > 0)
+                    {
+                        foreach (var r in dataG)
+                        {
+                            db.Tb_Group.Remove(r);
+                        }
+                    }
+                    db.SaveChanges();
+                    var data = db.Tb_Task.Where(r => r.TaskID == taskid).FirstOrDefault();
+                    if (data != null)
+                    {
+                        db.Tb_Task.Remove(data);
+                        db.SaveChanges();
+                        jsonReturn = new JsonResponse { status = true, message = "ลบข้อมูลเรียบร้อยเเล้ว" };
+                    }
+                    else
+                    {
+                        jsonReturn = new JsonResponse { status = false, message = "ไม่พบข้อมูลที่ต้องการลบ" };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = "error" + ex.Message };
+            }
+            return Json(jsonReturn);
+        }
+
+        public ActionResult GTaskScore(int Gid, int taskID)
+        {
+            using (var db = new Student_AttendanceEntities())
+            {
+                ViewBag.key = Gid + "," + taskID;
+                var task = db.Tb_Task.Where(r => r.TaskID == taskID).FirstOrDefault();
+                ViewBag.TaskName = task.TaskName;
+                ViewBag.TaskNote = task.Note;
+                var data1 = (from r in db.Tb_Group
+                             join t in db.Tb_Task on r.TaskID equals t.TaskID
+                             where r.TaskID == taskID && r.StudyGroupID == Gid
+                             orderby r.GroupID
+                             select new GroupTaskModel
+                             {
+                                 GroupID = r.GroupID,
+                                 GroupName = r.GroupName,
+                                 StudyGroupID = (int)r.StudyGroupID,
+                                 FullScore = (int)t.FullScore,
+                                 TaskID = taskID
+                             }).OrderBy(r => r.GroupID).Distinct().ToList();
+                ViewBag.Group = data1;
+                int fullScore = data1.Select(r => r.FullScore).FirstOrDefault();
+                var data3 = new List<GroupTaskModel>();
+                if (data1.Count > 0)
+                {
+                    foreach (var r in data1)
+                    {
+                        var a = (from x in db.Tb_GroupTask
+                                 join s in db.Tb_Student on x.StdID equals s.StdID
+                                 where x.GroupID == r.GroupID && s.StatusID == 5
+                                 orderby x.GroupID
+                                 select new GroupTaskModel
+                                 {
+                                     GroupID = x.GroupID,
+                                     StdID = x.StdID,
+                                     NameTH = s.NameTH,
+                                     Score = (double)x.Score,
+                                     FullScore = fullScore
+                                 }).ToList();
+                        if (a.Count > 0)
+                        {
+                            foreach (var c in a)
+                            {
+                                data3.Add(new GroupTaskModel
+                                {
+                                    GroupID = c.GroupID,
+                                    StdID = c.StdID,
+                                    NameTH = c.NameTH,
+                                    Score = (double)c.Score,
+                                    FullScore = c.FullScore
+                                });
+                            }
+                        }
+                    }
+                }
+                ViewBag.GroupTask = data3;
+            }
+            return View();
+        }
+
+        public JsonResult SaveAddGroup(string valueKey, string groupName)
+        {
+            var jsonReturn = new JsonResponse();
+            string[] str = valueKey.Split(',');
+            int studyGroupID = int.Parse(str[0]);
+            int taskID = int.Parse(str[1]);
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var data = new Tb_Group()
+                    {
+                        GroupName = groupName,
+                        StudyGroupID = studyGroupID,
+                        TaskID = taskID
+                    };
+                    db.Tb_Group.Add(data);
+                    db.SaveChanges();
+                    jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อย" };
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = ex.Message };
+            }
+            return Json(jsonReturn);
+        }
+
+        public JsonResult getStudentToGroupTask(string valueKey)
+        {
+            var jsonReturn = new JsonResponse();
+            string[] str = valueKey.Split(',');
+            int groupID = int.Parse(str[0]);
+            int studyGroupID = int.Parse(str[1]);
+            int taskID = int.Parse(str[2]);
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var data1 = db.Tb_Student.Where(r => r.StudyGroupID == studyGroupID && r.StatusID == 5).Select(r => r.StdID).ToList();
+                    var data2 = (from r in db.Tb_Group
+                                 join g in db.Tb_GroupTask on r.GroupID equals g.GroupID
+                                 where r.TaskID == taskID && r.StudyGroupID == studyGroupID
+                                 select g.StdID).ToList();
+                    var data3 = data1.Where(r => !data2.Contains(r)).ToList();
+                    var data4 = db.Tb_Student.Where(r => data3.Contains(r.StdID)).Select(r => new
+                    {
+                        GroupID = groupID,
+                        StdID = r.StdID,
+                        StdCode = r.StdCode,
+                        NameTH = r.NameTH
+                    }).ToList();
+                    jsonReturn = new JsonResponse { status = true, data = data4 };
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = ex.Message };
+            }
+
+            return Json(jsonReturn);
+        }
+
+        public JsonResult SaveAddStdToGroupTask(List<GroupTaskModel> model)
+        {
+            var jsonReturn = new JsonResponse();
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    if (model.Count > 0)
+                    {
+                        foreach (var r in model)
+                        {
+                            var data = new Tb_GroupTask()
+                            {
+                                GroupID = r.GroupID,
+                                StdID = r.StdID,
+                                Score = 0
+                            };
+                            db.Tb_GroupTask.Add(data);
+                        }
+                        db.SaveChanges();
+                        jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อย" };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = ex.Message };
+            }
+            return Json(jsonReturn);
+        }
+
+        public JsonResult getGroupName(int groupID)
+        {
+            var jsonReturn = new JsonResponse();
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var groupName = db.Tb_Group.Where(r => r.GroupID == groupID).Select(r => r.GroupName).FirstOrDefault();
+                    if (groupName != null)
+                    {
+                        jsonReturn = new JsonResponse { status = true, data = groupName };
+                    }
+                    else
+                    {
+                        jsonReturn = new JsonResponse { status = false, message = "ไม่พบข้อมูล" };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = ex.Message };
+            }
+            return Json(jsonReturn);
+        }
+
+        public JsonResult SaveGroupName(GroupModel model)
+        {
+            var jsonReturn = new JsonResponse();
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var data = db.Tb_Group.Where(r => r.GroupID == model.GroupID).FirstOrDefault();
+                    if (data != null)
+                    {
+                        db.Tb_Group.Where(r => r.GroupID == model.GroupID).ForEach(r =>
+                        {
+                            r.GroupName = model.GroupName;
+                        });
+                        db.SaveChanges();
+                        jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อยแล้ว" };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = ex.Message };
+            }
+            return Json(jsonReturn);
+        }
+
+        public JsonResult DeleteGroup(int groupID)
+        {
+            var jsonReturn = new JsonResponse();
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var data1 = db.Tb_GroupTask.Where(r => r.GroupID == groupID).ToList();
+                    if (data1.Count > 0)
+                    {
+                        foreach (var r in data1)
+                        {
+                            db.Tb_GroupTask.Remove(r);
+                        }
+                        db.SaveChanges();
+                    }
+                    var data = db.Tb_Group.Where(r => r.GroupID == groupID).FirstOrDefault();
+                    if (data != null)
+                    {
+                        db.Tb_Group.Remove(data);
+                        db.SaveChanges();
+                        jsonReturn = new JsonResponse { status = true, message = "ลบข้อมูลเรียบร้อยเเล้ว" };
+                    }
+                    else
+                    {
+                        jsonReturn = new JsonResponse { status = false, message = "ไม่พบข้อมูลที่ต้องการลบ" };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = "error" + ex.Message };
+            }
+            return Json(jsonReturn);
+        }
+
+        public JsonResult getGroupTask(string key)
+        {
+            var jsonReturn = new JsonResponse();
+            string[] str = key.Split(',');
+            int groupID = int.Parse(str[0]);
+            int taskID = int.Parse(str[1]);
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var fullscore = db.Tb_Task.Where(r => r.TaskID == taskID).Select(r => r.FullScore).FirstOrDefault();
+                    var data = (from r in db.Tb_GroupTask
+                                join s in db.Tb_Student on r.StdID equals s.StdID
+                                where r.GroupID == groupID && s.StatusID == 5
+                                orderby r.StdID
+                                select new GroupTaskModel
+                                {
+                                    GroupID = r.GroupID,
+                                    StdID = r.StdID,
+                                    NameTH = s.NameTH,
+                                    Score = (double)r.Score,
+                                    FullScore = (int)fullscore
+                                }).ToList();
+                    if (data != null)
+                    {
+                        jsonReturn = new JsonResponse { status = true, data = data };
+                    }
+                    else
+                    {
+                        jsonReturn = new JsonResponse { status = false, message = "ไม่พบข้อมูล" };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = ex.Message };
+            }
+            return Json(jsonReturn);
+        }
+
+        public JsonResult SaveGroupTaskScore(List<GroupTaskModel> model)
+        {
+            var jsonReturn = new JsonResponse();
+            var valid = false;
+            try
+            {
+                using (var db = new Student_AttendanceEntities())
+                {
+                    if (model != null)
+                    {
+                        foreach (var s in model)
+                        {
+                            if (s.Score <= s.FullScore)
+                            {
+                                valid = true;
+                                var data = db.Tb_GroupTask.Where(r => r.GroupID == s.GroupID && r.StdID == s.StdID).ToList();
+                                if (data != null)
+                                {
+                                    db.Tb_GroupTask.Where(r => r.GroupID == s.GroupID && r.StdID == s.StdID).ForEach(r =>
+                                    {
+                                        r.Score = s.Score;
+                                    });
+                                }
+                            }
+                            else
+                            {
+                                valid = false;
+                                break;
+                            }
+                        }
+                        if (valid)
+                        {
+                            db.SaveChanges();
+                            jsonReturn = new JsonResponse { status = true, message = "บันทึกข้อมูลเรียบร้อยแล้ว" };
+                        }
+                        else
+                        {
+                            jsonReturn = new JsonResponse { status = false, message = "คะแนนเกิน! คะแนนเต็ม" };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                jsonReturn = new JsonResponse { status = false, message = ex.Message };
+            }
+            return Json(jsonReturn);
+        }
+
         // summary No Exam And summary list of Check 
 
         public ActionResult SummaryNoExam(FilterModel model)
@@ -2557,6 +3537,73 @@ namespace Students_Attendance_Project.Controllers
             }
             return View(model);
         }  // ข้อมูล สรุปผลการเช็คชื่อ ตามกลุ่มเรียน ปีการศึกษา
+
+        public ActionResult SummaryTask(FilterModel model)
+        {
+            using (var db = new Student_AttendanceEntities())
+            {
+                var schYeardata = (from s in db.Tb_SchoolYear
+                                   orderby s.Year descending
+                                   select new SchoolYearModel()
+                                   {
+                                       SchYearID = s.SchYearID,
+                                       Term = s.Term,
+                                       Year = s.Year
+                                   }).ToList();
+                ViewBag.SchYear = schYeardata;
+                var endDate = db.Tb_SchoolYear.Where(r => r.StartDate <= DateTime.Now && DateTime.Now <= r.EndDate).Select(r => r.EndDate).FirstOrDefault();
+                endDate = endDate.AddDays(7);
+                if (model.Query == null)
+                {
+                    var dataTask = (from r in db.Tb_StudyGroup
+                                    join d in db.Tb_Department on r.DeptCode equals d.DeptCode
+                                    join s in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { s.SubjectCode, s.Course }
+                                    join y in db.Tb_SchoolYear on r.SchYearID equals y.SchYearID
+                                    where (string.IsNullOrEmpty(model.Query) || y.SchYearID.ToString().Contains(model.Query))
+                                    where (DateTime.Now >= y.StartDate && DateTime.Now <= endDate) && r.UserID == UserLogon.UserID
+                                    orderby r.StudyGroupCode ascending
+                                    select new SummaryModel()
+                                    {
+                                        SchYearID = y.SchYearID,
+                                        Term = y.Term,
+                                        Year = y.Year,
+                                        StudyGroupID = r.StudyGroupID,
+                                        StudyGroupCode = r.StudyGroupCode,
+                                        SubjectCode = s.SubjectCode,
+                                        Course = s.Course,
+                                        SubjectName = s.SubjectName,
+                                        SubjectPractice = s.SubjectPractice,
+                                        SubjectTheory = s.SubjectTheory,
+                                        DeptName = d.DeptName
+                                    }).ToList();
+                    ViewBag.SummaryTask = dataTask;
+                }
+                else
+                {
+                    int schYear = int.Parse(model.Query);
+                    var dataTask = (from r in db.Tb_StudyGroup
+                                    join d in db.Tb_Department on r.DeptCode equals d.DeptCode
+                                    join s in db.Tb_Subject on new { r.SubjectCode, r.Course } equals new { s.SubjectCode, s.Course }
+                                    join y in db.Tb_SchoolYear on r.SchYearID equals y.SchYearID
+                                    orderby r.StudyGroupCode ascending
+                                    where r.SchYearID == schYear && r.UserID == UserLogon.UserID
+                                    select new SummaryModel()
+                                    {
+                                        SchYearID = y.SchYearID,
+                                        Term = y.Term,
+                                        Year = y.Year,
+                                        StudyGroupID = r.StudyGroupID,
+                                        StudyGroupCode = r.StudyGroupCode,
+                                        SubjectCode = s.SubjectCode,
+                                        Course = s.Course,
+                                        SubjectName = s.SubjectName,
+                                        DeptName = d.DeptName
+                                    }).ToList();
+                    ViewBag.SummaryTask = dataTask;
+                }
+            }
+            return View(model);
+        }  // ข้อมูล สรุปคะแนนการมอบมายงาน
 
         public ActionResult DetailSummaryListCheck(SummaryModel model)
         {
@@ -3051,6 +4098,269 @@ namespace Students_Attendance_Project.Controllers
                 return base.File(memoryStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName); // save file .xlsx
             }
         } // ส่งออกรายงานสรุปรายชื่อนักศึกษาที่ไม่มีสิทธิ์สอบ ตามรายวิชา-กลุ่มเรียน ในรูปแบบไฟล์ .xlsx (Excel)
+
+        public ActionResult ExportSummaryTask(StudyGroupModel model)
+        {
+            string[] strGroup = model.StudyGroupCode.Split('.');
+            string fileName = "SummaryTask_" + model.SubjectCode + "-" + strGroup[0] + strGroup[1] + ".xlsx";
+            var dataHeader = new object();
+            int countSTask = 0;
+            int countStudent = 0;
+            int countGTask = 0;
+
+            using (var db = new Student_AttendanceEntities())
+            {
+                dataHeader = (from t1 in db.Tb_SchoolYear
+                              join t2 in db.Tb_StudyGroup on t1.SchYearID equals t2.SchYearID
+                              join t3 in db.Tb_Subject on new { t2.SubjectCode, t2.Course } equals new { t3.SubjectCode, t3.Course }
+                              join t4 in db.Tb_Student on t2.StudyGroupID equals t4.StudyGroupID
+                              join t5 in db.Tb_Department on t2.DeptCode equals t5.DeptCode
+                              where t1.SchYearID == model.SchYearID && t2.StudyGroupID == model.StudyGroupID && t3.SubjectCode == model.SubjectCode && t3.Course == model.Course && t2.UserID == UserLogon.UserID
+                              orderby t4.StdCode
+                              select new SummaryModel
+                              {
+                                  Term = t1.Term,
+                                  Year = t1.Year,
+                                  DeptName = t5.DeptName,
+                                  SubjectCode = t3.SubjectCode,
+                                  SubjectName = t3.SubjectName,
+                                  Course = t3.Course,
+                                  StudyGroupCode = t2.StudyGroupCode
+                              }).ToList();
+            }
+
+            using (var package = new ExcelPackage())
+            {
+                package.Workbook.Worksheets.Add("Sheet1");
+                ExcelWorksheet ws = package.Workbook.Worksheets[1];
+                // ws.Name = "Test"; //Setting Sheet's name
+                ws.Cells.Style.Font.Size = 14; //Default font size for whole sheet
+                ws.Cells.Style.Font.Name = "TH SarabunPSK"; //Default Font name for whole sheet
+
+                //ws.Cells[1, 1].Value = "Sample DataTable Export"; // Heading Name
+                //ws.Cells[1, 1, 1, 10].Merge = true; //Merge columns start and end range
+                //ws.Cells[1, 1, 1, 10].Style.Font.Bold = true; //Font should be bold
+                //ws.Cells[1, 1, 1, 10].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center; // Aligmnet is center
+                var imgPath = Server.MapPath("~/icon/Logo_RMUTI_128X235.png");
+                Bitmap image = new Bitmap(imgPath);
+                ExcelPicture pic = ws.Drawings.AddPicture("Logo_RMUTI", image);
+                pic.SetPosition(5, 5);
+                pic.SetSize(48, (int)(235 * 0.347));
+
+
+                //Header Page 
+                ws.Cells["A1:I1"].Value = "                มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน";
+                ws.Cells["A1:I1"].Merge = true;                                                 // Merge = ผสานเซลล์และจัดกึ่งกลาง
+                ws.Cells["A1:I1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;    // จัดตำแหน่งอักษรแนวนอน 
+
+                ws.Cells["A2:I2"].Value = "                ศูนย์กลางมหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน";
+                ws.Cells["A2:I2"].Merge = true;
+                ws.Cells["A2:I2"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+                ws.Cells["A4:K4"].Value = "รายชื่อนักศึกษาตามรายวิชา - กลุ่มเรียน";
+                ws.Cells["A4:K4"].Merge = true;
+                ws.Cells["A4:K4"].Style.Font.Bold = true;
+                ws.Cells["A4:K4"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                foreach (var item in (List<SummaryModel>)dataHeader)
+                {
+                    ws.Cells["A6:B6"].Value = "ประจำภาคการศึกษา " + item.Term + "/" + item.Year;
+                    ws.Cells["A6:B6"].Merge = true;
+                    ws.Cells["A6:B6"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+                    ws.Cells["D6:L6"].Value = item.DeptName; // สาขาวิชา
+                    ws.Cells["D6:L6"].Merge = true;
+                    ws.Cells["D6:L6"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+                    ws.Cells["A7:E7"].Value = "รายวิชา " + item.SubjectCode + " | " + item.SubjectName;
+                    ws.Cells["A7:E7"].Merge = true;
+                    ws.Cells["A7:E7"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+                    ws.Cells["G7:I7"].Value = "กลุ่มเรียน " + item.StudyGroupCode;
+                    ws.Cells["G7:I7"].Merge = true;
+                    ws.Cells["G7:I7"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                    break;
+                }
+                //End Header Page 
+
+                // Haeder Table
+
+                int rowIndex = 9;  // หัวตาราง เริ่มบรรทัดที่ 9
+                string[] scoreText = { "คะแนนรวม" };
+                int j = 0;
+                int k = 0;
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var dataSTask = (from r in db.Tb_Task
+                                     where r.StudyGroupID == model.StudyGroupID && r.Type == 1
+                                     orderby r.TaskID ascending
+                                     select r.TaskName).ToArray();
+                    var dataGTask = (from r in db.Tb_Task
+                                     where r.StudyGroupID == model.StudyGroupID && r.Type == 2
+                                     orderby r.TaskID ascending
+                                     select r.TaskName).ToArray();
+                    countSTask = dataSTask.Length;
+                    countGTask = dataGTask.Length;
+
+                    for (int col = 1; col <= 2 + countSTask + 2; col++)
+                    {
+                        ws.Cells[rowIndex, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        ws.Cells[rowIndex, col].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        //ws.Cells[rowIndex, col].Style.Font.Bold = false;
+                        //ws.Cells[rowIndex, col].AutoFitColumns();
+                        switch (col)
+                        {
+                            case 1:
+                                ws.Cells[rowIndex, col].Value = "รหัสนักศึกษา";
+                                break;
+                            case 2:
+                                ws.Cells[rowIndex, col].Value = "ชื่อ-สกุล";
+                                break;
+                            default:
+                                {
+                                    if (col > 2 && col <= countSTask + 2)  // แสดงวันที่มีการเช็คชื่อในแต่ละคอลัมน์ 
+                                    {
+                                        ws.Cells[rowIndex, col].Style.VerticalAlignment = ExcelVerticalAlignment.Bottom;    // จัดตำแหน่งอักษรแนวตั้ง
+                                        ws.Cells[rowIndex, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                                        ws.Cells[rowIndex, col].AutoFitColumns(4);                                          // จัดความกว้างคอลัมน์ parameter หน่วย = picxel
+                                        ws.Cells[rowIndex, col].Style.TextRotation = 90;                                    // จัดทิศทางอักษร 90 องศา
+                                        ws.Cells[rowIndex, col].Value = dataSTask[k] + " [S]";
+                                        k++;
+                                    }
+                                    break;
+                                }
+                        }
+                    }
+                    k = 0;
+                    rowIndex = 9;
+                    for (int col = 1; col <= 2 + countSTask + countGTask + 1; col++)
+                    {
+                        ws.Cells[rowIndex, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        ws.Cells[rowIndex, col].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        //ws.Cells[rowIndex, col].Style.Font.Bold = false;
+                        //ws.Cells[rowIndex, col].AutoFitColumns();
+                        switch (col)
+                        {
+                            case 1:
+                                ws.Cells[rowIndex, col].Value = "รหัสนักศึกษา";
+                                break;
+                            case 2:
+                                ws.Cells[rowIndex, col].Value = "ชื่อ-สกุล";
+                                break;
+                            default:
+                                {
+                                    if (col > 2 + countSTask && col <= countSTask + countGTask + 2)  // แสดงวันที่มีการเช็คชื่อในแต่ละคอลัมน์ 
+                                    {
+                                        ws.Cells[rowIndex, col].Style.VerticalAlignment = ExcelVerticalAlignment.Bottom;    // จัดตำแหน่งอักษรแนวตั้ง
+                                        ws.Cells[rowIndex, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                                        ws.Cells[rowIndex, col].AutoFitColumns(4);                                          // จัดความกว้างคอลัมน์ parameter หน่วย = picxel
+                                        ws.Cells[rowIndex, col].Style.TextRotation = 90;                                    // จัดทิศทางอักษร 90 องศา
+                                        ws.Cells[rowIndex, col].Value = dataGTask[k] + " [G]";
+                                        k++;
+                                    }
+                                    else if (col > countSTask + countGTask + 1)
+                                    {
+                                        ws.Cells[rowIndex, col].AutoFitColumns(9);
+                                        ws.Cells[rowIndex, col].Value = scoreText[j];
+                                        ws.Cells[rowIndex, col].Style.Font.Bold = true;
+                                        j++;
+                                    }
+                                    break;
+                                }
+                        }
+                    }
+                }
+
+                //// Detail Table
+                using (var db = new Student_AttendanceEntities())
+                {
+                    var dataStudent = (from r in db.Tb_Student
+                                       where r.StudyGroupID == model.StudyGroupID && r.StatusID == 5 // 5 = สถานะลงทะเบียนเรียน
+                                       orderby r.StdCode
+                                       select new
+                                       {
+                                           StdID = r.StdID,
+                                           StdCode = r.StdCode,
+                                           NameTH = r.NameTH
+                                       }).ToList(); // ชุดแรก
+                    countStudent = dataStudent.Count();
+
+                    var dataTaskS = (from r in db.Tb_SingleTask
+                                     join e in db.Tb_Task on r.TaskID equals e.TaskID
+                                     join s in db.Tb_Student on r.StdID equals s.StdID
+                                     where e.StudyGroupID == model.StudyGroupID && e.Type == 1 && s.StatusID == 5
+                                     group e by new { e.TaskID } into g
+                                     select new
+                                     {
+                                         g.Key,
+                                     }).ToList();
+                    var dataTaskG = (from c in db.Tb_Group
+                                     join e in db.Tb_Task on c.TaskID equals e.TaskID
+                                     where e.StudyGroupID == model.StudyGroupID && e.Type == 2
+                                     group e by new { e.TaskID } into g
+                                     select new
+                                     {
+                                         g.Key,
+                                     }).ToList();
+                    int rows = 10;
+                    foreach (var x in dataStudent)
+                    {
+                        int cols = 3;
+                        ws.Cells[rows, 1].Value = x.StdCode;
+                        ws.Cells[rows, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                        ws.Cells[rows, 1].AutoFitColumns(16);
+                        ws.Cells[rows, 2].Value = x.NameTH;
+                        ws.Cells[rows, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                        ws.Cells[rows, 2].AutoFitColumns(28);
+                        foreach (var r in dataTaskS)
+                        {
+
+                            var score = db.Tb_SingleTask.Where(e => e.TaskID == r.Key.TaskID && e.StdID == x.StdID).Select(e => e.Score).FirstOrDefault();
+                            ws.Cells[rows, cols].Value = score;
+                            ws.Cells[rows, cols].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                            ws.Cells[rows, cols].AutoFitColumns(4);
+                            cols += 1;
+                        }
+                        foreach (var r in dataTaskG)
+                        {
+                            var score = (from c in db.Tb_Group
+                                         join g in db.Tb_GroupTask on c.GroupID equals g.GroupID
+                                         join e in db.Tb_Task on c.TaskID equals e.TaskID
+                                         where r.Key.TaskID == c.TaskID && x.StdID == g.StdID
+                                         select g.Score).FirstOrDefault();
+                            ws.Cells[rows, cols].Value = score;
+                            ws.Cells[rows, cols].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                            ws.Cells[rows, cols].AutoFitColumns(4);
+                            cols += 1;
+                        }
+                        rows += 1;
+                    }
+
+                    rows = 10;
+                    for (rows = 10; rows < countStudent + 10; rows++)
+                    {
+                        int col = dataTaskS.Count + dataTaskG.Count + 3;
+                        string header = ws.Cells[rowIndex, col].Value.ToString();
+                        switch (header)
+                        {
+                            case "คะแนนรวม":
+                                ws.Cells[rows, col].Formula = "SUM(" + ws.Cells[rows, 3].Address + ":" + ws.Cells[rows, countSTask+countGTask + 2].Address + ")";  // สูตรคำนวณ SUM
+                                break;
+                        }
+                    }
+                }
+                // Border Table ใส่เส้นขอบช่องตาราง
+                ws.SelectedRange[rowIndex, 1, rowIndex + countStudent, countGTask + countSTask + 3].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                ws.SelectedRange[rowIndex, 1, rowIndex + countStudent, countGTask + countSTask + 3].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                ws.SelectedRange[rowIndex, 1, rowIndex + countStudent, countGTask + countSTask + 3].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                ws.SelectedRange[rowIndex, 1, rowIndex + countStudent, countGTask + countSTask + 3].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+
+                ws.Cells[rowIndex + countStudent + 2, 1].Value = "[S] คือ งานเดี่ยว";
+                ws.Cells[rowIndex + countStudent + 3, 1].Value = "[G] คือ งานกลุ่ม";
+                var memoryStream = package.GetAsByteArray();
+                // mimetype from http://stackoverflow.com/questions/4212861/what-is-a-correct-mime-type-for-docx-pptx-etc
+                return base.File(memoryStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName); // save file .xlsx
+            }
+        } // ส่งออกรายงานสรุปคะแนนการมอบมายงาน ตามรายวิชา-กลุ่มเรียน ในรูปแบบไฟล์ .xlsx (Excel)
 
         public ActionResult HolidayCalendar()
         {
