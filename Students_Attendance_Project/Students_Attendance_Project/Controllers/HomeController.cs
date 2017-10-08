@@ -2677,6 +2677,7 @@ namespace Students_Attendance_Project.Controllers
                             }).ToList();
                 ViewBag.singleTaskScore = data;
                 ViewBag.studyGroupid = Gid;
+                ViewBag.FullScore = data.Select(r => r.FullScore).FirstOrDefault();
             }
             return View();
         }

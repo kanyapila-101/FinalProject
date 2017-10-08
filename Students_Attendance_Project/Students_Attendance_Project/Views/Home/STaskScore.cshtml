@@ -101,7 +101,7 @@
                     <div class="form-group">
                         <label class="col-sm-4 control-label">คะแนน :<span class="isRed"> *</span></label>
                         <div class="col-sm-3">
-                            <input type="number" class="form-control" id="Score" min="0" name="Score" tabindex="1" required onkeyup="checkScore(this.value)" onblur="checkScore(this.value)">
+                            <input type="number" class="form-control" id="Score" min="0" max="@ViewBag.FullScore" name="Score" tabindex="1" required onkeyup="checkScore(this.value)" onblur="checkScore(this.value)">
                             <div id="scoreInvalid" class="hidden" style="padding-top: 3px;">กรอกคะแนนไม่ถูกต้อง</div>
                         </div>
                     </div>
