@@ -460,6 +460,16 @@
                             })
                         });
 
+                        $.each(res.data.dataCompensate, function (i, e) {
+                            events.push({
+                                id: null,
+                                title: e.title,
+                                description: e.description,
+                                start: e.start,
+                                end: null,
+                                color: "#E55B3C"
+                            })
+                        });
 
                         $.each(res.data.dataHoliday, function (i, e) {
                             events.push({

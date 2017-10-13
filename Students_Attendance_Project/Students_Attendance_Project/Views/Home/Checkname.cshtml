@@ -129,10 +129,10 @@
                                                     <td style="text-align: left" class="hidden-xs hidden-sm">@r.StdCode</td>
                                                     <td style="text-align: left">@r.NameTH</td>
                                                     <td>
-                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="1" @(status == 1 ? "checked" : status == 7 ? "disabled" : status == 9 ? "checked" : "")>มา</label>
+                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="1" @(status == 1 ? "checked" : status == 7 ? "disabled" : "")>มา</label>
                                                         <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="2" @(status == 2 ? "checked" : status == 7 ? "disabled" : "")>สาย</label>
                                                         <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="3" @(status == 3 ? "checked" : status == 7 ? "disabled" : "")>ลา</label>
-                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="4" @(status == 4 ? "checked" : status == 7 ? "disabled" : "")>ขาด</label>
+                                                        <label class="radio-inline pull-left"><input type="radio" name="StatusID[@line]" id="StatusID" value="4" @(status == 4 ? "checked" : status == 7 ? "disabled" : status == 9 ? "checked" : "")>ขาด</label>
                                                     </td>
                                                     <td class="hidden-xs hidden-sm">
                                                         <input type="text" class="col-sm-12 Note" name="Note" value="@r.Note" @((r.StatusID == 7) ? "readonly" : "") />

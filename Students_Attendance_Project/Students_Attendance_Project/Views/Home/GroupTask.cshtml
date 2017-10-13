@@ -37,11 +37,11 @@
                             <table class="table table-bordered table-hover text-center" id="GroupTask-table">
                                 <thead>
                                     <tr class="success">
-                                        <th style="width: 7%;">งานที่</th>
+                                        <th style="width: 7%;" class="hidden-xs hidden-sm">งานที่</th>
                                         <th>ชื่องาน</th>
                                         <th style="width: 8%;">คะแนนเต็ม</th>
-                                        <th style="width: 25%;">หมายเหตุ</th>
-                                        <th style="width: 10%;">รายละเอีบด</th>
+                                        <th style="width: 25%;" class="hidden-xs hidden-sm">หมายเหตุ</th>
+                                        <th style="width: 10%;">รายละเอียด</th>
                                         <th style="width: 15%;"></th>
                                     </tr>
                                 </thead>
@@ -54,7 +54,7 @@
                                             foreach (var r in query)
                                             {
                                                 <tr class="@(line % 2 == 0 ? "info" : "")">
-                                                    <td>@line</td>
+                                                    <td class="hidden-xs hidden-sm">@line</td>
                                                     <td class="text-left">@r.TaskName</td>
                                                     <td>@r.FullScore</td>
                                                     <td class="text-left hidden-xs hidden-sm">@r.Note</td>

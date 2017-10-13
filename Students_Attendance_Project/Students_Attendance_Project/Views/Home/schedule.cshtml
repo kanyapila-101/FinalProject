@@ -419,6 +419,8 @@
         function Submit() {
             $('#form-search').submit();
         }
+        var checkedValue = $('#Schedule-form').find('input[name=typeSubject]:checked').val();
+        var chk = 0;
         $('.btn-edit').click(function () {
             var id = $(this).data("scheduleid");
             //alert(id);
@@ -465,6 +467,9 @@
                         $('#EndTimeInt').attr("disabled", false);
                         $('html, body').animate({ scrollTop: 800 }, 'slow');
                         $('.panelShow').focus();
+                        checkedValue = res.data.TypeSubject;
+                        chk = res.data.TypeSubject;
+                       // alert(checkedValue);
                     }
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
@@ -624,6 +629,9 @@
 
         $('.btn-save').click(function () {
             var form_data = new FormData($('#Schedule-form')[0]);
+            checkedValue = $('#Schedule-form').find('input[name=typeSubject]:checked').val();
+            //alert(checkedValue);
+            console.log(form_data);
             if ($('#Schedule-form').valid()) {
                 $.ajax({
                     type: 'post',
@@ -713,6 +721,9 @@
                             }
                             //$('#SubjectCode').val("");
                             EnableInput();
+                            checkedValue = $('#Schedule-form').find('input[name=typeSubject]:checked').val();
+                            $("input[name=typeSubject][value='"+ chk +"']").prop("checked", true);
+                            //alert(chk);
                         }
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
@@ -726,7 +737,8 @@
             }
         }
 
-        var checkedValue = $('#Schedule-form').find('input[name=typeSubject]:checked').val();
+        
+        //alert(checkedValue);
         $("input[type='radio']").change(function () {
             checkedValue = $(this).val();
             getTypeSubject();
@@ -787,7 +799,7 @@
                                     $('#EndTimeInt').val(total);
                                 }
                             }
-                            else if (res.data.TimeTheory != 0 || res.data.TimePractice == 0) {
+                            else if ((res.data.TimeTheory != 0 || res.data.TimePractice == 0) && (chk == 1 || checkedValue == 1)) {
                                 checkedValue = 1;
                                 $("input[name=typeSubject][value='1']").prop("checked", true);
                                 $("input[name=typeSubject][value='3']").prop("disabled", true);
@@ -805,7 +817,7 @@
                                 //    $("input[name=typeSubject][value='3']").prop("checked", true);
                                 //}
                             }
-                            else if (res.data.TimeTheory == 0 || res.data.TimePractice != 0) {
+                            else if ((res.data.TimeTheory == 0 || res.data.TimePractice != 0) && (chk == 3 || checkedValue == 3)) {
                                 checkedValue = 3;
                                 $("input[name=typeSubject][value='3']").prop("checked", true);
                                 $("input[name=typeSubject][value='1']").prop("disabled", true);
@@ -824,6 +836,9 @@
                                 //else {
                                 //    swal("ขออภัย !", "ประเภทรายวิชานี้เป็น ทฤษฎี", "error");
                                 //}
+                            }
+                            else {
+                                $("input[name=typeSubject][value='" + chk + "']").prop("checked", true);
                             }
                         }
                     },
