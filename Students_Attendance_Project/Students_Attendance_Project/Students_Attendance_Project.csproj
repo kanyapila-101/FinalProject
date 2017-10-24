@@ -1667,7 +1667,6 @@
     <Content Include="Views\Admin\_Profile.cshtml" />
     <Content Include="Views\Login\acs.cshtml" />
     <Content Include="Usermanual\AdminManual.pdf" />
-    <Content Include="Usermanual\Usermanual-StudentsAttandance.pdf" />
     <Content Include="Views\Home\CheckSchedule.cshtml" />
     <Content Include="Views\Home\Checkname.cshtml" />
     <Content Include="Views\Login\error404.cshtml" />
@@ -1678,6 +1677,7 @@
     <Content Include="Views\Home\GroupTask.cshtml" />
     <Content Include="Views\Home\GTaskScore.cshtml" />
     <Content Include="Views\Home\SummaryTask.cshtml" />
+    <Content Include="Usermanual\Usermanual-StudentsAttandance.pdf" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
